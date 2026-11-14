@@ -1,0 +1,12 @@
+# Inference-only configuration for the 48 original Quxian images (001--048).
+# The M6 model structure is ultimately read from the checkpoint passed by
+# --model; this file provides the intended M6 run name and output settings.
+base_config: ../ablations/m6_afm_guided_highres_clear100_seed42.yaml
+
+model:
+  name: "M6-AFMGuided-HighRes-Quxian48-Inference"
+
+prediction:
+  # The source images have already been resized to 320 x 320.
+  batch_size: 1
+  output_size: [320, 320]

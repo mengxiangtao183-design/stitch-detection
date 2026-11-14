@@ -1,0 +1,17 @@
+# M0-AFM clear100 supplementary ablation.
+#
+# This is the clean MobileNetV4 + Mobile-FPN + attentive AFM baseline:
+# - no HighRes;
+# - no plain fusion;
+# - no D1/DySample/B7/M7-M12 modules;
+# - used to compare against E1 MobileNetV4 + legacy C3Net decoder.
+base_config: mobile_base_320_clear100.yaml
+
+model:
+  name: "M0-AFM-MobileNetV4-FPN-Clear100-Seed42"
+  decoder:
+    type: "mobile_fpn"
+    mobile_fpn:
+      high_res_refine:
+        enable: false
+

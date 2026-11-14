@@ -1,0 +1,17 @@
+{
+  "name": "SynBlurTrain-Imgs2Dev",
+  "train_source": "H:\\C3Netqing\\MISCFilter\\manifests\\c3net_external_rx_synblur_v1_3x_splitval\\train.tsv",
+  "val_source": "H:\\C3Netqing\\MISCFilter\\manifests\\c3net_external_rx_img2test\\val.tsv",
+  "train_policy": "DB/XJ/SD SynBlur-v1 synthetic inputs are used for rapid module training.",
+  "val_policy": "Held-out DB/XJ/SD val identities are evaluated with Imgs2 inputs for module selection.",
+  "test_policy": "DB/XJ/SD/RX test inputs use Imgs2.",
+  "rx_policy": "RX remains external test only.",
+  "train_pairs": 3240,
+  "val_pairs": 120,
+  "test_counts": {
+    "DB": 100,
+    "XJ": 100,
+    "SD": 100,
+    "RX": 500
+  }
+}

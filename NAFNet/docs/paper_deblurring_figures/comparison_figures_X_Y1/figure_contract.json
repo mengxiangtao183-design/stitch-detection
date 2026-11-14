@@ -1,0 +1,39 @@
+{
+  "core_conclusion": "MBDNet-P+ balances deblurring quality and inference latency while showing competitive performance across six matched test domains.",
+  "figureX_panels": {
+    "a": "Macro full-image PSNR versus batch-1 latency across all 11 methods.",
+    "b": "Macro middle-band PSNR versus the same latency across all 11 methods.",
+    "c": "Per-domain PSNR difference between MBDNet-P+ and each of 10 comparators; positive favors MBDNet-P+.",
+    "d": "Share of 500 matched images where MBDNet-P+ has strictly higher saved-image PSNR than each comparator."
+  },
+  "figureY1": {
+    "domain": "DB",
+    "filename": "img474_v2.png",
+    "roi_xyxy": [
+      112,
+      112,
+      208,
+      208
+    ],
+    "roi_width_height": [
+      96,
+      96
+    ],
+    "db_median_comparator_mean_delta_psnr_db": 1.185649300273166,
+    "selected_case_comparator_mean_delta_psnr_db": 1.1857917878738853,
+    "image_adjustments": "RGB as saved; no local contrast, gamma or color changes"
+  },
+  "size_cm": {
+    "FigureX": [
+      16.0,
+      18.8
+    ],
+    "FigureY1": [
+      16.0,
+      6.8
+    ]
+  },
+  "backend": "Python / Matplotlib",
+  "source_data": "figureX_source_data.csv and figureX_per_image_psnr.csv",
+  "metric_note": "Panel X(c,d) recomputes PSNR from saved uint8 PNG outputs against matched clear targets; X(a,b) use the existing benchmark macro averages."
+}

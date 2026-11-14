@@ -1,0 +1,14 @@
+{
+  "name": "External-RX-Imgs2Test",
+  "base_manifest_dir": "H:\\C3Netqing\\MISCFilter\\manifests\\c3net_external_rx",
+  "input_folder": "Imgs2",
+  "train_val_policy": "train.tsv and val.tsv are copied from canonical External-RX and still use Imgs1.",
+  "test_policy": "test_DB/XJ/SD/RX use clear as target and Imgs2 as input.",
+  "rx_policy": "RX remains external test only.",
+  "test_counts": {
+    "DB": 100,
+    "XJ": 100,
+    "SD": 100,
+    "RX": 500
+  }
+}

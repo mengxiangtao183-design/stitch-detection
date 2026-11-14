@@ -1,0 +1,89 @@
+{
+  "name": "Controlled-LineTrace-SynBlur-v2",
+  "base_manifest_dir": "H:\\C3Netqing\\MISCFilter\\manifests\\c3net_external_rx",
+  "output_subdir": "ImgsSynLineV2",
+  "seed": 42,
+  "primary_degradation": "line-evidence-weighted, three-horizontal-stripe non-uniform motion blur",
+  "angle_degrees": [
+    -18,
+    18
+  ],
+  "train_policy": "DB/XJ/SD train clear images are degraded into 3 structured variants per image.",
+  "val_policy": "Held-out DB/XJ/SD val clear images are degraded into 1 structured variant per image.",
+  "internal_test_policy": "DB/XJ/SD test clear images are degraded into 1 structured variant per image.",
+  "external_test_policy": "RX test clear images are degraded into 1 structured variant per image and remain external test only.",
+  "train_variants": [
+    {
+      "suffix": "v2a",
+      "kernel_choices": [
+        13,
+        15,
+        17
+      ]
+    },
+    {
+      "suffix": "v2b",
+      "kernel_choices": [
+        17,
+        19,
+        21
+      ]
+    },
+    {
+      "suffix": "v2c",
+      "kernel_choices": [
+        21,
+        23,
+        25
+      ]
+    }
+  ],
+  "one_variant_kernel_choices": [
+    15,
+    17,
+    19,
+    21,
+    23,
+    25
+  ],
+  "line_strength_range": [
+    0.9,
+    1.0
+  ],
+  "background_strength_range": [
+    0.4,
+    0.62
+  ],
+  "auxiliary_degradation_policy": {
+    "none_probability": 0.75,
+    "noise_probability": 0.1,
+    "jpeg_probability": 0.1,
+    "gamma_probability": 0.05,
+    "note": "Auxiliary perturbations are deliberately sparse; the task remains motion-deblurring dominant."
+  },
+  "counts": {
+    "train": 3240,
+    "val": 120,
+    "DB": 100,
+    "XJ": 100,
+    "SD": 100,
+    "RX": 500
+  },
+  "generated_counts": {
+    "train": 3240,
+    "val": 120,
+    "test_DB": 100,
+    "test_XJ": 100,
+    "test_SD": 100,
+    "test_RX": 500
+  },
+  "skipped_counts": {
+    "train": 0,
+    "val": 0,
+    "test_DB": 0,
+    "test_XJ": 0,
+    "test_SD": 0,
+    "test_RX": 0
+  },
+  "degradation_params": "H:\\C3Netqing\\MISCFilter\\manifests\\c3net_controlled_linetrace_synblur_v2\\degradation_params.jsonl"
+}

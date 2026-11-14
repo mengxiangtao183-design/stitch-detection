@@ -1,0 +1,22 @@
+# M6 / AGHR: AFM-guided HighRes full-data ablation.
+#
+# This is not an extra post-processing head.  It refines the M4 HighRes design:
+# the AFM coarse prediction is converted to probability + uncertainty priors
+# and fused into HighResStitchRefineHead together with edge, localization and
+# RGB detail features.
+#
+# Fair full comparison:
+# - base is exactly M4 HighRes full 150 seed42;
+# - no D1 alignment, no WRD/B7, no extra loss;
+# - train from the same MobileNetV4 pretrained backbone setup.
+base_config: m4_highres_refine_full_150_seed42.yaml
+
+model:
+  name: "M6-AFMGuided-HighRes-MobileNetV4-FPN-Full-150-Seed42"
+  decoder:
+    mobile_fpn:
+      high_res_refine:
+        enable: true
+        afm_guidance:
+          enable: true
+

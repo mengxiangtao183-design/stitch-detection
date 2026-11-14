@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Editable vector architecture diagram.
+  Active configuration source:
+  training_tpt_net_bandgate_stage2tmt_hsgorsv2_fast100.yml
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="2490" viewBox="0 0 1600 2490" role="img" aria-labelledby="title desc">
+  <title id="title">TPT-Net with AF-BandGate, Stage-2 TMT and HSGORS-v2</title>
+  <desc id="desc">Detailed flow diagram of the active three-stage deblurring architecture.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#44546a"/>
+    </marker>
+    <marker id="arrowGreen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#18805d"/>
+    </marker>
+    <marker id="arrowOrange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#bd6b16"/>
+    </marker>
+    <style>
+      .bg { fill: #ffffff; }
+      .title { font-family: Arial, 'Microsoft YaHei', sans-serif; font-size: 31px; font-weight: 700; fill: #14253d; }
+      .subtitle { font-family: Arial, 'Microsoft YaHei', sans-serif; font-size: 16px; fill: #516174; }
+      .section { font-family: Arial, 'Microsoft YaHei', sans-serif; font-size: 22px; font-weight: 700; fill: #ffffff; }
+      .h { font-family: Arial, 'Microsoft YaHei', sans-serif; font-size: 17px; font-weight: 700; fill: #14253d; }
+      .t { font-family: Arial, 'Microsoft YaHei', sans-serif; font-size: 14px; fill: #28394f; }
+      .s { font-family: Arial, 'Microsoft YaHei', sans-serif; font-size: 12px; fill: #516174; }
+      .tiny { font-family: Arial, 'Microsoft YaHei', sans-serif; font-size: 11px; fill: #516174; }
+      .white { fill: #ffffff; }
+      .box { stroke: #60758d; stroke-width: 1.5; rx: 8; ry: 8; }
+      .base { fill: #edf4fb; }
+      .new { fill: #e5f5ed; stroke: #25815f; }
+      .image { fill: #fff3de; stroke: #bd6b16; }
+      .memory { fill: #f3edfa; stroke: #7657a6; }
+      .muted { fill: #f6f8fa; stroke: #a5b0bd; }
+      .line { fill: none; stroke: #44546a; stroke-width: 2; marker-end: url(#arrow); }
+      .lineNew { fill: none; stroke: #18805d; stroke-width: 2; marker-end: url(#arrowGreen); }
+      .lineImg { fill: none; stroke: #bd6b16; stroke-width: 2; marker-end: url(#arrowOrange); }
+      .skip { fill: none; stroke: #7657a6; stroke-width: 1.7; stroke-dasharray: 6 4; marker-end: url(#arrow); }
+      .dash { fill: none; stroke: #8a98a8; stroke-width: 1.4; stroke-dasharray: 5 4; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1600" height="2490"/>
+  <text class="title" x="800" y="48" text-anchor="middle">TPT-Net: TriStripe + PairAligned + Stage-2 TMT + HSGORS-v2 + AF-BandGate</text>
+  <text class="subtitle" x="800" y="76" text-anchor="middle">当前启用配置 | 输入 3 x 320 x 320 | N_FEAT=96, Scale_UNet=48, Scale_Recovery=32</text>
+
+  <!-- Legend -->
+  <rect class="box base" x="70" y="100" width="178" height="32"/><text class="s" x="159" y="121" text-anchor="middle">继承的主干算子</text>
+  <rect class="box new" x="266" y="100" width="210" height="32"/><text class="s" x="371" y="121" text-anchor="middle">当前新增/改良模块</text>
+  <rect class="box image" x="495" y="100" width="180" height="32"/><text class="s" x="585" y="121" text-anchor="middle">RGB 图像/残差</text>
+  <rect class="box memory" x="694" y="100" width="198" height="32"/><text class="s" x="793" y="121" text-anchor="middle">跨阶段特征/注入</text>
+  <path class="skip" d="M 930 116 H 1040"/><text class="s" x="1053" y="121">跨尺度或跨阶段传递</text>
+  <path class="dash" d="M 1260 116 H 1370"/><text class="s" x="1384" y="121">未启用的可选路径</text>
+
+  <!-- Input -->
+  <rect x="565" y="158" width="470" height="56" class="box image"/>
+  <text class="h" x="800" y="182" text-anchor="middle">模糊输入 I_b</text>
+  <text class="s" x="800" y="202" text-anchor="middle">RGB, 3 x 320 x 320; 横向线迹退化</text>
+  <path class="lineImg" d="M 800 214 V 250"/>
+
+  <!-- STAGE 1 -->
+  <rect x="45" y="250" width="1510" height="670" rx="12" ry="12" fill="#f8fbfe" stroke="#4379a5" stroke-width="2"/>
+  <rect x="45" y="250" width="1510" height="42" rx="11" ry="11" fill="#4379a5"/>
+  <text class="section" x="70" y="278">Stage-1: TriStripe 共享对粗恢复与三尺度证据提取</text>
+  <text class="s white" x="1220" y="277">3 条带，垂直重叠率 0.20，横向内容不切分</text>
+
+  <!-- stripe crop sketch -->
+  <rect x="80" y="330" width="230" height="246" fill="#fdfdfd" stroke="#60758d" stroke-width="1.5"/>
+  <rect x="96" y="347" width="198" height="92" fill="#ddecfa" stroke="#4379a5"/>
+  <rect x="96" y="420" width="198" height="92" fill="#e5f5ed" stroke="#25815f" opacity="0.94"/>
+  <rect x="96" y="493" width="198" height="66" fill="#f9e6d0" stroke="#bd6b16" opacity="0.94"/>
+  <text class="s" x="195" y="388" text-anchor="middle">Stripe A: y=0..124</text>
+  <text class="s" x="195" y="461" text-anchor="middle">Stripe B: y=98..222</text>
+  <text class="s" x="195" y="535" text-anchor="middle">Stripe C: y=196..320</text>
+  <text class="tiny" x="195" y="598" text-anchor="middle">相邻重叠约 26 px；每条带宽度=320</text>
+  <text class="tiny" x="195" y="616" text-anchor="middle">条带特征共享编码器参数</text>
+  <path class="line" d="M 310 451 H 370"/>
+
+  <!-- stage1 encoder -->
+  <rect x="370" y="336" width="310" height="230" class="box base"/>
+  <text class="h" x="525" y="363" text-anchor="middle">共享三尺度 Encoder</text>
+  <text class="s" x="525" y="386" text-anchor="middle">对每个 A / B / C 条带独立编码</text>
+  <rect x="390" y="403" width="270" height="33" class="box muted"/><text class="s" x="525" y="425" text-anchor="middle">Level-1: 96 x H x W, 2 x CAB</text>
+  <rect x="390" y="445" width="270" height="33" class="box muted"/><text class="s" x="525" y="467" text-anchor="middle">Down x2 + Level-2: 144 x H/2 x W/2</text>
+  <rect x="390" y="487" width="270" height="33" class="box muted"/><text class="s" x="525" y="509" text-anchor="middle">Down x2 + Level-3: 192 x H/4 x W/4</text>
+  <text class="tiny" x="525" y="548" text-anchor="middle">输出 E1=[E1^1,E1^2,E1^3], E1 属于 A/B/C</text>
+
+  <!-- pairs -->
+  <path class="line" d="M 680 451 H 730"/>
+  <rect x="730" y="322" width="298" height="118" class="box memory"/>
+  <text class="h" x="879" y="348" text-anchor="middle">共享对 P12</text>
+  <text class="s" x="879" y="371" text-anchor="middle">拼接 Stripe A + Stripe B 特征</text>
+  <text class="s" x="879" y="394" text-anchor="middle">对应原始图像区域 y=0..222</text>
+  <text class="tiny" x="879" y="419" text-anchor="middle">E1^P12 的 1x / 1/2x / 1/4x 三尺度</text>
+  <rect x="730" y="466" width="298" height="118" class="box memory"/>
+  <text class="h" x="879" y="492" text-anchor="middle">共享对 P23</text>
+  <text class="s" x="879" y="515" text-anchor="middle">拼接 Stripe B + Stripe C 特征</text>
+  <text class="s" x="879" y="538" text-anchor="middle">对应原始图像区域 y=98..320</text>
+  <text class="tiny" x="879" y="563" text-anchor="middle">E1^P23 的 1x / 1/2x / 1/4x 三尺度</text>
+  <path class="line" d="M 1028 381 H 1080"/>
+  <path class="line" d="M 1028 525 H 1080"/>
+
+  <!-- Decoder SAM -->
+  <rect x="1080" y="324" width="300" height="260" class="box base"/>
+  <text class="h" x="1230" y="350" text-anchor="middle">共享对 Decoder + SAM12</text>
+  <text class="s" x="1230" y="374" text-anchor="middle">分别解码 P12 与 P23</text>
+  <rect x="1100" y="393" width="260" height="31" class="box muted"/><text class="s" x="1230" y="414" text-anchor="middle">Level-3 CAB -> 上采样 + Skip</text>
+  <rect x="1100" y="433" width="260" height="31" class="box muted"/><text class="s" x="1230" y="454" text-anchor="middle">Level-2 CAB -> 上采样 + Skip</text>
+  <rect x="1100" y="473" width="260" height="31" class="box muted"/><text class="s" x="1230" y="494" text-anchor="middle">Level-1 CAB: D1^P</text>
+  <rect x="1100" y="521" width="260" height="42" class="box image"/>
+  <text class="s" x="1230" y="539" text-anchor="middle">SAM12: 特征注意 + RGB 残差</text>
+  <text class="tiny" x="1230" y="555" text-anchor="middle">输出 G1^P, I1^P = Conv(D1^P)+原始对图</text>
+
+  <!-- stage1 merge -->
+  <path class="lineImg" d="M 1230 584 V 630"/>
+  <rect x="450" y="630" width="700" height="150" class="box new"/>
+  <text class="h" x="800" y="657" text-anchor="middle">共享对融合：按空间位置线性加权混合</text>
+  <text class="s" x="800" y="683" text-anchor="middle">P12 与 P23 在完整中条带 B 区域重叠；无缝融合得到全图特征与粗恢复</text>
+  <rect x="475" y="707" width="300" height="48" class="box memory"/>
+  <text class="s" x="625" y="727" text-anchor="middle">Stage-1 多尺度证据</text><text class="tiny" x="625" y="744" text-anchor="middle">F1=[F1^1,F1^2,F1^3], R1=[R1^1,R1^2,R1^3]</text>
+  <rect x="825" y="707" width="300" height="48" class="box image"/>
+  <text class="s" x="975" y="727" text-anchor="middle">Stage-1 粗恢复 I1 与引导 G1</text><text class="tiny" x="975" y="744" text-anchor="middle">G1 供后续成对 Stage-2 使用</text>
+  <path class="line" d="M 625 780 V 878 H 378 V 965"/>
+  <path class="lineImg" d="M 975 780 V 878 H 1034 V 965"/>
+  <path class="skip" d="M 730 755 V 885 H 1330 V 1650"/>
+  <text class="tiny" x="1110" y="874" text-anchor="middle">F1/R1 三尺度保留，作为 Stage-2 记忆输入</text>
+
+  <!-- STAGE 2 -->
+  <rect x="45" y="920" width="1510" height="725" rx="12" ry="12" fill="#fbfcff" stroke="#25815f" stroke-width="2"/>
+  <rect x="45" y="920" width="1510" height="42" rx="11" ry="11" fill="#25815f"/>
+  <text class="section" x="70" y="948">Stage-2: PairAligned 双分支轨迹记忆传递（TMT）与全图解码</text>
+  <text class="s white" x="1218" y="947">P12/P23 各自保留匹配的原图与 Stage-1 证据；Stage-2 overlap=0</text>
+
+  <!-- stage2 inputs -->
+  <rect x="80" y="990" width="298" height="135" class="box image"/>
+  <text class="h" x="229" y="1018" text-anchor="middle">成对输入构造（两支）</text>
+  <text class="s" x="229" y="1043" text-anchor="middle">P12: I_b[0:222] + G1^P12</text>
+  <text class="s" x="229" y="1066" text-anchor="middle">P23: I_b[98:320] + G1^P23</text>
+  <text class="tiny" x="229" y="1090" text-anchor="middle">ShallowFeat2 后与 G1 拼接，再经 1x1 Concat12</text>
+  <path class="line" d="M 378 1057 H 430"/>
+
+  <!-- tmt encoder -->
+  <rect x="430" y="983" width="515" height="333" class="box new"/>
+  <text class="h" x="687" y="1011" text-anchor="middle">TMT Encoder（对 P12、P23 共享权重）</text>
+  <text class="s" x="687" y="1034" text-anchor="middle">三尺度主干：96 -> 144 -> 192，2 x CAB / Level</text>
+  <rect x="450" y="1053" width="475" height="70" class="box memory"/>
+  <text class="s" x="687" y="1073" text-anchor="middle">先执行轨迹校准跨阶段融合（Gated-CSFF）</text>
+  <text class="tiny" x="687" y="1092" text-anchor="middle">输入 [当前特征, Enc1, Dec1, |Enc1-Dec1|] -> 1x1 -> 横向 DWConv k=7 -> Gate</text>
+  <text class="tiny" x="687" y="1108" text-anchor="middle">输出：当前 + gate x (投影 Enc1 + 投影 Dec1)，初始 gate=1</text>
+  <rect x="450" y="1141" width="475" height="145" class="box new"/>
+  <text class="s" x="687" y="1163" text-anchor="middle">每一尺度再执行 Trajectory Memory Transfer Unit</text>
+  <text class="tiny" x="687" y="1185" text-anchor="middle">投影 Enc1 / Dec1 -> Agreement=0.5(E+D), Disagreement=|E-D|</text>
+  <text class="tiny" x="687" y="1205" text-anchor="middle">Agreement 经水平 DWConv k=15 + 垂直 DWConv k=5 得到条带上下文</text>
+  <text class="tiny" x="687" y="1225" text-anchor="middle">MemoryGate([Current, Agreement, Disagreement, StripContext])</text>
+  <text class="tiny" x="687" y="1245" text-anchor="middle">Current + 0.10 x Zero-3x3(Gate x StripContext)</text>
+  <text class="tiny" x="687" y="1268" text-anchor="middle">F2^P=[F2^P,1,F2^P,2,F2^P,3]，保留 P12/P23 的空间对应关系</text>
+  <path class="lineNew" d="M 945 1148 H 990"/>
+
+  <!-- blending into full -->
+  <rect x="990" y="992" width="255" height="120" class="box memory"/>
+  <text class="h" x="1118" y="1020" text-anchor="middle">三尺度全图融合</text>
+  <text class="s" x="1118" y="1044" text-anchor="middle">按 P12/P23 位置混合</text>
+  <text class="s" x="1118" y="1066" text-anchor="middle">F2^1: 96 x 320 x 320</text>
+  <text class="s" x="1118" y="1088" text-anchor="middle">F2^2: 144 x 160 x 160</text>
+  <text class="s" x="1118" y="1110" text-anchor="middle">F2^3: 192 x 80 x 80</text>
+  <path class="lineNew" d="M 1118 1112 V 1165"/>
+
+  <!-- decoder -->
+  <rect x="990" y="1165" width="255" height="156" class="box new"/>
+  <text class="h" x="1118" y="1194" text-anchor="middle">TMT Decoder</text>
+  <text class="s" x="1118" y="1217" text-anchor="middle">Level-3 -> Level-2 -> Level-1</text>
+  <text class="tiny" x="1118" y="1238" text-anchor="middle">每次上采样使用 Skip attention</text>
+  <text class="tiny" x="1118" y="1258" text-anchor="middle">每尺度追加：Norm + DWConv(1x15)</text>
+  <text class="tiny" x="1118" y="1277" text-anchor="middle">+ DWConv(5x1) + Zero-1x1 残差</text>
+  <text class="s" x="1118" y="1305" text-anchor="middle">R2=[R2^1,R2^2,R2^3]</text>
+  <path class="lineNew" d="M 1245 1243 H 1290"/>
+
+  <!-- SAM23 -->
+  <rect x="1290" y="1155" width="225" height="176" class="box new"/>
+  <text class="h" x="1402" y="1183" text-anchor="middle">Trajectory SAM23</text>
+  <text class="tiny" x="1402" y="1207" text-anchor="middle">SAM: 特征注意 + I_b 残差</text>
+  <text class="tiny" x="1402" y="1228" text-anchor="middle">特征细化：水平 1x15</text>
+  <text class="tiny" x="1402" y="1247" text-anchor="middle">+ 垂直 5x1 轨迹校正</text>
+  <text class="tiny" x="1402" y="1268" text-anchor="middle">图像残差分支：</text>
+  <text class="tiny" x="1402" y="1286" text-anchor="middle">[R2^1, I2, I_b] -> 横向卷积</text>
+  <text class="tiny" x="1402" y="1304" text-anchor="middle">-> Zero-RGB x 0.05</text>
+  <path class="lineImg" d="M 1402 1331 V 1370"/>
+
+  <rect x="1118" y="1370" width="284" height="62" class="box image"/>
+  <text class="h" x="1260" y="1395" text-anchor="middle">Stage-2 结构恢复 I2</text>
+  <text class="s" x="1260" y="1417" text-anchor="middle">以及全图引导特征 G2</text>
+  <path class="lineImg" d="M 1260 1432 V 1690 H 1165 V 1750"/>
+  <path class="skip" d="M 1005 1321 V 1630 H 1408 V 1750"/>
+  <text class="tiny" x="1350" y="1480" text-anchor="middle">F2/R2 三尺度作为终端恢复器注入证据</text>
+
+  <!-- STAGE 3 -->
+  <rect x="45" y="1645" width="1510" height="520" rx="12" ry="12" fill="#fbfcff" stroke="#7657a6" stroke-width="2"/>
+  <rect x="45" y="1645" width="1510" height="42" rx="11" ry="11" fill="#7657a6"/>
+  <text class="section" x="70" y="1673">Stage-3: HSGORS-v2 原分辨率恢复与多尺度注入</text>
+  <text class="s white" x="1180" y="1672">保留稳定的 3 次注入拓扑；在每个恢复块后接轨迹门控残差适配器</text>
+
+  <!-- input stage3 -->
+  <rect x="80" y="1730" width="245" height="118" class="box image"/>
+  <text class="h" x="202" y="1758" text-anchor="middle">终端输入特征</text>
+  <text class="s" x="202" y="1783" text-anchor="middle">ShallowFeat3(I_b) 96 ch</text>
+  <text class="s" x="202" y="1806" text-anchor="middle">与 G2 拼接，经 Concat23</text>
+  <text class="s" x="202" y="1829" text-anchor="middle">X0: 128 x 320 x 320</text>
+  <path class="line" d="M 325 1789 H 375"/>
+
+  <!-- recovery chain -->
+  <rect x="375" y="1712" width="240" height="150" class="box base"/>
+  <text class="h" x="495" y="1740" text-anchor="middle">恢复段 1</text>
+  <text class="s" x="495" y="1765" text-anchor="middle">ORB1: 8 x CAB</text>
+  <rect x="394" y="1780" width="202" height="60" class="box new"/>
+  <text class="s" x="495" y="1803" text-anchor="middle">Adapter1: 2 x TGRB</text>
+  <text class="tiny" x="495" y="1824" text-anchor="middle">X + a1 x (TGRB(X)-X), a1=0.02</text>
+  <path class="line" d="M 615 1787 H 665"/>
+  <rect x="665" y="1712" width="240" height="150" class="box base"/>
+  <text class="h" x="785" y="1740" text-anchor="middle">恢复段 2</text>
+  <text class="s" x="785" y="1765" text-anchor="middle">ORB2: 8 x CAB</text>
+  <rect x="684" y="1780" width="202" height="60" class="box new"/>
+  <text class="s" x="785" y="1803" text-anchor="middle">Adapter2: 2 x TGRB</text>
+  <text class="tiny" x="785" y="1824" text-anchor="middle">X + a2 x (TGRB(X)-X), a2=0.02</text>
+  <path class="line" d="M 905 1787 H 955"/>
+  <rect x="955" y="1712" width="240" height="150" class="box base"/>
+  <text class="h" x="1075" y="1740" text-anchor="middle">恢复段 3</text>
+  <text class="s" x="1075" y="1765" text-anchor="middle">ORB3: 8 x CAB</text>
+  <rect x="974" y="1780" width="202" height="60" class="box new"/>
+  <text class="s" x="1075" y="1803" text-anchor="middle">Adapter3: 2 x TGRB</text>
+  <text class="tiny" x="1075" y="1824" text-anchor="middle">X + a3 x (TGRB(X)-X), a3=0.02</text>
+  <path class="line" d="M 1195 1787 H 1245"/>
+  <rect x="1245" y="1730" width="260" height="118" class="box image"/>
+  <text class="h" x="1375" y="1758" text-anchor="middle">RGB 残差恢复</text>
+  <text class="s" x="1375" y="1782" text-anchor="middle">Tail 3x3(X3) + I_b</text>
+  <text class="s" x="1375" y="1805" text-anchor="middle">得到初始全分辨率恢复 I3</text>
+  <text class="tiny" x="1375" y="1828" text-anchor="middle">Stage3TRR、Edge refine 均未启用</text>
+
+  <!-- injection -->
+  <rect x="160" y="1942" width="1050" height="178" class="box memory"/>
+  <text class="h" x="685" y="1970" text-anchor="middle">来自 Stage-2 的编码器/解码器三尺度注入</text>
+  <text class="s" x="685" y="1995" text-anchor="middle">注入 1：Proj(F2^1) + Proj(R2^1) 直接加到恢复段 1 后</text>
+  <text class="s" x="685" y="2022" text-anchor="middle">注入 2：Proj(Up x2(F2^2)) + Proj(Up x2(R2^2)) 加到恢复段 2 后</text>
+  <text class="s" x="685" y="2049" text-anchor="middle">注入 3：Proj(Up x4(F2^3)) + Proj(Up x4(R2^3)) 加到恢复段 3 后</text>
+  <text class="tiny" x="685" y="2080" text-anchor="middle">每次均为 1x1 通道投影到 128 ch 后相加，避免把低分辨率语义直接覆盖原分辨率纹理</text>
+  <text class="tiny" x="685" y="2102" text-anchor="middle">该注入拓扑被保留；恢复单元本身由轨迹门控适配器进行结构性改良</text>
+  <path class="skip" d="M 420 1942 V 1882 H 495 V 1862"/>
+  <path class="skip" d="M 685 1942 V 1905 H 785 V 1862"/>
+  <path class="skip" d="M 955 1942 V 1882 H 1075 V 1862"/>
+  <path class="lineImg" d="M 1375 1848 V 2215"/>
+
+  <!-- TGRB inset -->
+  <rect x="1230" y="1942" width="285" height="178" class="box new"/>
+  <text class="h" x="1373" y="1970" text-anchor="middle">TGRB 内部（每 Adapter 2 个）</text>
+  <text class="tiny" x="1373" y="1993" text-anchor="middle">LayerNorm -> 1x1 扩张为 2C</text>
+  <text class="tiny" x="1373" y="2013" text-anchor="middle">DWConv 3x3 + DWConv 1x15 + DWConv 5x1</text>
+  <text class="tiny" x="1373" y="2033" text-anchor="middle">-> 1x1 Mix -> SimpleGate -> 通道校准</text>
+  <text class="tiny" x="1373" y="2053" text-anchor="middle">-> Zero-1x1 x beta(0.05) 残差</text>
+  <text class="tiny" x="1373" y="2073" text-anchor="middle">LayerNorm -> 1x1 FFN -> SimpleGate</text>
+  <text class="tiny" x="1373" y="2093" text-anchor="middle">-> Zero-1x1 x gamma(0.05) 残差</text>
+
+  <!-- AF BANDGATE -->
+  <rect x="45" y="2210" width="1510" height="215" rx="12" ry="12" fill="#fffdf8" stroke="#bd6b16" stroke-width="2"/>
+  <rect x="45" y="2210" width="1510" height="42" rx="11" ry="11" fill="#bd6b16"/>
+  <text class="section" x="70" y="2238">AF-BandGate：最终自适应频带残差细化</text>
+  <text class="s white" x="1222" y="2237">隐藏通道=16；只对最终 RGB 恢复执行，I2 作为参考传入接口</text>
+  <rect x="80" y="2275" width="205" height="94" class="box image"/>
+  <text class="h" x="182" y="2304" text-anchor="middle">输入 I3</text>
+  <text class="s" x="182" y="2328" text-anchor="middle">3x3 Conv + GELU</text><text class="tiny" x="182" y="2348" text-anchor="middle">3 -> 16 通道特征</text>
+  <path class="lineImg" d="M 285 2322 H 337"/>
+  <rect x="337" y="2275" width="260" height="94" class="box new"/>
+  <text class="h" x="467" y="2304" text-anchor="middle">频域混合</text>
+  <text class="s" x="467" y="2328" text-anchor="middle">rFFT2 -> 实虚拼接 -> 1x1 Mixer</text><text class="tiny" x="467" y="2348" text-anchor="middle">为 320 尺寸在 FP32 频域计算</text>
+  <path class="lineNew" d="M 597 2322 H 649"/>
+  <rect x="649" y="2275" width="290" height="94" class="box new"/>
+  <text class="h" x="794" y="2304" text-anchor="middle">自适应频带门控</text>
+  <text class="s" x="794" y="2328" text-anchor="middle">保留频带：0.10 - 0.30</text><text class="tiny" x="794" y="2348" text-anchor="middle">由低/带/高频能量 + RGB 标准差预测强度</text>
+  <path class="lineNew" d="M 939 2322 H 991"/>
+  <rect x="991" y="2275" width="255" height="94" class="box new"/>
+  <text class="h" x="1118" y="2304" text-anchor="middle">残差图像解码</text>
+  <text class="s" x="1118" y="2328" text-anchor="middle">iFFT2 -> 3x3 Zero-Conv</text><text class="tiny" x="1118" y="2348" text-anchor="middle">乘 tanh(scale) 与样本门强度</text>
+  <path class="lineImg" d="M 1246 2322 H 1298"/>
+  <rect x="1298" y="2275" width="215" height="94" class="box image"/>
+  <text class="h" x="1405" y="2304" text-anchor="middle">最终清晰图 I_hat</text>
+  <text class="s" x="1405" y="2328" text-anchor="middle">I_hat = I3 + 频域残差</text><text class="tiny" x="1405" y="2348" text-anchor="middle">主评价输出</text>
+
+  <text class="tiny" x="800" y="2460" text-anchor="middle">注：绿色模块含 Zero-Conv / 小尺度残差初始化，便于从 Stage2TMT + AF 预训练权重平稳微调；图中仅包含本次 HSGORS-v2 Fast100 配置的实际启用路径。</text>
+</svg>

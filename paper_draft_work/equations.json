@@ -1,0 +1,162 @@
+[
+  {
+    "formula": "B=K\\otimes I+n",
+    "number": 1
+  },
+  {
+    "formula": "\\hat I=D_{\\theta}(B),\\quad P=S_{\\phi}(\\hat I),\\quad \\hat y=R(P)",
+    "number": 2
+  },
+  {
+    "formula": "\\begin{array}{l} X_1=X+\\beta W_{p2}(\\mathrm{SG}(Q)), \\\\ Q=\\mathrm{DW}_{3\\times3}(W_{p1}(\\mathrm{LN}(X))) \\end{array}",
+    "number": 3
+  },
+  {
+    "formula": "Y=X_1+\\gamma W_{p4}(\\mathrm{SG}(W_{p3}(\\mathrm{LN}(X_1))))",
+    "number": 4
+  },
+  {
+    "formula": "\\begin{array}{l} F_g=\\mathrm{DW}_{3\\times3}(X),\\quad F_s=\\mathrm{DW}_{1\\times5}(X), \\\\ F_l=\\mathrm{DW}_{1\\times5,d=3}(X) \\end{array}",
+    "number": 5
+  },
+  {
+    "formula": "(\\alpha_s,\\alpha_l)=\\mathrm{Softmax}\\!\\left(W_s(\\mathrm{DW}_{3\\times3}(X))\\right)",
+    "number": 6
+  },
+  {
+    "formula": "G=\\sigma\\!\\left(W_g(\\mathrm{DW}_{3\\times3}(X))\\right)",
+    "number": 7
+  },
+  {
+    "formula": "F_h=\\alpha_s\\odot F_s+\\alpha_l\\odot F_l",
+    "number": 8
+  },
+  {
+    "formula": "F_m=(1-G)\\odot F_g+G\\odot F_h",
+    "number": 9
+  },
+  {
+    "formula": "Y=X+\\eta W_o(F_m)",
+    "number": 10
+  },
+  {
+    "formula": "\\begin{array}{l} Y=X+\\lambda W_c([A,B]), \\\\ A=\\mathrm{DW}_{3\\times3}(X),\\quad B=\\mathrm{DW}_{3\\times3,d=2}(X) \\end{array}",
+    "number": 11
+  },
+  {
+    "formula": "\\hat I=B+W_{out}(F_{dec})",
+    "number": 12
+  },
+  {
+    "formula": "L_{rec}=10\\log_{10}\\!\\left(\\mathrm{MSE}(\\hat I,I)+\\varepsilon\\right)",
+    "number": 13
+  },
+  {
+    "formula": "L_{grad}=\\mathrm{Mean}\\!\\left(\\sqrt{(\\nabla_x\\hat I-\\nabla_x I)^2+\\varepsilon^2}\\right)",
+    "number": 14
+  },
+  {
+    "formula": "\\begin{array}{l} L_{deb}=L_{rec}+0.02L_{grad} \\\\ \\quad +0.03\\left(1-\\mathrm{SSIM}(\\hat I,I)\\right) \\end{array}",
+    "number": 15
+  },
+  {
+    "formula": "P_l=\\psi_l\\!\\left(L_l+\\mathrm{Up}(P_{l+1})\\right)",
+    "number": 16
+  },
+  {
+    "formula": "E=\\phi_e(F_e),\\quad L=\\phi_l(F_l)",
+    "number": 17
+  },
+  {
+    "formula": "A=\\sigma(g(L))",
+    "number": 18
+  },
+  {
+    "formula": "F_f=\\psi([E\\odot A,L]),\\quad Z_c=h(F_f)",
+    "number": 19
+  },
+  {
+    "formula": "P_c=\\sigma(\\mathrm{Up}(Z_c))",
+    "number": 20
+  },
+  {
+    "formula": "U_c=4P_c(1-P_c)",
+    "number": 21
+  },
+  {
+    "formula": "\\begin{array}{l} F_h=\\rho([\\mathrm{Up}(E_h),\\mathrm{Up}(L_h), \\\\ \\quad F_{rgb},P_c,U_c]) \\end{array}",
+    "number": 22
+  },
+  {
+    "formula": "\\begin{array}{l} Z_f=W_f(F_h),\\quad Z_e=W_e(F_h), \\\\ Z_{ctr}=W_{ctr}(F_h) \\end{array}",
+    "number": 23
+  },
+  {
+    "formula": "L_{focal}=-\\alpha(1-p_t)^{\\gamma}\\log(p_t)",
+    "number": 24
+  },
+  {
+    "formula": "\\begin{array}{l} \\mathrm{TI}=\\frac{\\mathrm{TP}}{\\mathrm{TP}+\\alpha_t\\mathrm{FP}+\\beta_t\\mathrm{FN}+\\varepsilon}, \\\\ L_{tv}=1-\\mathrm{TI} \\end{array}",
+    "number": 25
+  },
+  {
+    "formula": "\\begin{array}{l} L_{seg}=1.0L_{edge}+1.15L_{loc} \\\\ \\quad +1.2\\left(L_{final}+0.2L_{dice-edge}\\right) \\end{array}",
+    "number": 26
+  },
+  {
+    "formula": "m(x)=\\frac{1}{H}\\sum_{y=1}^{H}P(y,x)",
+    "number": 27
+  },
+  {
+    "formula": "t(x)=\\frac{\\sum_{y=1}^{H}yP(y,x)}{\\sum_{y=1}^{H}P(y,x)+\\varepsilon}",
+    "number": 28
+  },
+  {
+    "formula": "[a,b]=\\mathrm{argmin}_{a,b}\\sum_{x\\in\\Omega}(t(x)-ax-b)^2",
+    "number": 29
+  },
+  {
+    "formula": "r(x)=t(x)-(ax+b)",
+    "number": 30
+  },
+  {
+    "formula": "\\begin{array}{l} q_i^{ref}=\\mathrm{Median}(\\mathcal Q_i), \\\\ \\mathcal Q_i=\\{q_j\\mid j\\ne i,\\ j=1,\\ldots,6\\} \\end{array}",
+    "number": 31
+  },
+  {
+    "formula": "R(v;s,f)=\\mathrm{clip}\\!\\left(\\frac{v-s}{f-s},0,1\\right)",
+    "number": 32
+  },
+  {
+    "formula": "\\begin{array}{l} S_{skip}=0.60R(\\Delta gap;0.05,0.28) \\\\ \\quad +0.40R(\\Delta cov;0.08,0.45) \\end{array}",
+    "number": 33
+  },
+  {
+    "formula": "\\begin{array}{l} G_{part}=R(cov;0.06,0.30) \\\\ \\quad \\cdot R(span;0.05,0.30) \\end{array}",
+    "number": 34
+  },
+  {
+    "formula": "\\begin{array}{l} R_s=R(\\Delta span;0.08,0.45), \\\\ R_g=R(\\Delta gap;0.06,0.30), \\\\ R_a^-=R(\\Delta arc^-;0.08,0.35), \\\\ R_a^+=R(\\Delta arc^+;0.35,1.20), \\\\ T_b=0.50R_s+0.25R_g+0.25R_a^-, \\\\ S_{break}=G_{part}T_b(1-0.85R_a^+) \\end{array}",
+    "number": 35
+  },
+  {
+    "formula": "S_{skew}=\\mathrm{clip}\\!\\left(\\frac{|a|W/H}{0.40},0,1\\right)",
+    "number": 36
+  },
+  {
+    "formula": "\\begin{array}{l} G_{cont}=R(cov;0.45,0.70) \\\\ \\quad \\cdot R(span;0.45,0.75) \\end{array}",
+    "number": 37
+  },
+  {
+    "formula": "\\begin{array}{l} T_l=0.55R(\\Delta dev;0.18,0.95) \\\\ \\quad +0.25R(\\Delta sag;0.20,1.20) \\\\ \\quad +0.20R(\\Delta arc^{+};0.04,0.25), \\\\ S_{loose}=G_{cont}T_l \\end{array}",
+    "number": 38
+  },
+  {
+    "formula": "\\begin{array}{l} \\mathrm{Precision}=\\frac{TP}{TP+FP}, \\\\ \\mathrm{Recall}=\\frac{TP}{TP+FN} \\end{array}",
+    "number": 39
+  },
+  {
+    "formula": "\\begin{array}{l} F_1=\\frac{2\\cdot\\mathrm{Precision}\\cdot\\mathrm{Recall}}{\\mathrm{Precision}+\\mathrm{Recall}}, \\\\ \\mathrm{IoU}=\\frac{TP}{TP+FP+FN} \\end{array}",
+    "number": 40
+  }
+]

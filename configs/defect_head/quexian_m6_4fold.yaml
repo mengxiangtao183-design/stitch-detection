@@ -1,0 +1,48 @@
+# MG-SixDefect Head: first-stage training configuration.
+# C3Net M6 remains frozen.  The active dataset contains 112 independent
+# original sources and no horizontal-flip samples.
+
+seed: 42
+
+data:
+  dataset_root: "H:/DATASET/quexian/dataset_112_320"
+  labels_csv: "H:/DATASET/quexian/dataset_112_320/defect_review/defect_labels_completed.csv"
+  num_folds: 4
+  fold: 0
+  validation_group_fraction: 0.20
+  include_flips_in_train: false
+  test_original_only: true
+
+segmenter:
+  checkpoint: "H:/C3Netqing/results/training/runs/m6-afmguided-highres-mobilenetv4-fpn-full-150-seed42_20260726_003419/checkpoints/model_best.pth"
+  # M6 uses centerline_weight=0.0, so its centerline prediction is not a
+  # supervised signal.  The head therefore falls back to final_mask.
+  use_centerline: false
+
+model:
+  num_units: 6
+  hidden_channels: 48
+  token_dim: 96
+  transformer_layers: 2
+  transformer_heads: 4
+  dropout: 0.10
+
+training:
+  epochs: 80
+  batch_size: 4
+  learning_rate: 0.0003
+  weight_decay: 0.0001
+  num_workers: 0
+  early_stop_patience: 15
+  max_positive_weight: 20.0
+  use_amp: true
+
+threshold_calibration:
+  # A threshold is learned only when the validation fold has enough *source
+  # images* on both sides.  With the present 112-image dataset, rare classes
+  # will safely retain 0.5 instead of overfitting to one or two examples.
+  min_positive_source_images: 4
+  min_negative_source_images: 4
+
+output:
+  root: "H:/C3Netqing/results/defect_head/m6_quexian_4fold"

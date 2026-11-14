@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="416.16pt" height="114.192pt" viewBox="0 0 416.16 114.192" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-09-25T23:04:29.284113</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.9.2, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 114.192 
+L 416.16 114.192 
+L 416.16 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 13.152 73.728 
+L 61.512 73.728 
+L 61.512 44.8992 
+L 13.152 44.8992 
+z
+" clip-path="url(#p147b313c1a)" style="fill: #f7fafb; stroke: #aab6bf; stroke-width: 1.25; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 74.904 73.728 
+L 125.124 73.728 
+L 125.124 44.8992 
+L 74.904 44.8992 
+z
+" clip-path="url(#p147b313c1a)" style="fill: #f7fafb; stroke: #aab6bf; stroke-width: 1.25; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 138.516 49.704 
+L 193.572 49.704 
+L 193.572 20.8752 
+L 138.516 20.8752 
+z
+" clip-path="url(#p147b313c1a)" style="fill: #f7fafb; stroke: #aab6bf; stroke-width: 1.25; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 209.196 73.728 
+L 260.16 73.728 
+L 260.16 44.8992 
+L 209.196 44.8992 
+z
+" clip-path="url(#p147b313c1a)" style="fill: #f7fafb; stroke: #aab6bf; stroke-width: 1.25; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 274.296 73.728 
+L 324.516 73.728 
+L 324.516 44.8992 
+L 274.296 44.8992 
+z
+" clip-path="url(#p147b313c1a)" style="fill: #f7fafb; stroke: #aab6bf; stroke-width: 1.25; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 338.652 73.728 
+L 401.892 73.728 
+L 401.892 44.8992 
+L 338.652 44.8992 
+z
+" clip-path="url(#p147b313c1a)" style="fill: #f7fafb; stroke: #aab6bf; stroke-width: 1.25; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 63.509684 59.3136 
+Q 68.206779 59.3136 71.618136 59.3136 
+" clip-path="url(#p147b313c1a)" style="fill: none; stroke: #326d8c; stroke-width: 1.15; stroke-linecap: round"/>
+    <path d="M 67.218136 57.1136 
+L 71.618136 59.3136 
+L 67.218136 61.5136 
+z
+" clip-path="url(#p147b313c1a)" style="fill: #326d8c; stroke: #326d8c; stroke-width: 1.15; stroke-linecap: round"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 126.096686 57.568693 
+Q 131.818939 47.303503 136.915164 38.16135 
+" clip-path="url(#p147b313c1a)" style="fill: none; stroke: #326d8c; stroke-width: 1.15; stroke-linecap: round"/>
+    <path d="M 132.851191 40.933375 
+L 136.915164 38.16135 
+L 136.6944 43.075744 
+z
+" clip-path="url(#p147b313c1a)" style="fill: #326d8c; stroke: #326d8c; stroke-width: 1.15; stroke-linecap: round"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 194.661026 36.964124 
+Q 201.382919 47.299938 207.403835 56.557905 
+" clip-path="url(#p147b313c1a)" style="fill: none; stroke: #326d8c; stroke-width: 1.15; stroke-linecap: round"/>
+    <path d="M 206.849261 51.669915 
+L 207.403835 56.557905 
+L 203.160698 54.06877 
+z
+" clip-path="url(#p147b313c1a)" style="fill: #326d8c; stroke: #326d8c; stroke-width: 1.15; stroke-linecap: round"/>
+   </g>
+   <g id="patch_11">
+    <path d="M 127.12266 63.3792 
+Q 167.15871 63.3792 205.909022 63.3792 
+" clip-path="url(#p147b313c1a)" style="fill: none; stroke-dasharray: 4.255,1.84; stroke-dashoffset: 0; stroke: #326d8c; stroke-width: 1.15; stroke-linecap: round"/>
+    <path d="M 201.509022 61.1792 
+L 205.909022 63.3792 
+L 201.509022 65.5792 
+z
+" clip-path="url(#p147b313c1a)" style="fill: #326d8c; stroke-dasharray: 4.255,1.84; stroke-dashoffset: 0; stroke: #326d8c; stroke-width: 1.15; stroke-linecap: round"/>
+   </g>
+   <g id="patch_12">
+    <path d="M 262.158229 59.3136 
+Q 267.226993 59.3136 271.010018 59.3136 
+" clip-path="url(#p147b313c1a)" style="fill: none; stroke: #326d8c; stroke-width: 1.15; stroke-linecap: round"/>
+    <path d="M 266.610018 57.1136 
+L 271.010018 59.3136 
+L 266.610018 61.5136 
+z
+" clip-path="url(#p147b313c1a)" style="fill: #326d8c; stroke: #326d8c; stroke-width: 1.15; stroke-linecap: round"/>
+   </g>
+   <g id="patch_13">
+    <path d="M 326.514229 59.3136 
+Q 331.582993 59.3136 335.366018 59.3136 
+" clip-path="url(#p147b313c1a)" style="fill: none; stroke: #326d8c; stroke-width: 1.15; stroke-linecap: round"/>
+    <path d="M 330.966018 57.1136 
+L 335.366018 59.3136 
+L 330.966018 61.5136 
+z
+" clip-path="url(#p147b313c1a)" style="fill: #326d8c; stroke: #326d8c; stroke-width: 1.15; stroke-linecap: round"/>
+   </g>
+   <g id="text_1">
+    <text style="fill: #263746; font: 700 8px 'Times New Roman'; text-anchor: middle" x="37.332" y="58.223845" transform="rotate(-0 37.332 58.223845)">Input</text>
+   </g>
+   <g id="text_2">
+    <text style="fill: #526370; font: 8px 'Times New Roman'; text-anchor: middle" x="37.332" y="67.282023" transform="rotate(-0 37.332 67.282023)">RGB image</text>
+   </g>
+   <g id="text_3">
+    <text style="fill: #263746; font: 700 8px 'Times New Roman'; text-anchor: middle" x="100.014" y="58.278845" transform="rotate(-0 100.014 58.278845)">Quality gate</text>
+   </g>
+   <g id="text_4">
+    <text style="fill: #526370; font: 8px 'Times New Roman'; text-anchor: middle" x="100.014" y="67.282023" transform="rotate(-0 100.014 67.282023)">Routing</text>
+   </g>
+   <g id="text_5">
+    <text style="fill: #263746; font: 700 8px 'Times New Roman'; text-anchor: middle" x="166.044" y="34.199845" transform="rotate(-0 166.044 34.199845)">MBDNet-P+</text>
+   </g>
+   <g id="text_6">
+    <text style="fill: #526370; font: 8px 'Times New Roman'; text-anchor: middle" x="166.044" y="43.258023" transform="rotate(-0 166.044 43.258023)">Deblurring</text>
+   </g>
+   <g id="text_7">
+    <text style="fill: #263746; font: 700 8px 'Times New Roman'; text-anchor: middle" x="234.678" y="58.223845" transform="rotate(-0 234.678 58.223845)">APHNet</text>
+   </g>
+   <g id="text_8">
+    <text style="fill: #526370; font: 8px 'Times New Roman'; text-anchor: middle" x="234.678" y="67.282023" transform="rotate(-0 234.678 67.282023)">Segmentation</text>
+   </g>
+   <g id="text_9">
+    <text style="fill: #263746; font: 700 8px 'Times New Roman'; text-anchor: middle" x="299.406" y="58.278845" transform="rotate(-0 299.406 58.278845)">Binary mask</text>
+   </g>
+   <g id="text_10">
+    <text style="fill: #526370; font: 8px 'Times New Roman'; text-anchor: middle" x="299.406" y="67.289523" transform="rotate(-0 299.406 67.289523)">320 × 320</text>
+   </g>
+   <g id="text_11">
+    <text style="fill: #263746; font: 700 8px 'Times New Roman'; text-anchor: middle" x="370.272" y="58.223845" transform="rotate(-0 370.272 58.223845)">BTSR</text>
+   </g>
+   <g id="text_12">
+    <text style="fill: #526370; font: 8px 'Times New Roman'; text-anchor: middle" x="370.272" y="67.289523" transform="rotate(-0 370.272 67.289523)">Defect decision</text>
+   </g>
+   <g id="text_13">
+    <text style="fill: #326d8c; font: 8px 'Times New Roman'; text-anchor: start" x="145.956" y="15.3312" transform="rotate(-0 145.956 15.3312)">Restore</text>
+   </g>
+   <g id="text_14">
+    <text style="fill: #326d8c; font: 8px 'Times New Roman'; text-anchor: middle" x="163.44" y="73.728" transform="rotate(-0 163.44 73.728)">Bypass</text>
+   </g>
+   <g id="text_15">
+    <text style="fill: #526370; font: 8px 'Times New Roman'; text-anchor: start" x="13.896" y="97.3824" transform="rotate(-0 13.896 97.3824)">BTSR uses binary-mask trajectories and topology; RGB images are shown only for visualization.</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p147b313c1a">
+   <rect x="7.2" y="7.2" width="401.76" height="99.792"/>
+  </clipPath>
+ </defs>
+</svg>

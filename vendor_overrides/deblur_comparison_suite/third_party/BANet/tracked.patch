@@ -1,0 +1,16 @@
+diff --git a/models/BANet_model.py b/models/BANet_model.py
+index 6063fce..50bbed3 100644
+--- a/models/BANet_model.py
++++ b/models/BANet_model.py
+@@ -3,9 +3,8 @@ import torch.nn as nn
+ import logging
+ import sys
+ from torch.nn import functional as F
+-from thop import profile
+-from torchsummary import summary
+-from ptflops import get_model_complexity_info
++# Analysis-only packages from the original demo are intentionally omitted.
++# The network itself does not reference them in the forward path.
+ 
+ 
+ class BA_Block(nn.Module):

@@ -1,0 +1,17 @@
+{
+  "domain": "DB",
+  "filename": "img474_v2.png",
+  "roi_xyxy": [
+    112,
+    112,
+    208,
+    208
+  ],
+  "roi_width_height": [
+    96,
+    96
+  ],
+  "db_median_comparator_mean_delta_psnr_db": 1.185649300273166,
+  "selected_case_comparator_mean_delta_psnr_db": 1.1857917878738853,
+  "image_adjustments": "RGB as saved; no local contrast, gamma or color changes"
+}

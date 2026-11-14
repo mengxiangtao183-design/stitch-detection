@@ -1,0 +1,72 @@
+GPU: [0]
+SEED: 42
+
+DATA:
+  ROOT: 'H:/DATASET'
+  TRAIN_DIRS:
+    - 'H:/DATASET/DB/train'
+    - 'H:/DATASET/XJ/train'
+    - 'H:/DATASET/SD/train'
+  # RX remains an unseen generalization test and is never used to train the gate.
+  SOURCE_DOMAINS: ['DB', 'XJ', 'SD']
+  INPUT_SUBDIR: 'Imgs1'
+  TARGET_SUBDIR: 'clear'
+  MAX_IMAGES_PER_TRAIN_DIR: 100
+  VAL_SPLIT: 0.1
+
+CACHE:
+  ROOT: 'H:/C3Netqing/Deblurring/checkpoints/train/Deblurring/fusion_cache/Fast100'
+  USE_AMP: True
+
+EXPERTS:
+  A:
+    NAME: 'M2_EdgeTriStripe'
+    CONFIG: 'H:/C3Netqing/Deblurring/training_mprnet_edge_tristripe_fast100.yml'
+    WEIGHTS: 'H:/C3Netqing/Deblurring/checkpoints/train/Deblurring/models/MPRNet_EdgeTriStripe_Fast100/model_best.pth'
+    CACHE_SUBDIR: 'm2'
+  B:
+    NAME: 'M5v3_FrequencyBandGate'
+    CONFIG: 'H:/C3Netqing/Deblurring/training_mprnet_edge_tristripe_frequency_v3_bandgate_fast100.yml'
+    WEIGHTS: 'H:/C3Netqing/Deblurring/checkpoints/train/Deblurring/models/MPRNet_EdgeTriStripe_FrequencyBandGate_Fast100/model_best.pth'
+    CACHE_SUBDIR: 'm5v3'
+
+FUSION:
+  IN_CHANNELS: 12
+  HIDDEN: [32, 48, 64]
+  MLP_HIDDEN: 24
+  USE_DESCRIPTORS: True
+  DESCRIPTOR_HIDDEN: 16
+  ROUTING_MODE: 'hard_margin'
+  # Ignore ambiguous samples for routing supervision. This is close to the
+  # lower quartile of |weighted expert error difference| in the 300-image cache.
+  ROUTING_MARGIN: 0.0004
+  ROUTING_LOSS_WEIGHT: 0.05
+  ROI_TARGET_WEIGHT: 0.20
+  # Full-image reconstruction remains the primary objective.
+  ROI_LOSS_WEIGHT: 0.15
+  ORACLE_LOSS_WEIGHT: 0.05
+  TRAIN_ALPHA_TEMPERATURE: 1.0
+  INFERENCE_ALPHA_TEMPERATURE: 1.0
+  AUGMENT_HFLIP: True
+  ROI_TOP_RATIO: 0.3333333333333333
+  ROI_BOTTOM_RATIO: 0.6666666666666666
+  MODEL_DIR: 'H:/C3Netqing/Deblurring/checkpoints/train/Deblurring/models/MPRNet_QualityFusionV2_Fast100'
+  WEIGHTS: 'H:/C3Netqing/Deblurring/checkpoints/train/Deblurring/models/MPRNet_QualityFusionV2_Fast100/model_best.pth'
+  RESULT_DIR: 'H:/C3Netqing/Deblurring/checkpoints/train/Deblurring/results/MPRNet_QualityFusionV2_Fast100_TestBest'
+
+OPTIM:
+  BATCH_SIZE: 16
+  VAL_BATCH_SIZE: 16
+  NUM_EPOCHS: 25
+  LR_INITIAL: 1.0e-4
+  LR_MIN: 1.0e-6
+  NUM_WORKERS: 0
+  USE_AMP: True
+  RESUME: True
+
+TEST:
+  DATASETS: ['DB', 'XJ', 'SD', 'RX']
+  SPLIT: 'test'
+  MAX_IMAGES: 0
+  NUM_WORKERS: 0
+  USE_AMP: True

@@ -1,0 +1,10 @@
+# Timing/evaluation config for M6 clear100 validation.
+base_config: m6_afm_guided_highres_clear100_seed42.yaml
+
+evaluation:
+  batch_size: 1
+  num_workers: 0
+
+prediction:
+  batch_size: 1
+

@@ -1,0 +1,4 @@
+# Runtime additions for the existing c3net Conda environment (PyTorch 2.1 + CUDA 11.8).
+cupy-cuda11x==13.3.0
+kornia==0.7.3
+natsort==8.4.0

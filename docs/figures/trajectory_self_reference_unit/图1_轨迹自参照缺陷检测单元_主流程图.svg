@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="560" viewBox="0 0 1800 560">
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#687681"/></marker>
+</defs>
+<rect width="1800" height="560" fill="#FFFFFF"/>
+<line x1="42" y1="92" x2="444" y2="92" stroke="#98A6B3" stroke-width="1.5"/>
+<line x1="42" y1="92" x2="42" y2="108" stroke="#98A6B3" stroke-width="1.5"/>
+<line x1="444" y1="92" x2="444" y2="108" stroke="#98A6B3" stroke-width="1.5"/>
+<text x="243.0" y="72" text-anchor="middle" font-family="Microsoft YaHei, SimSun, sans-serif" font-size="20" font-weight="500" fill="#687681">输入与规范化</text>
+<line x1="478" y1="92" x2="1098" y2="92" stroke="#98A6B3" stroke-width="1.5"/>
+<line x1="478" y1="92" x2="478" y2="108" stroke="#98A6B3" stroke-width="1.5"/>
+<line x1="1098" y1="92" x2="1098" y2="108" stroke="#98A6B3" stroke-width="1.5"/>
+<text x="788.0" y="72" text-anchor="middle" font-family="Microsoft YaHei, SimSun, sans-serif" font-size="20" font-weight="500" fill="#687681">轨迹建模与单元定位</text>
+<line x1="1132" y1="92" x2="1534" y2="92" stroke="#98A6B3" stroke-width="1.5"/>
+<line x1="1132" y1="92" x2="1132" y2="108" stroke="#98A6B3" stroke-width="1.5"/>
+<line x1="1534" y1="92" x2="1534" y2="108" stroke="#98A6B3" stroke-width="1.5"/>
+<text x="1333.0" y="72" text-anchor="middle" font-family="Microsoft YaHei, SimSun, sans-serif" font-size="20" font-weight="500" fill="#687681">特征表征与缺陷判定</text>
+<line x1="1568" y1="92" x2="1752" y2="92" stroke="#98A6B3" stroke-width="1.5"/>
+<line x1="1568" y1="92" x2="1568" y2="108" stroke="#98A6B3" stroke-width="1.5"/>
+<line x1="1752" y1="92" x2="1752" y2="108" stroke="#98A6B3" stroke-width="1.5"/>
+<text x="1660.0" y="72" text-anchor="middle" font-family="Microsoft YaHei, SimSun, sans-serif" font-size="20" font-weight="500" fill="#687681">输出</text>
+<rect x="42" y="145" width="184" height="184" rx="3" fill="#EAF1F6" stroke="#17324D" stroke-width="2.2"/>
+<text x="134.0" y="199" text-anchor="middle" font-family="Microsoft YaHei, SimSun, sans-serif" font-size="25" font-weight="600" fill="#17324D">ACHNet 掩码</text>
+<line x1="64" y1="217" x2="204" y2="217" stroke="#D6DEE4" stroke-width="1.4"/>
+<text x="134.0" y="261" text-anchor="middle" font-family="Times New Roman, Cambria Math, serif" font-size="27" font-weight="500" fill="#1F2933">B(x,y)</text>
+<text x="134.0" y="298" text-anchor="middle" font-family="Microsoft YaHei, SimSun, sans-serif" font-size="18" font-weight="400" fill="#687681">320 × 320</text>
+<line x1="234" y1="237.0" x2="250" y2="237.0" stroke="#687681" stroke-width="2.2" marker-end="url(#arrow)"/>
+<rect x="260" y="145" width="184" height="184" rx="3" fill="#FFFFFF" stroke="#17324D" stroke-width="2.2"/>
+<text x="352.0" y="199" text-anchor="middle" font-family="Microsoft YaHei, SimSun, sans-serif" font-size="25" font-weight="600" fill="#17324D">掩码规范化</text>
+<line x1="282" y1="217" x2="422" y2="217" stroke="#D6DEE4" stroke-width="1.4"/>
+<text x="352.0" y="261" text-anchor="middle" font-family="Times New Roman, Cambria Math, serif" font-size="27" font-weight="500" fill="#1F2933">B̃(x,y)</text>
+<text x="352.0" y="298" text-anchor="middle" font-family="Microsoft YaHei, SimSun, sans-serif" font-size="18" font-weight="400" fill="#687681">去除孤立噪声</text>
+<line x1="452" y1="237.0" x2="468" y2="237.0" stroke="#687681" stroke-width="2.2" marker-end="url(#arrow)"/>
+<rect x="478" y="145" width="184" height="184" rx="3" fill="#FFFFFF" stroke="#17324D" stroke-width="2.2"/>
+<text x="570.0" y="199" text-anchor="middle" font-family="Microsoft YaHei, SimSun, sans-serif" font-size="25" font-weight="600" fill="#17324D">中心轨迹构建</text>
+<line x1="500" y1="217" x2="640" y2="217" stroke="#D6DEE4" stroke-width="1.4"/>
+<text x="570.0" y="261" text-anchor="middle" font-family="Times New Roman, Cambria Math, serif" font-size="27" font-weight="500" fill="#1F2933">y(x)</text>
+<text x="570.0" y="298" text-anchor="middle" font-family="Microsoft YaHei, SimSun, sans-serif" font-size="18" font-weight="400" fill="#687681">纵向质量中心</text>
+<line x1="670" y1="237.0" x2="686" y2="237.0" stroke="#687681" stroke-width="2.2" marker-end="url(#arrow)"/>
+<rect x="696" y="145" width="184" height="184" rx="3" fill="#F4F7F9" stroke="#17324D" stroke-width="2.2"/>
+<text x="788.0" y="199" text-anchor="middle" font-family="Microsoft YaHei, SimSun, sans-serif" font-size="25" font-weight="600" fill="#17324D">全局趋势分离</text>
+<line x1="718" y1="217" x2="858" y2="217" stroke="#D6DEE4" stroke-width="1.4"/>
+<text x="788.0" y="261" text-anchor="middle" font-family="Times New Roman, Cambria Math, serif" font-size="22" font-weight="500" fill="#1F2933">r(x)=y(x)−(ax+b)</text>
+<text x="788.0" y="298" text-anchor="middle" font-family="Microsoft YaHei, SimSun, sans-serif" font-size="18" font-weight="400" fill="#687681">方向与局部形变解耦</text>
+<line x1="888" y1="237.0" x2="904" y2="237.0" stroke="#687681" stroke-width="2.2" marker-end="url(#arrow)"/>
+<rect x="914" y="145" width="184" height="184" rx="3" fill="#FFFFFF" stroke="#17324D" stroke-width="2.2"/>
+<text x="1006.0" y="199" text-anchor="middle" font-family="Microsoft YaHei, SimSun, sans-serif" font-size="25" font-weight="600" fill="#17324D">六单元定位</text>
+<line x1="936" y1="217" x2="1076" y2="217" stroke="#D6DEE4" stroke-width="1.4"/>
+<text x="1006.0" y="261" text-anchor="middle" font-family="Times New Roman, Cambria Math, serif" font-size="27" font-weight="500" fill="#1F2933">{uᵢ}ᵢ₌₁⁶</text>
+<text x="1006.0" y="298" text-anchor="middle" font-family="Microsoft YaHei, SimSun, sans-serif" font-size="18" font-weight="400" fill="#687681">首尾截断保护</text>
+<line x1="1106" y1="237.0" x2="1122" y2="237.0" stroke="#687681" stroke-width="2.2" marker-end="url(#arrow)"/>
+<rect x="1132" y="145" width="184" height="184" rx="3" fill="#FFFFFF" stroke="#17324D" stroke-width="2.2"/>
+<text x="1224.0" y="199" text-anchor="middle" font-family="Microsoft YaHei, SimSun, sans-serif" font-size="25" font-weight="600" fill="#17324D">轨迹特征编码</text>
+<line x1="1154" y1="217" x2="1294" y2="217" stroke="#D6DEE4" stroke-width="1.4"/>
+<text x="1224.0" y="261" text-anchor="middle" font-family="Times New Roman, Cambria Math, serif" font-size="27" font-weight="500" fill="#1F2933">fᵢ ∈ ℝ¹²</text>
+<text x="1224.0" y="298" text-anchor="middle" font-family="Microsoft YaHei, SimSun, sans-serif" font-size="18" font-weight="400" fill="#687681">连续性·长度·形态·方向</text>
+<line x1="1324" y1="237.0" x2="1340" y2="237.0" stroke="#687681" stroke-width="2.2" marker-end="url(#arrow)"/>
+<rect x="1350" y="145" width="184" height="184" rx="3" fill="#F4F7F9" stroke="#17324D" stroke-width="2.2"/>
+<text x="1442.0" y="199" text-anchor="middle" font-family="Microsoft YaHei, SimSun, sans-serif" font-size="25" font-weight="600" fill="#17324D">分类与互斥融合</text>
+<line x1="1372" y1="217" x2="1512" y2="217" stroke="#D6DEE4" stroke-width="1.4"/>
+<text x="1442.0" y="261" text-anchor="middle" font-family="Times New Roman, Cambria Math, serif" font-size="27" font-weight="500" fill="#1F2933">qₖ=sₖ/τₖ</text>
+<text x="1442.0" y="298" text-anchor="middle" font-family="Microsoft YaHei, SimSun, sans-serif" font-size="18" font-weight="400" fill="#687681">最大置信比决策</text>
+<line x1="1542" y1="237.0" x2="1558" y2="237.0" stroke="#687681" stroke-width="2.2" marker-end="url(#arrow)"/>
+<rect x="1568" y="145" width="184" height="184" rx="3" fill="#EAF1F6" stroke="#17324D" stroke-width="2.2"/>
+<text x="1660.0" y="199" text-anchor="middle" font-family="Microsoft YaHei, SimSun, sans-serif" font-size="25" font-weight="600" fill="#17324D">类别与位置输出</text>
+<line x1="1590" y1="217" x2="1730" y2="217" stroke="#D6DEE4" stroke-width="1.4"/>
+<text x="1660.0" y="261" text-anchor="middle" font-family="Times New Roman, Cambria Math, serif" font-size="27" font-weight="500" fill="#1F2933">(ĉ, Ω̂)</text>
+<text x="1660.0" y="298" text-anchor="middle" font-family="Microsoft YaHei, SimSun, sans-serif" font-size="18" font-weight="400" fill="#687681">正常/四类缺陷</text>
+<line x1="42" y1="390" x2="1752" y2="390" stroke="#D6DEE4" stroke-width="1.4"/>
+<text x="42" y="435" text-anchor="start" font-family="Microsoft YaHei, SimSun, sans-serif" font-size="18" font-weight="600" fill="#17324D">输入</text>
+<text x="99" y="435" text-anchor="start" font-family="Microsoft YaHei, SimSun, sans-serif" font-size="18" font-weight="400" fill="#687681">ACHNet 输出的二值线迹掩码</text>
+<text x="665" y="435" text-anchor="start" font-family="Microsoft YaHei, SimSun, sans-serif" font-size="18" font-weight="600" fill="#17324D">自参照</text>
+<text x="742" y="435" text-anchor="start" font-family="Microsoft YaHei, SimSun, sans-serif" font-size="18" font-weight="400" fill="#687681">长度与形态均相对于同图线迹统计量归一化</text>
+<text x="1302" y="435" text-anchor="start" font-family="Microsoft YaHei, SimSun, sans-serif" font-size="18" font-weight="600" fill="#17324D">输出</text>
+<text x="1359" y="435" text-anchor="start" font-family="Microsoft YaHei, SimSun, sans-serif" font-size="18" font-weight="400" fill="#687681">缺陷类型、置信比及异常单元范围</text>
+<text x="900.0" y="505" text-anchor="middle" font-family="Times New Roman, Cambria Math, serif" font-size="25" font-weight="500" fill="#1F2933">B(x,y) → y(x) → r(x) → {uᵢ} → fᵢ → qₖ → (ĉ, Ω̂)</text>
+</svg>

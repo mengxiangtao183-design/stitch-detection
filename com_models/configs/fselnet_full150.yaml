@@ -1,0 +1,9 @@
+base_config: comparison_base_full150.yaml
+model:
+  name: COM-FSELNet-ECCV2024-Full150-Seed42
+  architecture: fselnet
+
+training:
+  # FSEL's frequency-domain reverse parser overflows in FP16 at random
+  # initialization; the official comparison is therefore trained in FP32.
+  use_amp: false

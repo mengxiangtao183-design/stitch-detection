@@ -54,6 +54,7 @@ from datetime import datetime
 from typing import Optional, Dict
 from dataclasses import dataclass
 import logging
+import re
 
 class RunMode(Enum):
     """
@@ -100,6 +101,7 @@ class RunDirectories:
     checkpoints: Optional[Path] = None
     visualizations: Optional[Path] = None
     metrics: Optional[Path] = None
+    metrics_file: Optional[Path] = None
     log_file: Optional[Path] = None
 
 class DirectoryManager:
@@ -113,16 +115,27 @@ class DirectoryManager:
     - Timestamp-based run folders
     """
     
-    def __init__(self, mode: str):
+    def __init__(self, mode: str, run_name: Optional[str] = None):
         """
         Initialize directory manager.
         
         Args:
             mode: Run mode ('train', 'evaluate', or 'predict')
+            run_name: Human-readable experiment label, usually ``model.name``.
         """
         self.mode = RunMode[mode.upper()].value
         self.timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        self.run_name = self._sanitize_run_name(run_name)
         self.run_dirs = self._setup_directories()
+
+    @staticmethod
+    def _sanitize_run_name(run_name: Optional[str]) -> str:
+        """Create a portable, readable path component from a model name."""
+        if not run_name:
+            return "run"
+        normalized = re.sub(r"[^A-Za-z0-9._-]+", "-", str(run_name).strip())
+        normalized = normalized.strip(".-_").lower()
+        return normalized[:96] or "run"
         
     def _setup_directories(self) -> RunDirectories:
         """
@@ -132,7 +145,7 @@ class DirectoryManager:
             RunDirectories object with all necessary paths
         """
         # Create base run directory
-        root = Path('results') / self.mode / 'runs' / f'run_{self.timestamp}'
+        root = Path('results') / self.mode / 'runs' / f'{self.run_name}_{self.timestamp}'
         run_dirs = RunDirectories(root=root)
         
         # Setup mode-specific directory structure

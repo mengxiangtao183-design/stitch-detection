@@ -48,10 +48,15 @@ import numpy as np
 from PIL import Image
 from tqdm import tqdm
 
-from models.c3net import C3Net
+from com_models.registry import build_model
+from utils.checkpoint_utils import load_model_checkpoint
+# from com_models.OPNet_model import OPNet_Wrapper as OPNet
+# from com_models.fselnet_model import fselnet_Wrapper as fselnet 
+# from com_models.sam2_model import SAM2_Wrapper as SAM2
 from utils.visualization import save_binary_visualization, save_heatmap_visualization, save_overlay_visualization
 from utils.run_manager import DirectoryManager
 from utils.image_processor import CODImageProcessor
+from utils.checkpoint_utils import normalize_state_dict_keys
 
 class PredictionResultManager:
     """
@@ -96,6 +101,10 @@ class PredictionResultManager:
         # Segmentation directories
         self.seg_dir = self.viz_root / 'segmentation'
         self.seg_binary_dir = self.seg_dir / 'binary'
+        # Preserve the unthresholded M6 output for downstream units that use
+        # soft geometric evidence.  Heatmaps are colour visualizations and
+        # cannot recover calibrated probabilities.
+        self.seg_probability_dir = self.seg_dir / 'probability'
         self.seg_heatmap_dir = self.seg_dir / 'heatmap'
         self.seg_overlay_dir = self.seg_dir / 'overlay'
 
@@ -106,7 +115,7 @@ class PredictionResultManager:
         self.edge_overlay_dir = self.edge_dir / 'overlay'
         
         # Create all directories
-        for d in [self.seg_binary_dir, self.seg_heatmap_dir, self.seg_overlay_dir,
+        for d in [self.seg_binary_dir, self.seg_probability_dir, self.seg_heatmap_dir, self.seg_overlay_dir,
               self.edge_binary_dir, self.edge_heatmap_dir, self.edge_overlay_dir]:
             d.mkdir(parents=True, exist_ok=True)
         
@@ -143,6 +152,10 @@ class PredictionResultManager:
         base_name = Path(filename).stem
         
         # Save segmentation predictions
+        np.save(
+            self.seg_probability_dir / f'{base_name}.npy',
+            np.clip(np.asarray(seg_pred, dtype=np.float32), 0.0, 1.0),
+        )
         save_binary_visualization(
             seg_pred,
             self.seg_binary_dir / f'{base_name}.png'
@@ -180,7 +193,7 @@ class PredictionResultManager:
         
     def summarize(self):
         """Generate summary of predictions."""
-        n_predictions = len(list(self.seg_dir.glob('*.png')))
+        n_predictions = len(list(self.seg_binary_dir.glob('*.png')))
         
         # Compute average timings
         avg_timings = {
@@ -273,9 +286,14 @@ class Predictor:
 
     def _initialize_model(self, model_path: str, model_config: Dict) -> nn.Module:
         """Initialize and warm up model."""
-        model = C3Net(model_config)
-        checkpoint = torch.load(model_path, map_location=self.device)
-        model.load_state_dict(checkpoint['model_state_dict'])
+        model = build_model(model_config)
+        checkpoint = load_model_checkpoint(model_path, map_location=self.device)
+        state_dict = normalize_state_dict_keys(checkpoint['model_state_dict'])
+        missing_keys, unexpected_keys = model.load_state_dict(state_dict, strict=False)
+        if missing_keys:
+            logging.warning(f"Missing keys when loading predictor checkpoint: {missing_keys}")
+        if unexpected_keys:
+            logging.warning(f"Unexpected keys when loading predictor checkpoint: {unexpected_keys}")
         model = model.to(self.device)
         model.eval()
         
@@ -285,7 +303,8 @@ class Predictor:
         
         with torch.inference_mode():
             _ = model(dummy_input)
-            torch.cuda.synchronize()
+            if self.device.type == 'cuda':
+                torch.cuda.synchronize()
             
         return model
         
@@ -308,8 +327,8 @@ class Predictor:
         self.result_manager.update_timing('preprocessing', time.time() - start_time)
         return image_tensor.unsqueeze(0)  # Add batch dimension
         
-    def predict_single(self, image_path: str, 
-                  output_size: Optional[Tuple[int, int]] = None) -> Tuple[np.ndarray, np.ndarray]:
+    def predict_single(self, image_path: str,
+                  output_size: Optional[Tuple[int, int]] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """
         Process single image through complete prediction pipeline.
         
@@ -341,8 +360,8 @@ class Predictor:
             # Log inference time with image name
             self.result_manager.log_message(f"Inference time for {image_path}: {inference_time:.3f}s")
             # Get predictions from all scales and edge map
-            seg_pred = outputs['final_mask']  # Segmentation prediction
-            edge_pred = outputs['edge_mask']  # Edge prediction
+            seg_pred = outputs['final_mask'].sigmoid()
+            edge_pred = outputs['edge_mask'].sigmoid()
 
 
             # Resize if needed
@@ -417,7 +436,8 @@ class Predictor:
                     )
                     
                 # Memory cleanup after each batch
-                torch.cuda.empty_cache()
+                if self.device.type == 'cuda':
+                    torch.cuda.empty_cache()
                 
             # Generate summary
             return self.result_manager.summarize()

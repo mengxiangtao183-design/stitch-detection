@@ -1,0 +1,6 @@
+base_config: comparison_base_full150.yaml
+model:
+  name: COM-UNet-Full150-Seed42
+  architecture: unet
+  base_channels: 64
+

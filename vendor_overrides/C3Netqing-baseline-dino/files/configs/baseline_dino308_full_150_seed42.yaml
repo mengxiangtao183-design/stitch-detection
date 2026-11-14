@@ -1,0 +1,17 @@
+# Original C3Net reproduction on the complete clear training split.
+base_config: baseline_dino308_clear100.yaml
+
+model:
+  name: "Original-C3Net-DINO308-Full-150-Seed42"
+
+training:
+  seed: 42
+  num_epochs: 150
+  # null removes the previous per-dataset 100-image cap.
+  max_samples_per_dataset: null
+  save_best: true
+  save_freq: 30
+  early_stop_patience: 151
+  # The original C3Net validation loop exposes weighted_f but not binary_iou.
+  # Final test-set selection is still reported with Binary IoU as the primary metric.
+  monitor_metric: weighted_f

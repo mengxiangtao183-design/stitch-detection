@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2100" height="1250" viewBox="0 0 2100 1250">
+  <defs><marker id="a" markerWidth="12" markerHeight="10" refX="11" refY="5" orient="auto"><path d="M0,0 L12,5 L0,10 Z" fill="#333"/></marker><style>.t{font-family:'Times New Roman','SimSun',serif;fill:#202020}.title{font-size:42px;font-weight:bold}.sub{font-size:22px}.h{font-size:28px;font-weight:bold}.m{font-size:22px}.s{font-size:18px}.xs{font-size:15px}.box{fill:#fff;stroke:#333;stroke-width:2}.norm{fill:#edf1f5;stroke:#65717b;stroke-width:2}.local{fill:#d9efd8;stroke:#5b9a5c;stroke-width:2}.dilated{fill:#cce8d1;stroke:#4b8f53;stroke-width:2}.fuse{fill:#cfe8f6;stroke:#4e8fb4;stroke-width:2}.note{fill:#fff0ad;stroke:#c69b28;stroke-width:2}.panel{fill:#f0fbf2;stroke:#58b978;stroke-width:3;stroke-dasharray:12 9}.line{fill:none;stroke:#333;stroke-width:2.5;marker-end:url(#a)}.skip{fill:none;stroke:#666;stroke-width:2.3;stroke-dasharray:9 7;marker-end:url(#a)}.grid{stroke:#aaa;stroke-width:1}</style></defs>
+  <rect width="2100" height="1250" fill="white"/>
+  <text x="1050" y="55" text-anchor="middle" class="t title">LRC 低分辨率上下文模块</text><text x="1050" y="90" text-anchor="middle" class="t sub">Low-Resolution Context Unit: local–dilated parallel aggregation</text>
+  <rect x="40" y="125" width="2020" height="770" rx="28" class="panel"/>
+  <text x="75" y="172" class="t h">(a) 并行局部—空洞上下文聚合</text>
+  <rect x="80" y="410" width="130" height="82" rx="9" class="box"/><text x="145" y="449" text-anchor="middle" class="t m">输入 Q</text><text x="145" y="477" text-anchor="middle" class="t xs">B×C×Hq×Wq</text>
+  <rect x="270" y="410" width="105" height="82" rx="9" class="norm"/><text x="323" y="448" text-anchor="middle" class="t m">LN</text><text x="323" y="476" text-anchor="middle" class="t xs">Qₙ=LN(Q)</text><path d="M210 451 H270" class="line"/>
+  <rect x="465" y="260" width="260" height="120" rx="11" class="local"/><text x="595" y="299" text-anchor="middle" class="t m">局部分支 L</text><text x="595" y="334" text-anchor="middle" class="t s">3×3 Depthwise Conv</text><text x="595" y="363" text-anchor="middle" class="t xs">padding=1, dilation=1, C→C</text>
+  <rect x="465" y="520" width="260" height="120" rx="11" class="dilated"/><text x="595" y="559" text-anchor="middle" class="t m">空洞分支 D</text><text x="595" y="594" text-anchor="middle" class="t s">3×3 Depthwise Conv</text><text x="595" y="623" text-anchor="middle" class="t xs">padding=2, dilation=2, C→C</text>
+  <path d="M375 451 H420 V320 H465 M420 451 V580 H465" class="line"/>
+
+  <!-- sampling grids -->
+  <g transform="translate(790,230)"><text x="0" y="-18" class="t m">局部 3×3 采样</text><rect x="0" y="0" width="180" height="180" fill="#fff" stroke="#777"/><path d="M60 0 V180 M120 0 V180 M0 60 H180 M0 120 H180" class="grid"/><g fill="#5b9a5c"><circle cx="30" cy="30" r="8"/><circle cx="90" cy="30" r="8"/><circle cx="150" cy="30" r="8"/><circle cx="30" cy="90" r="8"/><circle cx="90" cy="90" r="8"/><circle cx="150" cy="90" r="8"/><circle cx="30" cy="150" r="8"/><circle cx="90" cy="150" r="8"/><circle cx="150" cy="150" r="8"/></g><text x="90" y="212" text-anchor="middle" class="t s">有效感受野 3×3</text></g>
+  <g transform="translate(790,485)"><text x="0" y="-18" class="t m">空洞 3×3, d=2 采样</text><rect x="0" y="0" width="200" height="200" fill="#fff" stroke="#777"/><path d="M40 0 V200 M80 0 V200 M120 0 V200 M160 0 V200 M0 40 H200 M0 80 H200 M0 120 H200 M0 160 H200" class="grid"/><g fill="#4b8f53"><circle cx="20" cy="20" r="8"/><circle cx="100" cy="20" r="8"/><circle cx="180" cy="20" r="8"/><circle cx="20" cy="100" r="8"/><circle cx="100" cy="100" r="8"/><circle cx="180" cy="100" r="8"/><circle cx="20" cy="180" r="8"/><circle cx="100" cy="180" r="8"/><circle cx="180" cy="180" r="8"/></g><text x="100" y="232" text-anchor="middle" class="t s">有效感受野 5×5，仅 9 个采样点</text></g>
+
+  <!-- concat and fuse -->
+  <rect x="1080" y="395" width="200" height="115" rx="11" class="fuse"/><text x="1180" y="432" text-anchor="middle" class="t m">通道拼接</text><text x="1180" y="468" text-anchor="middle" class="t s">Cat[L,D]</text><text x="1180" y="496" text-anchor="middle" class="t xs">B×2C×Hq×Wq</text>
+  <path d="M725 320 H1035 V425 H1080 M725 580 H1035 V480 H1080" class="line"/>
+  <rect x="1340" y="395" width="200" height="115" rx="11" class="fuse"/><text x="1440" y="432" text-anchor="middle" class="t m">1×1 Fuse</text><text x="1440" y="468" text-anchor="middle" class="t s">2C → C</text><text x="1440" y="496" text-anchor="middle" class="t xs">跨分支通道融合</text><path d="M1280 452 H1340" class="line"/>
+  <rect x="1600" y="410" width="155" height="85" rx="10" class="note"/><text x="1678" y="445" text-anchor="middle" class="t m">s⊙Context</text><text x="1678" y="475" text-anchor="middle" class="t xs">s∈R¹×ᶜ×¹×¹</text><path d="M1540 452 H1600" class="line"/>
+  <circle cx="1830" cy="452" r="31" class="box"/><text x="1830" y="463" text-anchor="middle" class="t h">+</text><path d="M1755 452 H1799" class="line"/>
+  <rect x="1900" y="410" width="125" height="85" rx="10" class="box"/><text x="1963" y="449" text-anchor="middle" class="t m">Qout</text><text x="1963" y="477" text-anchor="middle" class="t xs">B×C×Hq×Wq</text><path d="M1861 452 H1900" class="line"/>
+  <path d="M145 492 V780 H1830 V483" class="skip"/><text x="1030" y="770" text-anchor="middle" class="t s">恒等残差；s 初始化为 0，LRC 起始为严格恒等映射</text>
+  <text x="75" y="835" class="t h">完整计算：</text><text x="300" y="835" class="t m">Qout = Q + s⊙Conv₁×₁{Concat[DW₃×₃(LN(Q)), DW₃×₃,d=2(LN(Q))]}</text>
+  <text x="75" y="875" class="t s">LRC 不负责方向判定；它先向后续 MBD 提供稳定的局部细节与宽域模糊上下文。</text>
+
+  <!-- cards -->
+  <rect x="55" y="950" width="620" height="245" rx="16" fill="#f2fbf3" stroke="#5b9a5c" stroke-width="2"/>
+  <text x="85" y="992" class="t h">局部分支的优势</text>
+  <text x="85" y="1035" class="t m">• 连续 3×3 采样保持线迹端点与细织纹</text>
+  <text x="85" y="1075" class="t m">• 深度卷积不引入 C² 空间开销</text>
+  <text x="85" y="1115" class="t m">• 弥补空洞卷积的稀疏采样间隙</text>
+  <text x="85" y="1160" class="t s">对弱边缘、细针脚和局部亮度变化更敏感。</text>
+  <rect x="740" y="950" width="620" height="245" rx="16" fill="#eef8ef" stroke="#4b8f53" stroke-width="2"/>
+  <text x="770" y="992" class="t h">空洞分支的优势</text>
+  <text x="770" y="1035" class="t m">• 仅用 9 个采样点获得 5×5 感受野</text>
+  <text x="770" y="1075" class="t m">• H/4 尺度约覆盖原图 20×20 区域</text>
+  <text x="770" y="1115" class="t m">• 感知较长拖尾及邻近纹理关系</text>
+  <text x="770" y="1160" class="t s">避免在全分辨率直接使用大核带来的高计算量。</text>
+  <rect x="1425" y="950" width="620" height="245" rx="16" fill="#f1f8ff" stroke="#608cb5" stroke-width="2"/>
+  <text x="1455" y="992" class="t h">布置位置与输出用途</text>
+  <text x="1455" y="1035" class="t m">• 仅位于 12×DWPW 后的 H/4 瓶颈</text>
+  <text x="1455" y="1075" class="t m">• 拼接后用 1×1 Conv 学习自适应融合</text>
+  <text x="1455" y="1115" class="t m">• 输出直接送入连续两个 MBD 阶段</text>
+  <text x="1455" y="1160" class="t s">作用是提供上下文，不使用材料标签或真实线迹掩膜。</text>
+</svg>

@@ -1,0 +1,7 @@
+# Timing-only config for M0 full-data ablation.
+base_config: mobile_base_320_full_150_seed42.yaml
+
+evaluation:
+  batch_size: 1
+  num_workers: 0
+

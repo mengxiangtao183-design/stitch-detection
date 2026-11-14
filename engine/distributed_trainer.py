@@ -38,7 +38,7 @@ import numpy as np
 from utils.metrics import MetricsProcessor
 from utils.loss_functions import C3NetLoss
 from utils.run_manager import DirectoryManager
-from models.c3net import C3Net
+from com_models.registry import build_model
 from utils.distributed_data_loader import get_distributed_training_loaders
 
 class AverageMeter:
@@ -171,7 +171,7 @@ class DistributedTrainer:
     def _initialize_model(self) -> torch.nn.Module:
         """Initialize model with DDP and memory optimizations."""
         # Create base model
-        model = C3Net(self.model_config).to(self.device)
+        model = build_model(self.model_config).to(self.device)
         
         # Apply memory optimizations
         self._apply_memory_optimizations(model)
@@ -730,12 +730,8 @@ class DistributedTrainer:
         # Extract model state dict (unwrap DDP)
         model_state_dict = self.model.module.state_dict()
         
-        save_dict = {
+        checkpoint_metadata = {
             'epoch': epoch,
-            'model_state_dict': model_state_dict,
-            'optimizer_state_dict': self.optimizer.state_dict(),
-            'scheduler_state_dict': self.scheduler.state_dict(),
-            'scaler': self.scaler.state_dict(),
             'metrics': metrics,
             'config': {
                 'training': self.config,
@@ -745,14 +741,34 @@ class DistributedTrainer:
             'mode': self.mode_config,
             'world_size': self.world_size
         }
+
+        if is_best:
+            save_dict = {
+                **checkpoint_metadata,
+                'model_state_dict': {
+                    key: value.detach().to('cpu', copy=True).contiguous()
+                    for key, value in model_state_dict.items()
+                },
+            }
+        else:
+            save_dict = {
+                **checkpoint_metadata,
+                'model_state_dict': model_state_dict,
+                'optimizer_state_dict': self.optimizer.state_dict(),
+                'scheduler_state_dict': self.scheduler.state_dict(),
+                'scaler': self.scaler.state_dict(),
+            }
         
         filename = 'model_best.pth' if is_best else f'checkpoint_{epoch:03d}.pth'
         save_path = self.monitor.checkpoint_dir / filename
         
-        # Atomic save
-        temp_path = save_path.with_suffix('.tmp')
-        torch.save(save_dict, temp_path)
-        temp_path.rename(save_path)
+        temp_path = save_path.with_name(
+            f'.{save_path.name}.{os.getpid()}.{epoch}.tmp'
+        )
+        # Keep checkpoint serialization consistent with the single-process
+        # trainer on Windows/PyTorch 2.1.
+        torch.save(save_dict, temp_path, _use_new_zipfile_serialization=False)
+        os.replace(temp_path, save_path)
         
         logging.info(f"Saved checkpoint: {save_path}")
 

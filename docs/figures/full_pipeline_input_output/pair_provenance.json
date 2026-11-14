@@ -1,0 +1,18 @@
+{
+  "source_id": "032",
+  "input_kind": "original clear RGB photograph",
+  "source_image": "H:\\DATASET\\quexian\\dataset_112_320\\images\\032.png",
+  "segmentation_mask": "H:\\C3Netqing\\results\\prediction\\runs\\m6-afmguided-highres-mobilenetv4-fpn-full-150-seed42_20260915_152506\\results\\segmentation\\binary\\032.png",
+  "prediction_source": "source-grouped four-fold held-out clear OOF predictions",
+  "predicted_class": "skip",
+  "predicted_unit": 2,
+  "unit_x0_x1": [
+    97,
+    158
+  ],
+  "display_y0_y1": [
+    129,
+    187
+  ],
+  "note": "Red box is a candidate unit window, not a pixel-accurate defect segmentation."
+}

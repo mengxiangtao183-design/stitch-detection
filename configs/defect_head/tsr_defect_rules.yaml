@@ -1,0 +1,21 @@
+# TSR-Defect: a new trajectory self-reference rule unit.
+# It is intentionally independent of the manuscript's pitch/centroid SPMM.
+num_units: 6
+mask_threshold: 0.50
+min_column_mass: 0.005
+skip_threshold: 0.50
+break_threshold: 0.50
+skew_threshold: 0.50
+loose_threshold: 0.50
+enable_global_skew: true
+enable_local_skew: false
+global_slope_score_scale: 0.40
+global_slope_start: 0.035
+global_slope_full: 0.110
+# Recover six unit boundaries from support valleys.  This keeps camera-truncated
+# outer stitches from being treated as short local defects.
+adaptive_slots: true
+projection_min_run_fraction: 0.15
+# Existing labels define skip/break/loose as mutually exclusive per unit.
+# When several scores cross thresholds, retain only the largest relative margin.
+local_defects_mutually_exclusive: true

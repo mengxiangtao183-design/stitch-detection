@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2100" height="1250" viewBox="0 0 2100 1250">
+  <defs><marker id="a" markerWidth="12" markerHeight="10" refX="11" refY="5" orient="auto"><path d="M0,0 L12,5 L0,10 Z" fill="#333"/></marker><style>.t{font-family:'Times New Roman','SimSun',serif;fill:#202020}.title{font-size:42px;font-weight:bold}.sub{font-size:22px}.h{font-size:28px;font-weight:bold}.m{font-size:22px}.s{font-size:18px}.xs{font-size:15px}.box{fill:#fff;stroke:#333;stroke-width:2}.norm{fill:#edf1f5;stroke:#65717b;stroke-width:2}.conv{fill:#cfe8f6;stroke:#4e8fb4;stroke-width:2}.dw{fill:#ffe1d3;stroke:#d48762;stroke-width:2}.gate{fill:#f7d5e4;stroke:#bd6f8c;stroke-width:2}.panel{fill:#f1f9ff;stroke:#62b3e3;stroke-width:3;stroke-dasharray:12 9}.note{fill:#fffaf0;stroke:#c69b28;stroke-width:2}.line{fill:none;stroke:#333;stroke-width:2.5;marker-end:url(#a)}.skip{fill:none;stroke:#666;stroke-width:2.3;stroke-dasharray:9 7;marker-end:url(#a)}</style></defs>
+  <rect width="2100" height="1250" fill="white"/>
+  <text x="1050" y="55" text-anchor="middle" class="t title">DWPW 通用恢复单元</text><text x="1050" y="90" text-anchor="middle" class="t sub">Depthwise–Pointwise Generic Restoration Block</text>
+  <rect x="40" y="125" width="2020" height="790" rx="28" class="panel"/>
+  <text x="75" y="172" class="t h">(a) 空间混合子层：归一化 → 通道扩展 → 深度空间卷积 → SimpleGate → 通道投影</text>
+  <rect x="80" y="290" width="120" height="76" rx="9" class="box"/><text x="140" y="335" text-anchor="middle" class="t m">输入 X</text><text x="140" y="357" text-anchor="middle" class="t xs">B×C×H×W</text>
+  <rect x="250" y="290" width="105" height="76" rx="9" class="norm"/><text x="303" y="324" text-anchor="middle" class="t m">LN</text><text x="303" y="351" text-anchor="middle" class="t xs">LayerNorm2d</text>
+  <rect x="410" y="270" width="155" height="116" rx="9" class="conv"/><text x="488" y="306" text-anchor="middle" class="t m">1×1 Conv</text><text x="488" y="338" text-anchor="middle" class="t s">C → 4C</text><text x="488" y="368" text-anchor="middle" class="t xs">hidden=2C；输出2×hidden</text>
+  <rect x="620" y="270" width="170" height="116" rx="9" class="dw"/><text x="705" y="306" text-anchor="middle" class="t m">3×3 DW Conv</text><text x="705" y="338" text-anchor="middle" class="t s">4C → 4C</text><text x="705" y="368" text-anchor="middle" class="t xs">groups=4C, padding=1</text>
+  <rect x="845" y="270" width="180" height="116" rx="9" class="gate"/><text x="935" y="304" text-anchor="middle" class="t m">Split + SimpleGate</text><text x="935" y="338" text-anchor="middle" class="t s">[U₁,U₂]∈R²ᶜ</text><text x="935" y="368" text-anchor="middle" class="t s">SG(U)=U₁⊙U₂</text>
+  <rect x="1080" y="270" width="155" height="116" rx="9" class="conv"/><text x="1158" y="306" text-anchor="middle" class="t m">1×1 Conv</text><text x="1158" y="338" text-anchor="middle" class="t s">2C → C</text><text x="1158" y="368" text-anchor="middle" class="t xs">project</text>
+  <rect x="1290" y="290" width="140" height="76" rx="9" class="note"/><text x="1360" y="324" text-anchor="middle" class="t m">β ⊙ Rₛ</text><text x="1360" y="351" text-anchor="middle" class="t xs">β∈R¹×ᶜ×¹×¹</text>
+  <circle cx="1490" cy="328" r="30" class="box"/><text x="1490" y="339" text-anchor="middle" class="t h">+</text>
+  <rect x="1555" y="290" width="120" height="76" rx="9" class="box"/><text x="1615" y="335" text-anchor="middle" class="t m">Y</text><text x="1615" y="357" text-anchor="middle" class="t xs">B×C×H×W</text>
+  <path d="M200 328 H250 M355 328 H410 M565 328 H620 M790 328 H845 M1025 328 H1080 M1235 328 H1290 M1430 328 H1460 M1520 328 H1555" class="line"/>
+  <path d="M140 366 V445 H1490 V358" class="skip"/><text x="730" y="438" text-anchor="middle" class="t s">恒等路径 X；β 逐通道缩放且初始化为 0</text>
+  <text x="75" y="500" class="t h">(b) 通道混合子层：轻量前馈映射，不再使用空间卷积</text>
+  <rect x="250" y="610" width="105" height="76" rx="9" class="norm"/><text x="303" y="644" text-anchor="middle" class="t m">LN</text><text x="303" y="671" text-anchor="middle" class="t xs">LayerNorm2d</text>
+  <rect x="410" y="590" width="155" height="116" rx="9" class="conv"/><text x="488" y="626" text-anchor="middle" class="t m">1×1 Conv</text><text x="488" y="658" text-anchor="middle" class="t s">C → 4C</text><text x="488" y="688" text-anchor="middle" class="t xs">FFN expand</text>
+  <rect x="620" y="590" width="180" height="116" rx="9" class="gate"/><text x="710" y="624" text-anchor="middle" class="t m">Split + SimpleGate</text><text x="710" y="658" text-anchor="middle" class="t s">2C ⊙ 2C → 2C</text><text x="710" y="688" text-anchor="middle" class="t xs">数据依赖通道交互</text>
+  <rect x="855" y="590" width="155" height="116" rx="9" class="conv"/><text x="933" y="626" text-anchor="middle" class="t m">1×1 Conv</text><text x="933" y="658" text-anchor="middle" class="t s">2C → C</text><text x="933" y="688" text-anchor="middle" class="t xs">FFN project</text>
+  <rect x="1065" y="610" width="145" height="76" rx="9" class="note"/><text x="1138" y="644" text-anchor="middle" class="t m">γ ⊙ R꜀</text><text x="1138" y="671" text-anchor="middle" class="t xs">γ∈R¹×ᶜ×¹×¹</text>
+  <circle cx="1275" cy="648" r="30" class="box"/><text x="1275" y="659" text-anchor="middle" class="t h">+</text>
+  <rect x="1340" y="610" width="130" height="76" rx="9" class="box"/><text x="1405" y="655" text-anchor="middle" class="t m">输出 Z</text><text x="1405" y="677" text-anchor="middle" class="t xs">B×C×H×W</text>
+  <path d="M1615 366 V535 H303 V610 M355 648 H410 M565 648 H620 M800 648 H855 M1010 648 H1065 M1210 648 H1245 M1305 648 H1340" class="line"/>
+  <path d="M1615 535 V760 H1275 V678" class="skip"/><text x="1490" y="752" text-anchor="middle" class="t s">恒等路径 Y；γ 逐通道缩放且初始化为 0</text>
+  <text x="75" y="825" class="t h">完整计算：</text><text x="300" y="825" class="t m">Y = X + β⊙P₁[SG(DW₃(P₀(LN(X))))]</text><text x="960" y="825" class="t m">Z = Y + γ⊙P₃[SG(P₂(LN(Y)))]</text>
+  <text x="75" y="872" class="t s">β=γ=0 时单元严格为恒等映射；训练过程中残差逐步开启，减轻深层图像恢复网络的梯度放大、色彩漂移与训练初期不稳定。</text>
+
+  <!-- details -->
+  <rect x="55" y="950" width="630" height="245" rx="16" fill="#fff9ef" stroke="#d49b50" stroke-width="2"/>
+  <text x="85" y="990" class="t h">张量与参数变化</text>
+  <text x="85" y="1032" class="t m">空间子层：C → 4C → 4C → 2C → C</text>
+  <text x="85" y="1070" class="t m">通道子层：C → 4C → 2C → C</text>
+  <text x="85" y="1108" class="t m">3×3 空间运算均为深度卷积</text>
+  <text x="85" y="1146" class="t s">参数主要集中在 1×1 通道映射，避免普通 3×3 卷积的 9C² 开销。</text>
+  <rect x="735" y="950" width="630" height="245" rx="16" fill="#f1f9ff" stroke="#62a8d3" stroke-width="2"/>
+  <text x="765" y="990" class="t h">SimpleGate 的作用</text>
+  <text x="765" y="1032" class="t m">SG([A,B]) = A ⊙ B</text>
+  <text x="765" y="1070" class="t m">无需 ReLU/GELU，仍形成乘性非线性</text>
+  <text x="765" y="1108" class="t m">一半通道调制另一半通道</text>
+  <text x="765" y="1146" class="t s">保留负值和低幅度恢复残差，适合像素级图像复原。</text>
+  <rect x="1415" y="950" width="630" height="245" rx="16" fill="#f3fbf3" stroke="#64a76a" stroke-width="2"/>
+  <text x="1445" y="990" class="t h">在 MBDNet-P+ 中的角色</text>
+  <text x="1445" y="1032" class="t m">共使用 28 个 DWPW 单元</text>
+  <text x="1445" y="1070" class="t m">负责通用纹理、颜色与非定向边缘恢复</text>
+  <text x="1445" y="1108" class="t m">与 MBD 方向分支相互补充</text>
+  <text x="1445" y="1146" class="t s">DWPW 始终存在；MBD 仅在 H/2 和 H/4 尺度选择性加入。</text>
+</svg>

@@ -1,0 +1,9 @@
+# Full-data M4 ablation: M0 plus the HighResStitchRefineHead.
+base_config: mobile_base_320_full_150_seed42.yaml
+
+model:
+  name: "M4-HighRes-MobileNetV4-FPN-Full-150-Seed42"
+  decoder:
+    mobile_fpn:
+      high_res_refine:
+        enable: true

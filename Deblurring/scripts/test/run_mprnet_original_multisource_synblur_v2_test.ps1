@@ -1,0 +1,25 @@
+param(
+    [string]$Checkpoint = "checkpoints/train/Deblurring/models/MultiSourceV2_MPRNetOriginal_S30_S42/model_best.pth",
+    [string]$OutputDir = "results/MultiSourceV2_MPRNetOriginal_S30_S42_midroi",
+    [string]$ManifestDir = "H:/C3Netqing/MISCFilter/manifests/c3net_multisource_linetrace_synblur_v2",
+    [int]$MaxImages = 0
+)
+
+$ErrorActionPreference = "Stop"
+$env:PYTHONFAULTHANDLER = "1"
+$RepoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
+if ($env:CONDA_DEFAULT_ENV -ne "c3net") { throw "Run: conda activate c3net" }
+if (!(Test-Path -LiteralPath $Checkpoint)) { throw "Checkpoint not found: $Checkpoint" }
+foreach ($domain in @("DB", "XJ", "SD", "RX", "RXHF", "TJML")) {
+    if (!(Test-Path -LiteralPath (Join-Path $ManifestDir "test_$domain.tsv"))) { throw "Missing test_$domain.tsv under $ManifestDir" }
+}
+
+Push-Location $RepoRoot
+try {
+    python -u test_manifest_mprnet_c3.py `
+        --data-root "H:/DATASET" --manifest-dir $ManifestDir `
+        --domains DB XJ SD RX RXHF TJML `
+        --checkpoint $Checkpoint --output-dir $OutputDir `
+        --workers 0 --max-images $MaxImages
+    if ($LASTEXITCODE -ne 0) { throw "Original MPRNet MultiSource SynBlur-v2 test failed with exit code $LASTEXITCODE" }
+} finally { Pop-Location }

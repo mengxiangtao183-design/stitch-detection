@@ -119,15 +119,16 @@ class SemanticEnhanceBlock(nn.Module):
 
     Refines high-level semantic features using Spatial and Channel Attention.
     Referred to as "Semantic Enhancement Unit" in the IEEE TAI paper.
+    专门用来精炼深层语义特征（比如来自 DINOv2 stage n 的特征），让特征在保持语义的同时，变得更关注重要空间区域和重要通道
 
     Applies a sequence of operations including depthwise separable convolutions
     for efficiency, Spatial Attention (CBAM-style), Efficient Channel Attention (ECA),
-    and a residual connection.
+    and a residual残差 connection.
 
     Args:
         channels (int): Number of input and output channels for the block.
         spatial_attn_kernel_size (int): Kernel size for the internal
-                                        SpatialAttentionModule. Default: 7.
+                                        SpatialAttentionModule空间注意力模块. Default: 7.
     """
     def __init__(self, channels: int, spatial_attn_kernel_size: int = 7):
         super().__init__()
@@ -136,7 +137,7 @@ class SemanticEnhanceBlock(nn.Module):
             raise ValueError(f"Input 'channels' must be a positive integer, got {channels}.")
         self.channels = channels
 
-        # --- Convolutional Block 1 (Depthwise Separable) ---
+        # --- Convolutional Block 1 (Depthwise Separable) ---第一组
         # Consists of Depthwise Conv -> GN -> ReLU -> Pointwise Conv -> GN -> ReLU
         self.conv1_dw = nn.Conv2d(channels, channels, kernel_size=3, padding=1, groups=channels, bias=False)
         self.norm1_dw = nn.GroupNorm(max(1, channels // 32), channels) # Adapt group size
@@ -145,13 +146,13 @@ class SemanticEnhanceBlock(nn.Module):
         # Group Norm and ReLU applied after the pointwise convolution
         self.norm1_pw_act = nn.Sequential(nn.GroupNorm(max(1, channels // 32), channels), nn.ReLU(inplace=True))
 
-        # --- Attention Modules ---
+        # --- Attention Modules ---·双注意力
         # Spatial Attention Module (CBAM Style)
         self.spatial_attn = SpatialAttentionModule(kernel_size=spatial_attn_kernel_size)
         # Efficient Channel Attention Module (ECA-Net)
         self.channel_attn = ECABlock(channels=channels)
 
-        # --- Convolutional Block 2 (Depthwise Separable) ---
+        # --- Convolutional Block 2 (Depthwise Separable) ---不激活
         # Applied after attention, before the residual connection.
         self.conv2_dw = nn.Conv2d(channels, channels, kernel_size=3, padding=1, groups=channels, bias=False)
         self.norm2_dw = nn.GroupNorm(max(1, channels // 32), channels)
@@ -160,7 +161,7 @@ class SemanticEnhanceBlock(nn.Module):
         # Group Norm applied before adding the residual.
         self.norm2_pw = nn.GroupNorm(max(1, channels // 32), channels)
 
-        # --- Final Activation ---
+        # --- Final Activation ---最终激活
         # Applied after the residual connection.
         self.final_act = nn.ReLU(inplace=True)
 
@@ -207,11 +208,65 @@ class SemanticEnhanceBlock(nn.Module):
 
 
 # --- Image Appearance CNN (for ICG Module) ---
+class ResidualLowPassPurifier(nn.Module):
+    """Constrained, learnable low-pass purification for ICG RGB guidance.
+
+    The depth-wise kernel is softmax-normalised, therefore each per-channel
+    kernel remains non-negative and sums to one.  The residual mixing strength
+    is constrained to ``[0, max_strength]`` so this block can attenuate only a
+    small amount of high-frequency appearance noise; it cannot replace or
+    invert the RGB evidence used by ICG.
+    """
+    def __init__(
+        self,
+        channels: int = 3,
+        kernel_size: int = 3,
+        max_strength: float = 0.30,
+        init_strength: float = 0.05,
+    ):
+        super().__init__()
+        if channels <= 0:
+            raise ValueError("channels must be positive")
+        if kernel_size <= 0 or kernel_size % 2 == 0:
+            raise ValueError("kernel_size must be a positive odd integer")
+        if not 0.0 < max_strength <= 1.0:
+            raise ValueError("max_strength must be in (0, 1]")
+        if not 0.0 <= init_strength < max_strength:
+            raise ValueError("init_strength must be in [0, max_strength)")
+
+        self.channels = channels
+        self.kernel_size = kernel_size
+        self.max_strength = float(max_strength)
+        # Uniform logits initialise a standard average low-pass kernel.
+        self.kernel_logits = nn.Parameter(torch.zeros(channels, 1, kernel_size, kernel_size))
+        if init_strength == 0.0:
+            alpha_logit = -8.0
+        else:
+            ratio = init_strength / max_strength
+            alpha_logit = float(torch.logit(torch.tensor(ratio)).item())
+        self.alpha_logit = nn.Parameter(torch.tensor(alpha_logit))
+
+    def forward(self, image: torch.Tensor) -> torch.Tensor:
+        if image.ndim != 4 or image.shape[1] != self.channels:
+            raise ValueError(
+                f"Expected RGB-like [B, {self.channels}, H, W] image, got {tuple(image.shape)}"
+            )
+        kernel = torch.softmax(self.kernel_logits.flatten(2), dim=-1).view_as(self.kernel_logits)
+        low_pass = F.conv2d(
+            image, kernel, padding=self.kernel_size // 2, groups=self.channels
+        )
+        alpha = self.max_strength * torch.sigmoid(self.alpha_logit)
+        return image + alpha * (low_pass - image)
+
+
 class ImageAppearanceCNN(nn.Module):
     """
     A lightweight Convolutional Neural Network (CNN) designed to extract
     low-level appearance features (like color and texture) from the input image.
     These features are used by the Image-based Context Guidance (ICG) module.
+    轻量级的两层卷积网络，
+    专门用来从原始图像（RGB）中提取低级外观特征
+    ，比如颜色分布、纹理模式、简单边缘等。
 
     Args:
         image_channels (int): Number of channels in the input image (typically 3 for RGB). Default: 3.
@@ -252,7 +307,7 @@ class ImageAppearanceCNN(nn.Module):
 
 # Include GuidedContrastModule 
 class GuidedContrastModule(nn.Module):
-    """ Enhanced contrast calculation (E2): Uses learned spatial aggregation and global context. """
+    """ Enhanced contrast calculation (E2): Uses learned spatial aggregation空间聚合 and global context. """
     def __init__(self, feature_channels: int, contrast_channels: int, aggregation_kernel_size: int = 5, global_bg_threshold: float = 0.1, eps: float = 1e-7):
         super().__init__(); self.feature_channels = feature_channels; self.contrast_channels = contrast_channels; self.aggregation_padding = aggregation_kernel_size // 2; self.global_bg_threshold = global_bg_threshold; self.eps = eps
         # Layers for Spatial Aggregation
@@ -260,20 +315,26 @@ class GuidedContrastModule(nn.Module):
         self.fg_agg_pw_norm_relu = ConvGNReLU(feature_channels, feature_channels, 1, padding=0, bias=False)
         self.bg_agg_dw = nn.Conv2d(feature_channels, feature_channels, aggregation_kernel_size, padding=self.aggregation_padding, groups=feature_channels, bias=False)
         self.bg_agg_pw_norm_relu = ConvGNReLU(feature_channels, feature_channels, 1, padding=0, bias=False)
-        # Layers for Combining Local and Global Background
+        # Layers for Combining Local and Global Background局部背景 + 全局背景 concat 后，用 1×1 融合回原通道
         self.bg_fusion = ConvGNReLU(feature_channels * 2, feature_channels, 1, padding=0, bias=False)
         # Final Contrast Refinement
         self.contrast_refiner = ConvGNReLU(feature_channels, self.contrast_channels, 1, padding=0, bias=False)
 
-    def forward(self, appearance_features: torch.Tensor, guidance_map: torch.Tensor) -> torch.Tensor:
-        if guidance_map.shape[1] != 1: guidance_map = guidance_map[:, :1, :, :]; guidance_map = torch.clamp(guidance_map, 0.0, 1.0)
+    def forward(self, appearance_features: torch.Tensor, guidance_map: torch.Tensor,dynamic_bg_thresh: float = 0.1) -> torch.Tensor:
+        #预处理 guidance_map指导掩码
+        if guidance_map.shape[1] != 1: guidance_map = guidance_map[:, :1, :, :]; 
+        guidance_map = torch.clamp(guidance_map, 0.0, 1.0)
         # Weight, Aggregate FG/BG
-        app_feat_fg = appearance_features * guidance_map; app_feat_bg = appearance_features * (1.0 - guidance_map)
+        app_feat_fg = appearance_features * guidance_map; 
+        app_feat_bg = appearance_features * (1.0 - guidance_map)
+        #分别聚合前景和背景
         agg_local_fg = self.fg_agg_pw_norm_relu(self.fg_agg_dw(app_feat_fg))
         agg_local_bg = self.bg_agg_pw_norm_relu(self.bg_agg_dw(app_feat_bg))
         # Global BG Context
-        with torch.no_grad(): bg_mask_confident = (guidance_map < self.global_bg_threshold).float(); bg_pixel_count = bg_mask_confident.sum(dim=[1, 2, 3], keepdim=True)
-        global_bg_sum = (appearance_features * bg_mask_confident).sum(dim=[2, 3], keepdim=True); global_bg_feat_avg = global_bg_sum / (bg_pixel_count + self.eps)
+        with torch.no_grad(): bg_mask_confident = (guidance_map < dynamic_bg_thresh).float(); 
+        bg_pixel_count = bg_mask_confident.sum(dim=[1, 2, 3], keepdim=True)
+        global_bg_sum = (appearance_features * bg_mask_confident).sum(dim=[2, 3], keepdim=True); 
+        global_bg_feat_avg = global_bg_sum / (bg_pixel_count + self.eps)
         global_bg_feat_expanded = global_bg_feat_avg.expand_as(appearance_features)
         # Fuse BG and Calculate Contrast
         effective_bg_feat = self.bg_fusion(torch.cat([agg_local_bg, global_bg_feat_expanded], dim=1))
@@ -285,8 +346,8 @@ class ImageBasedContextGuidance(nn.Module):
     """
     Image-based Context Guidance (ICG) Module - Paper Section 3.3.2.
 
-    Enhanced ICG implementation combining Guided Contrast Module and Iterative
-    Attention Gating for intrinsic saliency suppression.
+    Enhanced ICG implementation实现 combining Guided Contrast Module引导对比模块 and Iterative
+    Attention Gating迭代注意力门控 for intrinsic saliency suppression.抑制内在显著性
 
     Combines E2 (Guided Contrast Module) and E3 (Iterative Attention Gating),
     using the original simple ImageAppearanceCNN based on experimental findings.
@@ -296,8 +357,8 @@ class ImageBasedContextGuidance(nn.Module):
         image_channels (int): Input image channels. Default: 3.
         ia_cnn_channels (int): Output channels of internal ImageAppearanceCNN. Default: 32.
         contrast_channels (int): Output channels of the GuidedContrastModule. Default: 16.
-        contrast_agg_kernel (int): Kernel size for GFA aggregation in contrast module. Default: 5.
-        contrast_bg_thresh (float): Threshold for global BG context in contrast module. Default: 0.1.
+        contrast_agg_kernel (int): Kernel size for GFA 引导特征聚合aggregation in contrast module. Default: 5.
+        contrast_bg_thresh (float): Threshold阈值 for global BG context全局背景上下文 in contrast module. Default: 0.1.
         ag_intermediate_channels (Optional[int]): Intermediate channels for AGs. Default: None (feat_ch // 2).
         eps (float): Epsilon for numerical stability. Default: 1e-7.
         **kwargs: Absorbs unused parameters from config.
@@ -306,6 +367,8 @@ class ImageBasedContextGuidance(nn.Module):
                  feature_channels: int,
                  image_channels: int = 3,
                  ia_cnn_channels: int = 32, # For original simple CNN
+                 guidance_source: str = 'rgb',
+                 rgb_prefilter: Optional[dict] = None,
                  contrast_channels: int = 16, # Output of GuidedContrastModule
                  contrast_agg_kernel: int = 5, # Param for GuidedContrastModule
                  contrast_bg_thresh: float = 0.1, # Param for GuidedContrastModule
@@ -318,16 +381,46 @@ class ImageBasedContextGuidance(nn.Module):
         if not isinstance(feature_channels, int) or feature_channels <= 0: raise ValueError("'feature_channels' must be positive.")
         if not isinstance(ia_cnn_channels, int) or ia_cnn_channels <= 0: raise ValueError("'ia_cnn_channels' must be positive.")
         if not isinstance(contrast_channels, int) or contrast_channels <= 0: raise ValueError("'contrast_channels' must be positive.")
+        guidance_source = str(guidance_source).lower()
+        if guidance_source not in {'rgb', 'semantic_self'}:
+            raise ValueError("guidance_source must be 'rgb' or 'semantic_self'")
 
         self.feature_channels = feature_channels
         self.eps = eps
+        self.guidance_source = guidance_source
+        self.uses_rgb = guidance_source == 'rgb'
+
+        rgb_prefilter = rgb_prefilter or {}
+        self.use_rgb_prefilter = bool(rgb_prefilter.get('enable', False))
+        if self.use_rgb_prefilter and not self.uses_rgb:
+            raise ValueError("rgb_prefilter requires guidance_source='rgb'")
 
         # --- Define ICG Components ---
-        # 1. Initial Mask Head 
+        # 1. Initial Mask Head 初始掩码头
         self.initial_mask_head = nn.Conv2d(feature_channels, 1, kernel_size=1)
 
         # 2. Appearance CNN 
-        self.ia_cnn = ImageAppearanceCNN(image_channels, ia_cnn_channels)
+        if self.uses_rgb:
+            self.ia_cnn = ImageAppearanceCNN(image_channels, ia_cnn_channels)
+            self.semantic_projection = None
+            self.rgb_prefilter = (
+                ResidualLowPassPurifier(
+                    channels=image_channels,
+                    kernel_size=int(rgb_prefilter.get('kernel_size', 3)),
+                    max_strength=float(rgb_prefilter.get('max_strength', 0.30)),
+                    init_strength=float(rgb_prefilter.get('init_strength', 0.05)),
+                )
+                if self.use_rgb_prefilter else None
+            )
+        else:
+            # M19 SSCG: retain ICG's foreground/background contrast mechanism
+            # but derive its evidence from a separate low-dimensional P4
+            # semantic projection rather than raw image appearance.
+            self.ia_cnn = None
+            self.semantic_projection = ConvGNReLU(
+                feature_channels, ia_cnn_channels, kernel_size=1, padding=0
+            )
+            self.rgb_prefilter = None
 
         # 3. Contrast Module
         self.contrast_module = GuidedContrastModule(
@@ -338,7 +431,7 @@ class ImageBasedContextGuidance(nn.Module):
             eps=eps
         )
 
-        # 4. Attention Gates 
+        # 4. Attention Gates 两个串联的迭代注意力门控
         if ag_intermediate_channels is None:
             ag_intermediate_channels = max(1, feature_channels // 2)
 
@@ -347,30 +440,38 @@ class ImageBasedContextGuidance(nn.Module):
 
         # Log ignored parameters from kwargs if any unexpected ones were passed
         # Example: Check for freq/octave params which are not used here
-        known_params = {'feature_channels', 'image_channels', 'ia_cnn_channels',
+        known_params = {'feature_channels', 'image_channels', 'ia_cnn_channels', 'guidance_source', 'rgb_prefilter',
                         'contrast_channels', 'contrast_agg_kernel', 'contrast_bg_thresh',
                         'ag_intermediate_channels', 'eps'}
         ignored_params = {k:v for k,v in kwargs.items() if k not in known_params}
         if ignored_params:
             logger.warning(f"Enhanced ICG (E23) ignoring parameters: {ignored_params}")
 
+    def purify_rgb(self, image: torch.Tensor) -> torch.Tensor:
+        """Apply the optional RGB purifier before resolution reduction."""
+        return self.rgb_prefilter(image) if self.rgb_prefilter is not None else image
 
-    def forward(self, f_enhanced_n: torch.Tensor, resized_image: torch.Tensor) -> torch.Tensor:
+    def forward(self, f_enhanced_n: torch.Tensor, resized_image: Optional[torch.Tensor]) -> torch.Tensor:
         """ Forward pass implementing E2 (GuidedContrast) + E3 (Iterative AG). """
         # --- Shared Computations ---
-        image_appearance_features = self.ia_cnn(resized_image) # Original CNN
+        if self.uses_rgb:
+            if resized_image is None:
+                raise ValueError("RGB ICG requires resized_image")
+            appearance_features = self.ia_cnn(resized_image)
+        else:
+            appearance_features = self.semantic_projection(f_enhanced_n)
 
-        # --- Stage 1 ---
+        # --- Stage 1 ---生成初始掩码（粗物体定位）
         P_init = torch.sigmoid(self.initial_mask_head(f_enhanced_n))
         # Calculate contrast using E2 module
-        contrast_map_s1 = self.contrast_module(image_appearance_features, P_init)
-        # Apply First Attention Gate (E3)
+        contrast_map_s1 = self.contrast_module(appearance_features, P_init)
+        # Apply First Attention Gate (E3)第一次注意力门控调
         f_modulated_s1 = self.attn_gate1(x=f_enhanced_n, g=contrast_map_s1)
 
         # --- Stage 2 (Refinement) ---
         # Generate refined mask guidance P_refined (not directly used if contrast map is reused)
         # P_refined = torch.sigmoid(self.initial_mask_head(f_modulated_s1)) # Optional: use if recalculating contrast
-        # Reuse contrast map from Stage 1 (decisive choice)
+        # Reuse contrast map from Stage 1 (decisive choice)不迭代更新对比图
         contrast_map_s2 = contrast_map_s1
         # Apply Second Attention Gate (E3)
         f_final_modulated = self.attn_gate2(x=f_modulated_s1, g=contrast_map_s2)
@@ -401,7 +502,7 @@ class LightRefineBlock(nn.Sequential):
             nn.ReLU(inplace=True)
         )
 
-# --- Main Object Localization Branch ---
+# --- Main Object Localization Branch ---核心目标定位模块，上下文定位
 class ObjectLocalizationBranch(nn.Module):
     """
     Contextual Localization Pathway (CLP) - Paper Section 3.3.
@@ -414,7 +515,7 @@ class ObjectLocalizationBranch(nn.Module):
                  intermediate_channels: List[int],
                  output_channels: int,
                  num_enhance_blocks: int = 1,
-                 icg_params: dict = None, # Pass params for ICG E2+E3 here
+                 icg_params: dict = None, # Pass params参数 for ICG E2+E3 here
                  shared_upsamplers: nn.ModuleDict = None):
         super().__init__()
         # --- Input Validation & Channel Config (Keep as before) ---
@@ -432,7 +533,7 @@ class ObjectLocalizationBranch(nn.Module):
         self.adapt_n_minus_1 = ConvGNReLU(encoder_channels, self.chan_adapt, 1, padding=0)
         self.enhance_blocks = nn.Sequential(*[SemanticEnhanceBlock(self.chan_adapt) for _ in range(num_enhance_blocks)])
 
-        # Instantiate the  ICG module 
+        # Instantiate the  ICG module 基于图像的上下文引导模块
         self.icg_module = ImageBasedContextGuidance(
             feature_channels=self.chan_adapt, # Operates on enhanced features
             **(icg_params or {}) # Pass all relevant params for E2+E3 config
@@ -446,7 +547,7 @@ class ObjectLocalizationBranch(nn.Module):
 
     def forward(self, f_n_minus_1: torch.Tensor, f_n: torch.Tensor, x_resized_map: Dict[Tuple[int, int], torch.Tensor]) -> torch.Tensor:
         """ Forward pass using Enhanced ICG (E2+E3). """
-        # Retrieve Upsamplers
+        # Retrieve Upsamplers取出上采样器 & 获取对应分辨率的原始图像
         upsampler_adapt = self.upsamplers[str(self.chan_adapt)]; upsampler_fuse1 = self.upsamplers[str(self.chan_fuse1)]; upsampler_adapt_final = self.upsamplers[str(self.chan_adapt_final)]
         # Get Resized Image
         icg_h, icg_w = f_n.shape[-2:]; resized_image_for_icg = x_resized_map.get((icg_h, icg_w));
@@ -454,11 +555,11 @@ class ObjectLocalizationBranch(nn.Module):
 
         # --- Process F_N Stream with Enhanced ICG ---
         f_n_adapted = self.adapt_n(f_n)
-        f_n_enhanced = self.enhance_blocks(f_n_adapted)
+        f_n_enhanced = self.enhance_blocks(f_n_adapted)#语义增强
         # Apply ENHANCED ICG (E2+E3)
-        f_n_modulated = self.icg_module(f_n_enhanced, resized_image_for_icg)
+        f_n_modulated = self.icg_module(f_n_enhanced, resized_image_for_icg)#图像引导上下文调制
 
-        # --- Upsample, Fuse with F_N-1, Refine ---
+        # --- Upsample, Fuse with F_N-1, Refine ---上采样 + 与 stage n-1 融合
         f_n_up1 = upsampler_adapt(f_n_modulated)
         f_n_minus_1_adapted = self.adapt_n_minus_1(f_n_minus_1)
         f_n_minus_1_up1 = upsampler_adapt(f_n_minus_1_adapted)

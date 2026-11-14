@@ -1,0 +1,7 @@
+base_config: comparison_base_full150.yaml
+model:
+  name: COM-PointRend-R50-FPN-Full150-Seed42
+  architecture: pointrend_r50
+  pretrained: true
+  num_points: 8192
+

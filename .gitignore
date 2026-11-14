@@ -74,6 +74,49 @@ htmlcov/
 *.swp
 *~
 
+# Research workspace: generated data, runs, and downloaded weights
+**/checkpoints/
+!checkpoints/.gitkeep
+**/datasets/
+!datasets/.gitkeep
+**/dataset/
+**/results/
+**/outputs/
+**/runs/
+**/logs/
+**/pretrained/
+**/pretrained_models/
+**/_deps/
+.docx_deps/
+**/__pycache__/
+*.pth
+*.pt
+*.ckpt
+*.pkl
+*.safetensors
+*.onnx
+*.joblib
+*.zip
+*.7z
+*.tar
+*.tar.gz
+*.npy
+*.npz
+*.tiff
+*.log
+*.err.log
+
+# Local render and diagnostic artifacts
+_tmp_*
+tmp_*
+_quexian_contact_sheet.jpg
+c.out_channels
+docs/_render_*/
+docs/_edge_profile_*/
+docs/qa_*/
+paper_draft_work/final_render*.pdf
+Deblurring/_tmp_*/
+
 # System files
 .DS_Store
 Thumbs.db

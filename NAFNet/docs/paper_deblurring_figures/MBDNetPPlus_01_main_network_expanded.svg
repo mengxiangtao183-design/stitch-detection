@@ -1,0 +1,123 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="4800" height="2350" viewBox="0 0 4800 2350">
+  <defs>
+    <marker id="arrow" markerWidth="13" markerHeight="11" refX="12" refY="5.5" orient="auto"><path d="M0,0 L13,5.5 L0,11 Z" fill="#303030"/></marker>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="3" dy="4" stdDeviation="4" flood-color="#777" flood-opacity="0.22"/></filter>
+    <style>
+      .t{font-family:'Times New Roman','Arial',serif;fill:#202020}.title{font-size:52px;font-weight:bold}.sub{font-size:25px}.stage{font-size:27px;font-weight:bold}.m{font-size:20px}.s{font-size:17px}.xs{font-size:14px}
+      .panel0{fill:#f9fcff;stroke:#6ea8cf;stroke-width:2.5;stroke-dasharray:12 8}.panel1{fill:#fff9f4;stroke:#df9369;stroke-width:2.5;stroke-dasharray:12 8}.panel2{fill:#fffbe8;stroke:#c9a22e;stroke-width:2.7;stroke-dasharray:12 8}.legend{fill:#fff;stroke:#555;stroke-width:2.2;stroke-dasharray:8 6}
+      .conv{fill:#cfe8f6;stroke:#4e8fb4;stroke-width:2.2}.dwpw{fill:#ffe1d3;stroke:#d48762;stroke-width:2.2}.mbd{fill:#fff0ad;stroke:#c69b28;stroke-width:2.2}.lrc{fill:#d9efd8;stroke:#5b9a5c;stroke-width:2.2}.down{fill:#e7d9f2;stroke:#8f6aa4;stroke-width:2.2}.up{fill:#eadcf4;stroke:#9470aa;stroke-width:2.2}.box{fill:#fff;stroke:#333;stroke-width:2.1}
+      .flow{fill:none;stroke:#303030;stroke-width:2.8;marker-end:url(#arrow)}.skip{fill:none;stroke:#555;stroke-width:2.4;stroke-dasharray:10 7;marker-end:url(#arrow)}.guide{fill:none;stroke:#aaa;stroke-width:1.6;stroke-dasharray:5 6}
+    </style>
+  </defs>
+  <rect width="4800" height="1900" fill="white"/>
+  <text x="2400" y="66" text-anchor="middle" class="t title">MBDNet-P+ Detailed Architecture</text>
+  <text x="2400" y="105" text-anchor="middle" class="t sub">Scale-limited motion-biased encoder–decoder for line-trace image deblurring</text>
+  <text x="75" y="150" class="t s">RGB-only inference · no mask · no domain label · no stored degradation parameters · right/bottom replicate padding to multiples of 4</text>
+
+  <!-- resolution guides -->
+  <line x1="55" y1="350" x2="4690" y2="350" class="guide"/><text x="60" y="336" class="t m">H × W</text>
+  <line x1="55" y1="690" x2="4690" y2="690" class="guide"/><text x="60" y="676" class="t m">H/2 × W/2</text>
+  <line x1="55" y1="1110" x2="4690" y2="1110" class="guide"/><text x="60" y="1096" class="t m">H/4 × W/4</text>
+
+  <!-- input -->
+  <g filter="url(#shadow)"><polygon points="85,270 160,250 160,425 85,445" fill="#f6eaf2" stroke="#956b89" stroke-width="2"/><polygon points="100,255 175,235 175,410 100,430" fill="#fbeff7" stroke="#956b89" stroke-width="2"/><polygon points="115,240 190,220 190,395 115,415" fill="#fff8fc" stroke="#956b89" stroke-width="2"/></g>
+  <text x="138" y="475" text-anchor="middle" class="t stage">Blurred RGB</text><text x="138" y="503" text-anchor="middle" class="t m">B × 3 × H × W</text>
+  <rect x="235" y="285" width="155" height="128" rx="10" class="conv" filter="url(#shadow)"/><text x="313" y="325" text-anchor="middle" class="t stage">Stem</text><text x="313" y="361" text-anchor="middle" class="t m">3×3 Conv</text><text x="313" y="392" text-anchor="middle" class="t s">3 → 64</text><path d="M190 349 H235" class="flow"/>
+
+  <!-- Encoder E0: 3 individual blocks -->
+  <rect x="440" y="225" width="570" height="250" rx="18" class="panel0"/>
+  <text x="470" y="263" class="t stage">Encoder E0</text><text x="980" y="263" text-anchor="end" class="t s">B × 64 × H × W</text>
+  <g filter="url(#shadow)"><rect x="480" y="310" width="140" height="94" rx="9" class="dwpw"/><rect x="655" y="310" width="140" height="94" rx="9" class="dwpw"/><rect x="830" y="310" width="140" height="94" rx="9" class="dwpw"/></g>
+  <text x="550" y="349" text-anchor="middle" class="t m">DWPW</text><text x="550" y="378" text-anchor="middle" class="t s">E0-1 · C=64</text>
+  <text x="725" y="349" text-anchor="middle" class="t m">DWPW</text><text x="725" y="378" text-anchor="middle" class="t s">E0-2 · C=64</text>
+  <text x="900" y="349" text-anchor="middle" class="t m">DWPW</text><text x="900" y="378" text-anchor="middle" class="t s">E0-3 · C=64</text>
+  <path d="M390 349 H480 M620 357 H655 M795 357 H830" class="flow"/><circle cx="985" cy="357" r="8" fill="#333"/><text x="725" y="445" text-anchor="middle" class="t s">Full-resolution generic restoration · save skip F₀</text>
+
+  <!-- Down1 -->
+  <rect x="1050" y="575" width="175" height="145" rx="11" class="down" filter="url(#shadow)"/><text x="1138" y="616" text-anchor="middle" class="t stage">Down-1</text><text x="1138" y="650" text-anchor="middle" class="t s">3×3 DW, s=2</text><text x="1138" y="679" text-anchor="middle" class="t s">1×1 PW</text><text x="1138" y="706" text-anchor="middle" class="t s">64 → 128</text><path d="M970 357 H1018 V648 H1050" class="flow"/>
+
+  <!-- Encoder E1: 4 individual blocks + MBD -->
+  <rect x="1270" y="535" width="960" height="310" rx="18" class="panel1"/>
+  <text x="1305" y="578" class="t stage">Encoder E1</text><text x="2195" y="578" text-anchor="end" class="t s">B × 128 × H/2 × W/2</text>
+  <g filter="url(#shadow)"><rect x="1320" y="630" width="140" height="94" rx="9" class="dwpw"/><rect x="1500" y="630" width="140" height="94" rx="9" class="dwpw"/><rect x="1680" y="630" width="140" height="94" rx="9" class="dwpw"/><rect x="1860" y="630" width="140" height="94" rx="9" class="dwpw"/><rect x="2040" y="620" width="145" height="115" rx="9" class="mbd"/></g>
+  <text x="1390" y="669" text-anchor="middle" class="t m">DWPW</text><text x="1390" y="698" text-anchor="middle" class="t s">E1-1 · C=128</text>
+  <text x="1570" y="669" text-anchor="middle" class="t m">DWPW</text><text x="1570" y="698" text-anchor="middle" class="t s">E1-2 · C=128</text>
+  <text x="1750" y="669" text-anchor="middle" class="t m">DWPW</text><text x="1750" y="698" text-anchor="middle" class="t s">E1-3 · C=128</text>
+  <text x="1930" y="669" text-anchor="middle" class="t m">DWPW</text><text x="1930" y="698" text-anchor="middle" class="t s">E1-4 · C=128</text>
+  <text x="2113" y="665" text-anchor="middle" class="t stage">MBD-E</text><text x="2113" y="696" text-anchor="middle" class="t s">C=128</text><text x="2113" y="720" text-anchor="middle" class="t xs">motion routing</text>
+  <path d="M1225 648 H1320 M1460 677 H1500 M1640 677 H1680 M1820 677 H1860 M2000 677 H2040" class="flow"/><circle cx="2198" cy="677" r="8" fill="#333"/><text x="1750" y="805" text-anchor="middle" class="t s">Half-resolution restoration · save skip F₁</text>
+
+  <!-- Down2 -->
+  <rect x="2275" y="990" width="175" height="145" rx="11" class="down" filter="url(#shadow)"/><text x="2363" y="1031" text-anchor="middle" class="t stage">Down-2</text><text x="2363" y="1065" text-anchor="middle" class="t s">3×3 DW, s=2</text><text x="2363" y="1094" text-anchor="middle" class="t s">1×1 PW</text><text x="2363" y="1121" text-anchor="middle" class="t s">128 → 256</text><path d="M2185 677 H2240 V1063 H2275" class="flow"/>
+
+  <!-- expanded bottleneck -->
+  <rect x="255" y="1190" width="3680" height="350" rx="20" class="panel2"/>
+  <text x="290" y="1235" class="t stage">Quarter-resolution Bottleneck</text><text x="3900" y="1235" text-anchor="end" class="t s">B × 256 × H/4 × W/4</text>
+  <!-- 12 DWPW -->
+  <g filter="url(#shadow)">
+    <rect x="320" y="1290" width="115" height="92" rx="8" class="dwpw"/><rect x="460" y="1290" width="115" height="92" rx="8" class="dwpw"/><rect x="600" y="1290" width="115" height="92" rx="8" class="dwpw"/><rect x="740" y="1290" width="115" height="92" rx="8" class="dwpw"/>
+    <rect x="880" y="1290" width="115" height="92" rx="8" class="dwpw"/><rect x="1020" y="1290" width="115" height="92" rx="8" class="dwpw"/><rect x="1160" y="1290" width="115" height="92" rx="8" class="dwpw"/><rect x="1300" y="1290" width="115" height="92" rx="8" class="dwpw"/>
+    <rect x="1440" y="1290" width="115" height="92" rx="8" class="dwpw"/><rect x="1580" y="1290" width="115" height="92" rx="8" class="dwpw"/><rect x="1720" y="1290" width="115" height="92" rx="8" class="dwpw"/><rect x="1860" y="1290" width="115" height="92" rx="8" class="dwpw"/>
+  </g>
+  <g class="t"><text x="378" y="1328" text-anchor="middle" class="m">DWPW</text><text x="378" y="1358" text-anchor="middle" class="s">B-01</text><text x="518" y="1328" text-anchor="middle" class="m">DWPW</text><text x="518" y="1358" text-anchor="middle" class="s">B-02</text><text x="658" y="1328" text-anchor="middle" class="m">DWPW</text><text x="658" y="1358" text-anchor="middle" class="s">B-03</text><text x="798" y="1328" text-anchor="middle" class="m">DWPW</text><text x="798" y="1358" text-anchor="middle" class="s">B-04</text>
+  <text x="938" y="1328" text-anchor="middle" class="m">DWPW</text><text x="938" y="1358" text-anchor="middle" class="s">B-05</text><text x="1078" y="1328" text-anchor="middle" class="m">DWPW</text><text x="1078" y="1358" text-anchor="middle" class="s">B-06</text><text x="1218" y="1328" text-anchor="middle" class="m">DWPW</text><text x="1218" y="1358" text-anchor="middle" class="s">B-07</text><text x="1358" y="1328" text-anchor="middle" class="m">DWPW</text><text x="1358" y="1358" text-anchor="middle" class="s">B-08</text>
+  <text x="1498" y="1328" text-anchor="middle" class="m">DWPW</text><text x="1498" y="1358" text-anchor="middle" class="s">B-09</text><text x="1638" y="1328" text-anchor="middle" class="m">DWPW</text><text x="1638" y="1358" text-anchor="middle" class="s">B-10</text><text x="1778" y="1328" text-anchor="middle" class="m">DWPW</text><text x="1778" y="1358" text-anchor="middle" class="s">B-11</text><text x="1918" y="1328" text-anchor="middle" class="m">DWPW</text><text x="1918" y="1358" text-anchor="middle" class="s">B-12</text></g>
+  <rect x="2030" y="1278" width="145" height="115" rx="9" class="lrc" filter="url(#shadow)"/><text x="2103" y="1322" text-anchor="middle" class="t stage">LRC</text><text x="2103" y="1352" text-anchor="middle" class="t s">local+dilated</text><text x="2103" y="1377" text-anchor="middle" class="t xs">C=256</text>
+  <rect x="2225" y="1278" width="145" height="115" rx="9" class="mbd" filter="url(#shadow)"/><text x="2298" y="1322" text-anchor="middle" class="t stage">MBD-1</text><text x="2298" y="1352" text-anchor="middle" class="t s">C=256</text>
+  <rect x="2420" y="1290" width="115" height="92" rx="8" class="dwpw" filter="url(#shadow)"/><rect x="2570" y="1290" width="115" height="92" rx="8" class="dwpw" filter="url(#shadow)"/>
+  <text x="2478" y="1328" text-anchor="middle" class="t m">DWPW</text><text x="2478" y="1358" text-anchor="middle" class="t s">R-01</text><text x="2628" y="1328" text-anchor="middle" class="t m">DWPW</text><text x="2628" y="1358" text-anchor="middle" class="t s">R-02</text>
+  <rect x="2735" y="1278" width="145" height="115" rx="9" class="mbd" filter="url(#shadow)"/><text x="2808" y="1322" text-anchor="middle" class="t stage">MBD-2</text><text x="2808" y="1352" text-anchor="middle" class="t s">C=256</text>
+  <path d="M2450 1063 H2490 V1336 H320 M435 1336 H460 M575 1336 H600 M715 1336 H740 M855 1336 H880 M995 1336 H1020 M1135 1336 H1160 M1275 1336 H1300 M1415 1336 H1440 M1555 1336 H1580 M1695 1336 H1720 M1835 1336 H1860 M1975 1336 H2030 M2175 1336 H2225 M2370 1336 H2420 M2535 1336 H2570 M2685 1336 H2735" class="flow"/>
+  <circle cx="2905" cy="1336" r="8" fill="#333"/>
+  <text x="2110" y="1462" text-anchor="middle" class="t s">12 generic blocks → context aggregation → motion restoration → 2 generic refinements → motion restoration</text>
+
+  <!-- Up1 and Decoder E1 expanded -->
+  <rect x="2990" y="990" width="175" height="145" rx="11" class="up" filter="url(#shadow)"/><text x="3078" y="1031" text-anchor="middle" class="t stage">Up-1</text><text x="3078" y="1065" text-anchor="middle" class="t s">1×1: 256→512</text><text x="3078" y="1094" text-anchor="middle" class="t s">PixelShuffle(2)</text><text x="3078" y="1121" text-anchor="middle" class="t s">→128 channels</text><path d="M2880 1336 H2940 V1063 H2990" class="flow"/>
+  <circle cx="3230" cy="677" r="32" class="box"/><text x="3230" y="689" text-anchor="middle" class="t stage">+</text><path d="M3165 1063 H3190 V677 H3198" class="flow"/>
+  <rect x="3290" y="535" width="960" height="310" rx="18" class="panel1"/>
+  <text x="3325" y="578" class="t stage">Decoder D1</text><text x="4215" y="578" text-anchor="end" class="t s">B × 128 × H/2 × W/2</text>
+  <g filter="url(#shadow)"><rect x="3340" y="630" width="140" height="94" rx="9" class="dwpw"/><rect x="3520" y="630" width="140" height="94" rx="9" class="dwpw"/><rect x="3700" y="630" width="140" height="94" rx="9" class="dwpw"/><rect x="3880" y="630" width="140" height="94" rx="9" class="dwpw"/><rect x="4060" y="620" width="145" height="115" rx="9" class="mbd"/></g>
+  <text x="3410" y="669" text-anchor="middle" class="t m">DWPW</text><text x="3410" y="698" text-anchor="middle" class="t s">D1-1 · C=128</text><text x="3590" y="669" text-anchor="middle" class="t m">DWPW</text><text x="3590" y="698" text-anchor="middle" class="t s">D1-2 · C=128</text><text x="3770" y="669" text-anchor="middle" class="t m">DWPW</text><text x="3770" y="698" text-anchor="middle" class="t s">D1-3 · C=128</text><text x="3950" y="669" text-anchor="middle" class="t m">DWPW</text><text x="3950" y="698" text-anchor="middle" class="t s">D1-4 · C=128</text><text x="4133" y="665" text-anchor="middle" class="t stage">MBD-D</text><text x="4133" y="696" text-anchor="middle" class="t s">C=128</text><text x="4133" y="720" text-anchor="middle" class="t xs">motion routing</text>
+  <path d="M3262 677 H3340 M3480 677 H3520 M3660 677 H3700 M3840 677 H3880 M4020 677 H4060" class="flow"/><circle cx="4218" cy="677" r="8" fill="#333"/>
+
+  <!-- Up2 + D0 + Head -->
+  <rect x="4280" y="575" width="175" height="145" rx="11" class="up" filter="url(#shadow)"/><text x="4368" y="616" text-anchor="middle" class="t stage">Up-2</text><text x="4368" y="650" text-anchor="middle" class="t s">1×1: 128→256</text><text x="4368" y="679" text-anchor="middle" class="t s">PixelShuffle(2)</text><text x="4368" y="706" text-anchor="middle" class="t s">→64 channels</text><path d="M4205 677 H4280" class="flow"/>
+  <circle cx="3640" cy="357" r="32" class="box"/><text x="3640" y="369" text-anchor="middle" class="t stage">+</text><path d="M4455 648 H4485 V357 H3672" class="flow"/>
+  <rect x="3680" y="225" width="570" height="250" rx="18" class="panel0"/>
+  <text x="3710" y="263" class="t stage">Decoder D0</text><text x="4220" y="263" text-anchor="end" class="t s">B × 64 × H × W</text>
+  <g filter="url(#shadow)"><rect x="3720" y="310" width="140" height="94" rx="9" class="dwpw"/><rect x="3895" y="310" width="140" height="94" rx="9" class="dwpw"/><rect x="4070" y="310" width="140" height="94" rx="9" class="dwpw"/></g>
+  <text x="3790" y="349" text-anchor="middle" class="t m">DWPW</text><text x="3790" y="378" text-anchor="middle" class="t s">D0-1 · C=64</text><text x="3965" y="349" text-anchor="middle" class="t m">DWPW</text><text x="3965" y="378" text-anchor="middle" class="t s">D0-2 · C=64</text><text x="4140" y="349" text-anchor="middle" class="t m">DWPW</text><text x="4140" y="378" text-anchor="middle" class="t s">D0-3 · C=64</text>
+  <path d="M3672 357 H3720 M3860 357 H3895 M4035 357 H4070" class="flow"/>
+  <!-- head located after reverse visual flow -->
+  <rect x="4320" y="260" width="125" height="118" rx="10" class="conv" filter="url(#shadow)"/><text x="4383" y="299" text-anchor="middle" class="t stage">Head</text><text x="4383" y="333" text-anchor="middle" class="t m">3×3 Conv</text><text x="4383" y="360" text-anchor="middle" class="t s">64 → 3</text><path d="M4210 357 H4320" class="flow"/>
+  <circle cx="4540" cy="357" r="32" class="box"/><text x="4540" y="369" text-anchor="middle" class="t stage">+</text><path d="M4445 319 H4508" class="flow"/>
+  <g filter="url(#shadow)"><polygon points="4610,290 4685,270 4685,420 4610,440" fill="#e6f1ff" stroke="#608cb5" stroke-width="2"/><polygon points="4625,275 4700,255 4700,405 4625,425" fill="#f2f8ff" stroke="#608cb5" stroke-width="2"/></g><path d="M4572 357 H4610" class="flow"/><text x="4650" y="472" text-anchor="middle" class="t stage">Restored RGB</text><text x="4650" y="499" text-anchor="middle" class="t m">B × 3 × H × W</text>
+
+  <!-- skip paths and global residual -->
+  <path d="M2198 630 V525 H3230 V645" class="skip"/><text x="2710" y="512" text-anchor="middle" class="t s">Skip F₁: element-wise addition after Up-1</text>
+  <path d="M985 310 V185 H3640 V325" class="skip"/><text x="2300" y="174" text-anchor="middle" class="t s">Skip F₀: element-wise addition after Up-2</text>
+  <path d="M138 415 V1575 H4540 V389" class="skip"/><text x="2380" y="1565" text-anchor="middle" class="t s">Global image residual: Î = Iᵦ + Head(FD0) · crop to original H × W</text>
+
+  <!-- compact legend -->
+  <g transform="translate(0,470)">
+  <rect x="3200" y="1170" width="1500" height="570" rx="18" class="legend"/>
+  <text x="3240" y="1215" class="t stage">Legend</text>
+  <rect x="3260" y="1260" width="120" height="68" rx="8" class="conv"/><text x="3415" y="1303" class="t m">Conv / Stem / Reconstruction head</text>
+  <rect x="3260" y="1350" width="120" height="68" rx="8" class="dwpw"/><text x="3415" y="1393" class="t m">DWPW generic restoration block</text>
+  <rect x="3260" y="1440" width="120" height="68" rx="8" class="mbd"/><text x="3415" y="1483" class="t m">MBD motion-biased deblurring block</text>
+  <rect x="3260" y="1530" width="120" height="68" rx="8" class="lrc"/><text x="3415" y="1573" class="t m">LRC local–dilated context unit</text>
+  <rect x="3980" y="1260" width="120" height="68" rx="8" class="down"/><text x="4135" y="1303" class="t m">DownsampleDWPW</text>
+  <rect x="3980" y="1350" width="120" height="68" rx="8" class="up"/><text x="4135" y="1393" class="t m">UpsampleDWPW + PixelShuffle</text>
+  <circle cx="4040" cy="1474" r="28" class="box"/><text x="4040" y="1485" text-anchor="middle" class="t stage">+</text><text x="4135" y="1483" class="t m">Element-wise addition</text>
+  <path d="M3980 1564 H4085" class="skip"/><text x="4135" y="1573" class="t m">Skip / identity residual path</text>
+  <text x="3260" y="1645" class="t s">Block count: E0 3 · E1 4 · Bottleneck 12+2 · D1 4 · D0 3 = 28 DWPW</text>
+  <text x="3260" y="1680" class="t s">MBD placement: E1 1 · Bottleneck 2 · D1 1 · full resolution 0</text>
+  </g>
+
+  <!-- minimal notes -->
+  <rect x="255" y="1610" width="2800" height="145" rx="14" fill="#f7fafc" stroke="#778793" stroke-width="1.8"/>
+  <text x="290" y="1650" class="t stage">Topology summary</text>
+  <text x="290" y="1690" class="t m">64 → 128 → 256 → 128 → 64 channels · 28 DWPW · 4 MBD · 1 LRC · 13.70 M parameters</text>
+  <text x="290" y="1728" class="t s">Directional restoration is restricted to H/2 and H/4. Full-resolution stages remain generic to protect weave, glitter and oblique ornaments.</text>
+  <text x="2400" y="2310" text-anchor="middle" class="t s">Fig. X. Expanded architecture of MBDNet-P+. Every repeated restoration block is explicitly drawn.</text>
+</svg>

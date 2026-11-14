@@ -1,0 +1,151 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1900" height="1260" viewBox="0 0 1900 1260" role="img" aria-labelledby="title desc">
+  <title id="title">TPT-Net detailed architecture</title>
+  <desc id="desc">Detailed vector flowchart of the Tri-Pair Trajectory Network, including the TriStripe Stage 1, PairAligned Stage 2, TCFM, full-resolution Stage 3, and optional STAM and AF-BandGate innovations.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#334155"/>
+    </marker>
+    <marker id="arrow-orange" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#c2410c"/>
+    </marker>
+    <marker id="arrow-red" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#be123c"/>
+    </marker>
+    <style>
+      .bg { fill:#f8fafc; }
+      .title { font:700 31px 'Segoe UI','Microsoft YaHei',sans-serif; fill:#0f172a; }
+      .subtitle { font:400 16px 'Segoe UI','Microsoft YaHei',sans-serif; fill:#475569; }
+      .section { font:700 19px 'Segoe UI','Microsoft YaHei',sans-serif; fill:#1e3a5f; }
+      .label { font:600 15px 'Segoe UI','Microsoft YaHei',sans-serif; fill:#0f172a; text-anchor:middle; }
+      .small { font:400 12px 'Segoe UI','Microsoft YaHei',sans-serif; fill:#334155; text-anchor:middle; }
+      .tiny { font:400 11px 'Segoe UI','Microsoft YaHei',sans-serif; fill:#475569; text-anchor:middle; }
+      .group { fill:#eff6ff; stroke:#93c5fd; stroke-width:2; }
+      .node { fill:#ffffff; stroke:#64748b; stroke-width:1.8; rx:10; }
+      .node-blue { fill:#dbeafe; stroke:#2563eb; stroke-width:2; rx:10; }
+      .node-green { fill:#dcfce7; stroke:#16a34a; stroke-width:2; rx:10; }
+      .node-purple { fill:#f3e8ff; stroke:#9333ea; stroke-width:2; rx:10; }
+      .node-orange { fill:#ffedd5; stroke:#ea580c; stroke-width:2.5; rx:10; }
+      .node-red { fill:#ffe4e6; stroke:#e11d48; stroke-width:2.5; rx:10; }
+      .flow { fill:none; stroke:#334155; stroke-width:2.2; marker-end:url(#arrow); }
+      .flow-dash { fill:none; stroke:#64748b; stroke-width:1.8; stroke-dasharray:7 5; marker-end:url(#arrow); }
+      .flow-orange { fill:none; stroke:#c2410c; stroke-width:2.5; stroke-dasharray:7 4; marker-end:url(#arrow-orange); }
+      .flow-red { fill:none; stroke:#be123c; stroke-width:2.5; stroke-dasharray:7 4; marker-end:url(#arrow-red); }
+      .note { fill:#fff; stroke:#cbd5e1; stroke-width:1.2; rx:8; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1900" height="1260"/>
+  <text class="title" x="70" y="56">TPT-Net：Tri-Pair Trajectory Network</text>
+  <text class="subtitle" x="70" y="84">固定基线：TriStripe + PairAligned + TCFM + 全分辨率重建路径。橙色和红色虚线框表示可叠加的创新模块。</text>
+
+  <!-- Legend -->
+  <rect class="node-blue" x="1370" y="32" width="135" height="34"/><text class="tiny" x="1438" y="54">固定主干</text>
+  <rect class="node-orange" x="1520" y="32" width="155" height="34"/><text class="tiny" x="1598" y="54">AF-BandGate</text>
+  <rect class="node-red" x="1690" y="32" width="145" height="34"/><text class="tiny" x="1763" y="54">STAM</text>
+
+  <!-- Input -->
+  <rect class="node" x="80" y="150" width="180" height="72"/>
+  <text class="label" x="170" y="179">退化输入 I</text>
+  <text class="small" x="170" y="200">320 × 320 RGB</text>
+
+  <!-- Stage 1 group -->
+  <rect class="group" x="330" y="110" width="610" height="500" rx="18"/>
+  <text class="section" x="360" y="145">Stage 1：TriStripe 共享对重建</text>
+  <text class="small" x="607" y="169">3 条横向条带，重叠率 0.20；中间条带为线迹核心区域</text>
+
+  <!-- stripes -->
+  <rect class="node-blue" x="365" y="198" width="150" height="58"/><text class="label" x="440" y="223">Stripe s1</text><text class="tiny" x="440" y="242">上条带</text>
+  <rect class="node-blue" x="365" y="282" width="150" height="58"/><text class="label" x="440" y="307">Stripe s2</text><text class="tiny" x="440" y="326">中间线迹条带</text>
+  <rect class="node-blue" x="365" y="366" width="150" height="58"/><text class="label" x="440" y="391">Stripe s3</text><text class="tiny" x="440" y="410">下条带</text>
+
+  <rect class="node" x="575" y="250" width="170" height="104"/>
+  <text class="label" x="660" y="278">共享 Stage-1</text>
+  <text class="small" x="660" y="299">Shallow Feature</text>
+  <text class="small" x="660" y="318">Encoder 1</text>
+  <text class="small" x="660" y="337">(可选条带上下文)</text>
+
+  <rect class="node-green" x="790" y="208" width="120" height="70"/>
+  <text class="label" x="850" y="236">Pair 12</text><text class="tiny" x="850" y="255">F1_1 + F1_2</text>
+  <rect class="node-green" x="790" y="344" width="120" height="70"/>
+  <text class="label" x="850" y="372">Pair 23</text><text class="tiny" x="850" y="391">F1_2 + F1_3</text>
+
+  <rect class="node" x="575" y="448" width="170" height="82"/>
+  <text class="label" x="660" y="475">共享 Decoder 1</text>
+  <text class="small" x="660" y="495">SAM12 + pair RGB</text>
+  <text class="small" x="660" y="514">encoder / decoder features</text>
+  <rect class="node-purple" x="790" y="458" width="120" height="62"/>
+  <text class="label" x="850" y="484">重叠混合</text><text class="tiny" x="850" y="503">O1 + pair features</text>
+
+  <!-- Stage 2 group -->
+  <rect class="group" x="1010" y="110" width="720" height="500" rx="18"/>
+  <text class="section" x="1040" y="145">Stage 2：PairAligned 跨阶段重建</text>
+  <text class="small" x="1370" y="169">相邻对 [s1,s2]、[s2,s3] 独立处理后按尺度重组</text>
+
+  <rect class="node" x="1045" y="210" width="145" height="66"/>
+  <text class="label" x="1118" y="236">原始 pair 图像</text><text class="tiny" x="1118" y="255">I12 / I23</text>
+  <rect class="node" x="1045" y="314" width="145" height="66"/>
+  <text class="label" x="1118" y="340">Shallow Feature 2</text><text class="tiny" x="1118" y="359">+ matching SAM12</text>
+  <rect class="node-blue" x="1235" y="263" width="145" height="66"/>
+  <text class="label" x="1308" y="289">Stage-2 input</text><text class="tiny" x="1308" y="308">pair-specific feature</text>
+
+  <rect class="node-red" x="1435" y="210" width="250" height="138"/>
+  <text class="label" x="1560" y="239">STAM：线迹轨迹对齐</text>
+  <text class="small" x="1560" y="261">多尺度水平相关体：-6 … +6</text>
+  <text class="small" x="1560" y="281">预测 Δx / Δy 轨迹场</text>
+  <text class="small" x="1560" y="301">可微重采样 Stage-1 encoder / decoder</text>
+  <text class="tiny" x="1560" y="325">创新 A；未启用时直接传递原特征</text>
+
+  <rect class="node-purple" x="1435" y="402" width="250" height="72"/>
+  <text class="label" x="1560" y="429">TCFM</text>
+  <text class="small" x="1560" y="450">轨迹校准跨阶段特征调制</text>
+  <rect class="node-green" x="1235" y="500" width="145" height="66"/>
+  <text class="label" x="1308" y="526">Stage-2 Encoder</text><text class="tiny" x="1308" y="545">3 个尺度</text>
+  <rect class="node-green" x="1435" y="500" width="145" height="66"/>
+  <text class="label" x="1508" y="526">特征重组</text><text class="tiny" x="1508" y="545">pair blending</text>
+  <rect class="node" x="1605" y="500" width="95" height="66"/>
+  <text class="label" x="1653" y="526">Decoder 2</text><text class="tiny" x="1653" y="545">SAM23 / O2</text>
+
+  <!-- Stage 3 group -->
+  <rect class="group" x="330" y="690" width="1400" height="365" rx="18"/>
+  <text class="section" x="360" y="727">Stage 3：全分辨率重建与最终输出</text>
+  <text class="small" x="975" y="727">固定主干保留原有全分辨率重建路径；AF-BandGate 在 RGB 残差输出后执行频带校正</text>
+
+  <rect class="node" x="410" y="790" width="150" height="70"/>
+  <text class="label" x="485" y="817">Shallow Feature 3</text><text class="tiny" x="485" y="837">来自原始 I</text>
+  <rect class="node-blue" x="625" y="790" width="165" height="70"/>
+  <text class="label" x="708" y="817">Concat + SAM23</text><text class="tiny" x="708" y="837">注入 Stage-2 信息</text>
+  <rect class="node-blue" x="860" y="770" width="230" height="108"/>
+  <text class="label" x="975" y="799">全分辨率重建路径</text>
+  <text class="small" x="975" y="821">接收 Stage-2 encoder / decoder features</text>
+  <text class="small" x="975" y="842">多尺度上下文重建</text>
+  <rect class="node" x="1160" y="790" width="140" height="70"/>
+  <text class="label" x="1230" y="817">RGB Tail</text><text class="tiny" x="1230" y="837">+ residual I</text>
+  <rect class="node-orange" x="1370" y="770" width="230" height="108"/>
+  <text class="label" x="1485" y="799">AF-BandGate</text>
+  <text class="small" x="1485" y="821">频率残差细化</text>
+  <text class="small" x="1485" y="842">自适应频带校正</text>
+  <rect class="node-green" x="1645" y="790" width="115" height="70"/>
+  <text class="label" x="1703" y="817">复原图 O3</text><text class="tiny" x="1703" y="837">final output</text>
+
+  <!-- connectors -->
+  <path class="flow" d="M260 186 H330"/>
+  <path class="flow" d="M440 256 V282"/><path class="flow" d="M440 340 V366"/>
+  <path class="flow" d="M515 227 H575"/><path class="flow" d="M515 311 H575"/><path class="flow" d="M515 395 H575"/>
+  <path class="flow" d="M745 278 H790"/><path class="flow" d="M745 326 H770 V379 H790"/>
+  <path class="flow" d="M850 278 V448 H745"/><path class="flow" d="M850 414 V448 H745"/>
+  <path class="flow" d="M745 489 H790"/>
+  <path class="flow-dash" d="M850 520 V648 H1090 V380"/>
+  <path class="flow" d="M1190 243 V314"/><path class="flow" d="M1190 347 H1235"/>
+  <path class="flow-red" d="M1380 296 H1435"/><path class="flow-red" d="M1435 348 V402"/>
+  <path class="flow" d="M1560 474 V500 H1380"/><path class="flow" d="M1380 533 H1435"/><path class="flow" d="M1580 533 H1605"/>
+  <path class="flow" d="M1653 566 V720 H790"/>
+  <path class="flow" d="M485 790 V700"/><path class="flow" d="M560 825 H625"/><path class="flow" d="M790 825 H860"/><path class="flow" d="M1090 825 H1160"/>
+  <path class="flow-orange" d="M1300 825 H1370"/><path class="flow-orange" d="M1600 825 H1645"/>
+  <path class="flow-dash" d="M170 222 V970 H410"/>
+
+  <!-- Notes -->
+  <rect class="note" x="105" y="1110" width="1630" height="93"/>
+  <text class="label" x="920" y="1138">评测输出</text>
+  <text class="small" x="920" y="1162">完整图像：DB / XJ / SD / RX 各自平均后等权汇总；线迹指标：Stage-1 中间条带的非重叠核心区。</text>
+  <text class="small" x="920" y="1184">320 × 320 图像下，中间条带核心为 y = [124, 196)，覆盖中心线迹，不包含上下条带共享区域。</text>
+</svg>

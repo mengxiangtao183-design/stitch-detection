@@ -1,0 +1,10 @@
+base_config: comparison_base_full150.yaml
+model:
+  name: COM-PSPNet-R50-CVPR2017-Full150-Seed42
+  architecture: pspnet_r50
+  pretrained: true
+  psp_channels: 512
+
+training:
+  use_amp: true
+  gradient_clip: 1.0

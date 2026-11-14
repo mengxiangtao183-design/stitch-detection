@@ -1,0 +1,110 @@
+GPU: [0]
+
+VERBOSE: True
+
+MODEL:
+  MODE: 'Deblurring'
+  SESSION: 'MPRNet_TriPair_HSGORS_Fast100'
+  N_FEAT: 96
+  SCALE_UNETFEATS: 48
+  SCALE_ORSNETFEATS: 32
+  NUM_CAB: 8
+  EDGE_REFINE: True
+  EDGE_REFINE_MID: 24
+  LIGHT_ADAPT: False
+  TRAJECTORY_LIGHTWEIGHT: False
+
+  # B0 spatial backbone: shared middle stripe at both progressive stages.
+  STAGE1_TRISTRIPE: True
+  STAGE1_STRIPES: 3
+  STAGE1_OVERLAP: 0.20
+  STAGE2_OVERLAP: 0.0
+  STAGE2_PAIR_ALIGNED: True
+
+  # B0 reconstruction change: preserve the pretrained ORS CAB pathway and add
+  # a parallel, attention-free SimpleGate residual reassembly path at all three
+  # ORS cells.  No direction, edge, frequency, or spatial-attention module is added.
+  SIMPLE_GATED_ORSNET: False
+  HYBRID_SIMPLE_GATED_ORSNET: True
+  HSGORS_BLOCKS: 4
+  HSGORS_RESIDUAL_INIT: 0.05
+  HSGORS_ADAPTER_SCALE_INIT: 0.02
+
+  # IRR is deliberately off in B0; it is the next single-module experiment.
+  INTERSTAGE_RESIDUAL_REASSEMBLY: False
+
+OPTIM:
+  # SG-ORS replaces all 24 full-resolution CABs.  Keep the effective batch at
+  # 8 while fitting a 24 GB GPU safely: 1 image × 8 accumulated steps = 2 × 4.
+  BATCH_SIZE: 1
+  NUM_EPOCHS: 25
+  LR_INITIAL: 1.0e-5
+  LR_MIN: 1.0e-6
+  ACCUM_ITERS: 8
+  # Newly initialized SG-ORS blocks need to adapt within the screening run.
+  # All inherited MPRNet parameters remain at LR_INITIAL.
+  SGORS_LR_MULTIPLIER: 5.0
+
+TRAINING:
+  VAL_AFTER_EVERY: 3
+  CHECKPOINT_EVERY: 5
+  DO_VALIDATE: True
+  RESUME: true
+  FINETUNE: false
+  PRETRAINED_PATH: 'H:/C3Netqing/Deblurring/checkpoints/train/Deblurring/models/MPRNet/model_latest.pth'
+  RESEED_BEFORE_DATA: true
+  EPOCH_DETERMINISTIC_DATA: true
+  TRAIN_PS: 320
+  VAL_PS: 320
+  TRAIN_DIR: ''
+  VAL_DIR: ''
+  TRAIN_DIRS:
+    - 'H:/DATASET/DB/train'
+    - 'H:/DATASET/XJ/train'
+    - 'H:/DATASET/SD/train'
+  VAL_DIRS: []
+  INPUT_SUBDIR: 'Imgs1'
+  TARGET_SUBDIR: 'clear'
+  EDGE_SUBDIR: 'Edges'
+  MAX_IMAGES_PER_TRAIN_DIR: 100
+  VAL_SPLIT: 0.1
+  NUM_WORKERS: 0
+  SEED: 42
+  USE_AMP: True
+  CUDNN_BENCHMARK: False
+  CUDNN_DETERMINISTIC: True
+  SAVE_BEST: True
+  SAVE_BEST_EVERY: 1
+  SAVE_OPTIMIZER: true
+  SAVE_DIR: 'H:/C3Netqing/Deblurring/checkpoints/train'
+
+AUGMENT:
+  ENABLE: True
+  COLOR_PROB: 0.3
+  BRIGHTNESS: 0.15
+  CONTRAST: 0.15
+  SATURATION: 0.15
+  HUE: 0.02
+  GAMMA_PROB: 0.3
+  GAMMA_MIN: 0.85
+  GAMMA_MAX: 1.20
+  INPUT_NOISE_PROB: 0.10
+  INPUT_NOISE_STD: 0.010
+  LOW_LIGHT_PROB: 0.0
+
+LOSS:
+  STAGE_WEIGHTS: [1.0, 0.5, 0.25]
+  EDGE_WEIGHT: 0.02
+  DISTILL_WEIGHT: 0.00
+  STRIPE_CONSISTENCY_WEIGHT: 0.00
+  FREQUENCY_CONSISTENCY_WEIGHT: 0.00
+
+DISTILL:
+  ENABLE: False
+  TEACHER_WEIGHTS: ''
+  TEACHER_N_FEAT: 96
+  TEACHER_SCALE_UNETFEATS: 48
+  TEACHER_NUM_CAB: 8
+  TEACHER_EDGE_REFINE: False
+  TEACHER_EDGE_REFINE_MID: 24
+  TEACHER_AMP: False

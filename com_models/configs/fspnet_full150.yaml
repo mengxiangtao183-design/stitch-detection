@@ -1,0 +1,14 @@
+base_config: comparison_base_full150.yaml
+model:
+  name: COM-FSPNet-CVPR2023-Full150-Seed42-Stable
+  architecture: fspnet
+  ckpt: null
+
+training:
+  # FSPNet's sigmoid heads are adapted to logits in FP32; keeping the full
+  # model in FP32 avoids half-precision saturation at this conversion.
+  use_amp: false
+  batch_size: 1
+  gradient_clip: 0.5
+  optimizer:
+    learning_rate: 2.0e-5

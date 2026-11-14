@@ -2,11 +2,11 @@
 """
 Implements the Attentive Fusion Module (AFM) for the C3Net architecture.
 
-This module serves as the terminal stage of the C3Net decoder, responsible for
-synergistically integrating the outputs from the two specialized pathways:
-1. Edge Refinement Pathway (ERP): Provides high-resolution features rich in boundary details (`f_edge_features`).
+This module serves as the terminal stage终极段 of the C3Net decoder, responsible for
+synergistically integrating the outputs from the two specialized pathways:集成两通道输出
+1. Edge Refinement Pathway (ERP): Provides high-resolution features rich in boundary details边界细节 (`f_edge_features`).
 2. Contextual Localization Pathway (CLP): Provides features containing semantic context and
-   object localization information, crucially with salient distractors suppressed
+   object localization information, crucially关键 with salient distractors显著干扰 suppressed
    by the ICG module (`f_loc_features`).
 
 The core mechanism is an attention-gating strategy where the context-aware
@@ -16,6 +16,9 @@ localized regions of interest while suppressing irrelevant edge information.
 The gated edge features and the localization features are then combined and
 processed through refinement layers to produce the final, high-fidelity
 segmentation prediction.
+核心机制是一种注意力门控策略，其中上下文感知定位特征生成空间注意力图。
+该地图调节边缘特征，有效地强调了位于感兴趣的局部区域内的边界细节，同时抑制了不相关的边缘信息。
+门控边缘特征和定位特征然后通过细化层进行组合和处理，以产生最终的高保真分割预测。
 
 Input:
 - f_edge_features (torch.Tensor): Feature map from the Edge Detection Branch
@@ -27,7 +30,7 @@ Input:
 Output:
 - final_logits (torch.Tensor): Raw output logits for the final segmentation map
                                (B, 1, H, W). Suitable for use with a loss function
-                               expecting logits (e.g., BCEWithLogitsLoss).
+                               expecting logits 损失函数类值(e.g., BCEWithLogitsLoss).
 
 
 Author  : Baber Jan
@@ -49,13 +52,16 @@ class FinalFusionHead(nn.Module):
     """
     Attentive Fusion Module (AFM) - Paper Section 3.4.
 
-    Final Fusion Head for C3Net using Attention Gating.
+    Final Fusion Head for C3Net using Attention Gating.注意力门控
     Referred to as "Attentive Fusion Module" in the IEEE TAI paper.
 
     Combines Edge Branch and Localization Branch features. Uses localization features
     to generate a spatial attention gate, applies this gate to edge features,
     concatenates gated edge and localization features, refines the result,
     and predicts the final segmentation logits.
+    用 Localization Branch 的特征生成空间注意力图 → 
+    用这个注意力图“软门控” Edge Branch 的特征（让边缘只在物体区域被保留）→ 
+    concat 两条路径 → 多层卷积精炼 → 1×1 预测最终分割 logits
 
     Args:
         edge_channels (int): Number of channels in the input feature map from the
@@ -68,7 +74,7 @@ class FinalFusionHead(nn.Module):
                                  after combining features. Must be >= 1. Default: 2.
         attn_gen_intermediate_channels (int): Intermediate channels within the
                                               convolutional pathway used to generate
-                                              the attention gate. Default: 32.
+                                              the attention gate. Default: 32.生成注意力门的卷积中间通道
     """
     def __init__(self,
                  edge_channels: int,
@@ -117,12 +123,12 @@ class FinalFusionHead(nn.Module):
         # Uses a sequence of ConvGNReLU blocks (typically 3x3 kernel).
         refinement_layers = []
         # The first block adapts the channel dimension from the concatenated size (2 * fuse_channels)
-        # down to 'fuse_channels'.
+        # down to 'fuse_channels'.把 concat 后的 fuse_channels × 2 降回 fuse_channels
         refinement_layers.append(ConvGNReLU(fuse_channels * 2, fuse_channels, kernel_size=3, padding=1))
         # Add subsequent refinement blocks, each operating at 'fuse_channels'.
         for _ in range(num_refine_blocks - 1): # Subtract 1 because the first block is already added
             refinement_layers.append(ConvGNReLU(fuse_channels, fuse_channels, kernel_size=3, padding=1))
-        # Create the sequential module for refinement.
+        # Create the sequential module for refinement.多次精炼
         self.refinement_blocks = nn.Sequential(*refinement_layers)
 
         # 4. Final Prediction Layer: Predicts single-channel logits from the final refined features.
@@ -160,21 +166,21 @@ class FinalFusionHead(nn.Module):
         attention_map = self.attention_generator(f_loc_adapted) # Output shape: (B, 1, H, W), values in [0, 1]
         # logger.debug(f"Fusion Head - Attention Map: {attention_map.shape}")
 
-        # --- 3. Modulate Edge Features ---
+        # --- 3. Modulate调制 Edge Features ---用注意力图门控边缘特征
         # Apply the spatial attention gate element-wise to the adapted edge features.
         # This enhances edge details in regions deemed important by the localization branch.
         # Input shapes: (B, fuse_channels, H, W) * (B, 1, H, W)
         f_edge_gated = f_edge_adapted * attention_map # Output shape: (B, fuse_channels, H, W)
         # logger.debug(f"Fusion Head - Edge Gated: {f_edge_gated.shape}")
 
-        # --- 4. Combine Gated Edge and Localization Features ---
+        # --- 4. Combine Gated Edge and Localization Features ---融合
         # Concatenate the spatially gated edge features and the adapted localization features
         # along the channel dimension.
         # Input shapes: (B, fuse_channels, H, W) and (B, fuse_channels, H, W)
         f_combined = torch.cat([f_edge_gated, f_loc_adapted], dim=1) # Output shape: (B, fuse_channels * 2, H, W)
         # logger.debug(f"Fusion Head - Combined: {f_combined.shape}")
 
-        # --- 5. Refine Combined Features ---
+        # --- 5. Refine Combined Features ---精炼
         # Pass the combined features through the sequence of refinement ConvGNReLU blocks.
         # Learns to effectively integrate the context-selected edge details and localization context.
         # Input shape: (B, fuse_channels * 2, H, W)
@@ -190,3 +196,49 @@ class FinalFusionHead(nn.Module):
         # Return the raw logits. Activation (e.g., sigmoid) should be applied either
         # within the loss function or during post-processing/inference.
         return final_logits
+
+
+class PlainFusionHead(nn.Module):
+    """Non-attentive fusion head used for controlled baseline experiments.
+
+    Both decoder branches are first projected to a common width, concatenated,
+    refined with the same convolutional stack as :class:`FinalFusionHead`, and
+    mapped to one mask-logit channel.  In particular, this head contains no
+    spatial gate and never multiplicatively reweights the edge feature.
+    """
+
+    def __init__(
+        self,
+        edge_channels: int,
+        loc_channels: int,
+        fuse_channels: int = 64,
+        num_refine_blocks: int = 2,
+    ):
+        super().__init__()
+        if min(edge_channels, loc_channels, fuse_channels) <= 0:
+            raise ValueError("Fusion channel counts must be positive.")
+        if num_refine_blocks < 1:
+            raise ValueError("num_refine_blocks must be at least one.")
+
+        self.adapt_edge = ConvGNReLU(
+            edge_channels, fuse_channels, kernel_size=1, padding=0
+        )
+        self.adapt_loc = ConvGNReLU(
+            loc_channels, fuse_channels, kernel_size=1, padding=0
+        )
+        refinement_layers = [
+            ConvGNReLU(fuse_channels * 2, fuse_channels, kernel_size=3, padding=1)
+        ]
+        refinement_layers.extend(
+            ConvGNReLU(fuse_channels, fuse_channels, kernel_size=3, padding=1)
+            for _ in range(num_refine_blocks - 1)
+        )
+        self.refinement_blocks = nn.Sequential(*refinement_layers)
+        self.final_pred = nn.Conv2d(fuse_channels, 1, kernel_size=1)
+
+    def forward(
+        self, f_edge_features: torch.Tensor, f_loc_features: torch.Tensor
+    ) -> torch.Tensor:
+        edge = self.adapt_edge(f_edge_features)
+        loc = self.adapt_loc(f_loc_features)
+        return self.final_pred(self.refinement_blocks(torch.cat([edge, loc], dim=1)))

@@ -1,0 +1,7 @@
+# Resume the interrupted full-data Original C3Net baseline run.
+base_config: baseline_dino308_full_150_seed42.yaml
+
+training:
+  mode:
+    type: resume
+

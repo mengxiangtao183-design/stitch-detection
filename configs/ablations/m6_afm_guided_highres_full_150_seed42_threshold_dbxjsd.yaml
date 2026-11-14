@@ -1,0 +1,14 @@
+# Threshold-scan config for M6 full150.
+#
+# RX is an external generalization test set and must not be used to select the
+# binarization threshold.  This config scans thresholds only on DB/XJ/SD.
+base_config: m6_afm_guided_highres_full_150_seed42_timing_bs1.yaml
+
+evaluation:
+  batch_size: 1
+  num_workers: 0
+  datasets:
+    - "H:/DATASET/DB"
+    - "H:/DATASET/XJ"
+    - "H:/DATASET/SD"
+

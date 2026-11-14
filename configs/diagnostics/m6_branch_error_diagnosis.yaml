@@ -1,0 +1,14 @@
+# Read-only diagnostic evaluation for the original-protocol M6 checkpoint.
+# It does not alter model weights, training losses, thresholds, or datasets.
+base_config: ../ablations/m6_afm_guided_highres_full_150_seed42.yaml
+
+evaluation:
+  batch_size: 2
+  num_workers: 0
+  branch_diagnostics:
+    enable: true
+    # A fixed shared operating point for branch-evidence comparison.  RX is
+    # evaluation-only and is never used to select this value.
+    threshold: 0.5
+    # Per dataset, retain only the worst final-mask examples as mosaic panels.
+    max_visualizations_per_dataset: 24

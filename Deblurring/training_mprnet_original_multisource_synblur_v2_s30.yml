@@ -1,0 +1,95 @@
+GPU: [0]
+
+VERBOSE: True
+
+MODEL:
+  # Canonical MPRNet backbone.  Every historical project-specific option is
+  # explicitly disabled so this is an original-MPRNet comparison, not MPRNet+.
+  MODE: 'Deblurring'
+  SESSION: 'MultiSourceV2_MPRNetOriginal_S30_S42'
+  N_FEAT: 96
+  SCALE_UNETFEATS: 48
+  SCALE_ORSNETFEATS: 32
+  NUM_CAB: 8
+  EDGE_REFINE: False
+  LIGHT_ADAPT: False
+  FREQUENCY_REFINE: False
+  FREQUENCY_BAND_GATE: False
+  TRAJECTORY_LIGHTWEIGHT: False
+  STAGE1_TRISTRIPE: False
+  STAGE1_STRIPE_TRANSFORMER: False
+  STAGE2_STRIPE_TRANSFORMER: False
+  STAGE2_PAIR_ALIGNED: False
+  STAGE2_TMT: False
+  GATED_CSFF: False
+  STITCH_TRAJECTORY_ALIGNMENT: False
+  DUAL_DOMAIN_ORSNET: False
+  SIMPLE_GATED_ORSNET: False
+  HYBRID_SIMPLE_GATED_ORSNET: False
+  HSGORS_V2: False
+  STAGE3_TEPR: False
+  STAGE3_TRR: False
+  TPTRNET_CORE: False
+  TRISTRIPE_CONTEXT_PYRAMID: False
+  HORIZONTAL_TRAJECTORY_BLOCKS: False
+  HMT_NET_CORE: False
+  EVIDENCE_CANVAS_NET: False
+  TFR_NET_CORE: False
+  STRIPE_TOPOLOGY_RECONSTRUCTION: False
+  INTERSTAGE_RESIDUAL_REASSEMBLY: False
+
+OPTIM:
+  # Physical batch 2 with two accumulated updates: effective batch 4, as in
+  # the NAFNet/MBDNet V2 comparisons.
+  BATCH_SIZE: 2
+  ACCUM_ITERS: 2
+  NUM_EPOCHS: 30
+  LR_INITIAL: 2.0e-4
+  LR_MIN: 1.0e-7
+
+TRAINING:
+  TRAIN_PS: 320
+  VAL_PS: 320
+  TRAIN_MANIFEST: 'H:/C3Netqing/MISCFilter/manifests/c3net_multisource_linetrace_synblur_v2/train.tsv'
+  VAL_MANIFEST: 'H:/C3Netqing/MISCFilter/manifests/c3net_multisource_linetrace_synblur_v2/val.tsv'
+  MANIFEST_DATA_ROOT: 'H:/DATASET'
+  DO_VALIDATE: True
+  VAL_AFTER_EVERY: 1
+  CHECKPOINT_EVERY: 5
+  SAVE_BEST: True
+  SAVE_BEST_EVERY: 1
+  SAVE_OPTIMIZER: True
+  RESUME: True
+  FINETUNE: False
+  PRETRAINED_PATH: ''
+  NUM_WORKERS: 0
+  SEED: 42
+  EPOCH_DETERMINISTIC_DATA: True
+  CUDNN_BENCHMARK: False
+  CUDNN_DETERMINISTIC: True
+  USE_AMP: True
+  SAVE_DIR: 'H:/C3Netqing/Deblurring/checkpoints/train'
+
+AUGMENT:
+  # Same spatial transformations as the V2 NAFNet/MBDNet protocol:
+  # identity, horizontal flip, vertical flip, or 180-degree rotation.
+  ENABLE: True
+  PRESERVE_HORIZONTAL_TRAJECTORY: True
+  COLOR_PROB: 0.0
+  GAMMA_PROB: 0.0
+  INPUT_NOISE_PROB: 0.0
+  LOW_LIGHT_PROB: 0.0
+
+LOSS:
+  # Original MPRNet stage supervision; no edge map, frequency, distillation,
+  # or project-specific auxiliary loss.
+  STAGE_WEIGHTS: [1.0, 0.5, 0.25]
+  EDGE_WEIGHT: 0.0
+  DISTILL_WEIGHT: 0.0
+  STRIPE_CONSISTENCY_WEIGHT: 0.0
+  FREQUENCY_CONSISTENCY_WEIGHT: 0.0
+  STRUCTURE_TEXTURE_WEIGHT: 0.0
+
+DISTILL:
+  ENABLE: False
+  TEACHER_WEIGHTS: ''

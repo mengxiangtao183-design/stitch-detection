@@ -1,0 +1,7 @@
+# Timing-only config for the original C3Net DINO baseline.
+base_config: baseline_dino308_full_150_seed42.yaml
+
+evaluation:
+  batch_size: 1
+  num_workers: 0
+

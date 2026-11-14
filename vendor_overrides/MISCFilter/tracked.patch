@@ -1,0 +1,195 @@
+diff --git a/loss/losses.py b/loss/losses.py
+index 271fb5c..f50e79b 100644
+--- a/loss/losses.py
++++ b/loss/losses.py
+@@ -10,7 +10,7 @@ class CharbonnierLoss(nn.Module):
+         self.eps = eps
+ 
+     def forward(self, x, y):
+-        diff = x.to('cuda:0') - y.to('cuda:0')
++        diff = x - y.to(device=x.device, dtype=x.dtype)
+         loss = torch.mean(torch.sqrt((diff * diff) + (self.eps*self.eps)))
+         return loss
+ 
+@@ -19,14 +19,14 @@ class EdgeLoss(nn.Module):
+         super(EdgeLoss, self).__init__()
+         k = torch.Tensor([[.05, .25, .4, .25, .05]])
+         self.kernel = torch.matmul(k.t(),k).unsqueeze(0).repeat(3,1,1,1)
+-        if torch.cuda.is_available():
+-            self.kernel = self.kernel.to('cuda:0')
++        self.register_buffer("kernel_buffer", self.kernel)
+         self.loss = CharbonnierLoss()
+ 
+     def conv_gauss(self, img):
+-        n_channels, _, kw, kh = self.kernel.shape
++        kernel = self.kernel_buffer.to(device=img.device, dtype=img.dtype)
++        n_channels, _, kw, kh = kernel.shape
+         img = F.pad(img, (kw//2, kh//2, kw//2, kh//2), mode='replicate')
+-        return F.conv2d(img, self.kernel, groups=n_channels)
++        return F.conv2d(img, kernel, groups=n_channels)
+ 
+     def laplacian_kernel(self, current):
+         filtered    = self.conv_gauss(current)
+@@ -38,7 +38,7 @@ class EdgeLoss(nn.Module):
+         return diff
+ 
+     def forward(self, x, y):
+-        loss = self.loss(self.laplacian_kernel(x.to('cuda:0')), self.laplacian_kernel(y.to('cuda:0')))
++        loss = self.loss(self.laplacian_kernel(x), self.laplacian_kernel(y.to(device=x.device, dtype=x.dtype)))
+         return loss
+ 
+ class fftLoss(nn.Module):
+@@ -46,6 +46,6 @@ class fftLoss(nn.Module):
+         super(fftLoss, self).__init__()
+ 
+     def forward(self, x, y):
+-        diff = torch.fft.fft2(x.to('cuda:0')) - torch.fft.fft2(y.to('cuda:0'))
++        diff = torch.fft.fft2(x) - torch.fft.fft2(y.to(device=x.device, dtype=x.dtype))
+         loss = torch.mean(abs(diff))
+         return loss
+diff --git a/models/MISCKernel_cuda.py b/models/MISCKernel_cuda.py
+index be9e6fa..96ec5d1 100644
+--- a/models/MISCKernel_cuda.py
++++ b/models/MISCKernel_cuda.py
+@@ -1,8 +1,24 @@
++import warnings
++
++# The c3net environment uses CuPy's bundled CUDA 11.8 runtime. It does not
++# need a separately installed CUDA Toolkit, so suppress only this misleading
++# path-discovery warning while leaving CUDA runtime errors visible.
++warnings.filterwarnings(
++    "ignore",
++    message=r"CUDA path could not be detected.*",
++    category=UserWarning,
++    module=r"cupy\._environment",
++)
++
+ import cupy
+ import torch
+ import re
+ import math
+ 
++# RawKernel functions do not reliably retain their RawModule owner under CuPy
++# 13. Keep compiled modules alive for the process lifetime, matching the old
++# compile_with_cache behavior used by the original implementation.
++_CUPY_MODULE_CACHE = {}
+ 
+ 
+ kernel_Kernel_updateOutput = '''
+@@ -504,7 +520,14 @@ def cupy_kernel(strFunction, objectVariables):
+ 
+ @cupy.memoize(for_each_device=True)
+ def cupy_launch(strFunction, strKernel):
+-    return cupy.cuda.compile_with_cache(strKernel).get_function(strFunction)
++    # CuPy 13 removed compile_with_cache; RawModule preserves the original
++    # NVRTC compilation path while retaining the per-device memoization above.
++    module = cupy.RawModule(
++        code=strKernel,
++        name_expressions=(strFunction,),
++    )
++    _CUPY_MODULE_CACHE[(cupy.cuda.Device().id, strFunction, strKernel)] = module
++    return module.get_function(strFunction)
+ 
+ 
+ # end
+@@ -535,11 +558,7 @@ class FunctionKernel(torch.autograd.Function):
+         output = input.new_zeros([intSample, intInputDepth, intOutputHeight, intOutputWidth])
+ 
+         if input.is_cuda == True:
+-
+-            class Stream:
+-                ptr = torch.cuda.current_stream().cuda_stream
+-
+-            # end
++            stream = cupy.cuda.ExternalStream(torch.cuda.current_stream().cuda_stream)
+ 
+             n = output.nelement()
+             cupy_launch('kernel_Kernel_updateOutput', cupy_kernel('kernel_Kernel_updateOutput', {
+@@ -555,7 +574,7 @@ class FunctionKernel(torch.autograd.Function):
+                 block=tuple([512, 1, 1]),
+                 args=[n, input.data_ptr(), vertical.data_ptr(), horizontal.data_ptr(), offset_x.data_ptr(), offset_y.data_ptr(),
+                       weight.data_ptr(), output.data_ptr()],
+-                stream=Stream
++                stream=stream
+             )
+ 
+         elif input.is_cuda == False:
+@@ -598,10 +617,7 @@ class FunctionKernel(torch.autograd.Function):
+             ctx.needs_input_grad[5] == True else None
+ 
+         if input.is_cuda == True:
+-            class Stream:
+-                ptr = torch.cuda.current_stream().cuda_stream
+-
+-            # end
++            stream = cupy.cuda.ExternalStream(torch.cuda.current_stream().cuda_stream)
+ 
+             nv = gradVertical.nelement()
+             cupy_launch('kernel_Kernel_updateGradVertical', cupy_kernel('kernel_Kernel_updateGradVertical', {
+@@ -617,7 +633,7 @@ class FunctionKernel(torch.autograd.Function):
+                 block=tuple([512, 1, 1]),
+                 args=[nv, gradOutput.data_ptr(), input.data_ptr(), horizontal.data_ptr(), offset_x.data_ptr(),
+                       offset_y.data_ptr(), weight.data_ptr(), gradVertical.data_ptr()],
+-                stream=Stream
++                stream=stream
+             )
+ 
+             nh = gradHorizontal.nelement()
+@@ -634,7 +650,7 @@ class FunctionKernel(torch.autograd.Function):
+                 block=tuple([512, 1, 1]),
+                 args=[nh, gradOutput.data_ptr(), input.data_ptr(), vertical.data_ptr(), offset_x.data_ptr(),
+                       offset_y.data_ptr(), weight.data_ptr(), gradHorizontal.data_ptr()],
+-                stream=Stream
++                stream=stream
+             )
+ 
+             nx = gradOffsetX.nelement()
+@@ -652,7 +668,7 @@ class FunctionKernel(torch.autograd.Function):
+                 block=tuple([512, 1, 1]),
+                 args=[nx, gradOutput.data_ptr(), input.data_ptr(), vertical.data_ptr(), horizontal.data_ptr(), offset_x.data_ptr(),
+                       offset_y.data_ptr(), weight.data_ptr(), gradOffsetX.data_ptr()],
+-                stream=Stream
++                stream=stream
+             )
+ 
+             ny = gradOffsetY.nelement()
+@@ -671,7 +687,7 @@ class FunctionKernel(torch.autograd.Function):
+                 args=[ny, gradOutput.data_ptr(), input.data_ptr(), vertical.data_ptr(), horizontal.data_ptr(),
+                       offset_x.data_ptr(),
+                       offset_y.data_ptr(), weight.data_ptr(), gradOffsetY.data_ptr()],
+-                stream=Stream
++                stream=stream
+             )
+ 
+             nm = gradWeight.nelement()
+@@ -689,7 +705,7 @@ class FunctionKernel(torch.autograd.Function):
+                 args=[nm, gradOutput.data_ptr(), input.data_ptr(), vertical.data_ptr(), horizontal.data_ptr(),
+                       offset_x.data_ptr(),
+                       offset_y.data_ptr(), gradWeight.data_ptr()],
+-                stream=Stream
++                stream=stream
+             )
+ 
+         elif input.is_cuda == False:
+diff --git a/models/doconv_pytorch.py b/models/doconv_pytorch.py
+index f5222f0..06dc138 100644
+--- a/models/doconv_pytorch.py
++++ b/models/doconv_pytorch.py
+@@ -118,10 +118,13 @@ class DOConv2d(Module):
+             D = self.D + self.D_diag
+             W = torch.reshape(self.W, (self.out_channels // self.groups, self.in_channels, self.D_mul))
+ 
+-            # einsum outputs (out_channels // groups, in_channels, M * N),
+-            # which is reshaped to
+-            # (out_channels, in_channels // groups, M, N)
+-            DoW = torch.reshape(torch.einsum('ims,ois->oim', D, W), DoW_shape)
++            # Equivalent to torch.einsum('ims,ois->oim', D, W), but bmm is
++            # more stable on the Windows/PyTorch/CUDA stack used here.
++            DoW = torch.bmm(
++                W.permute(1, 0, 2).contiguous(),
++                D.permute(0, 2, 1).contiguous(),
++            )
++            DoW = torch.reshape(DoW.permute(1, 0, 2).contiguous(), DoW_shape)
+             #######################################################
+         else:
+             DoW = torch.reshape(self.W, DoW_shape)

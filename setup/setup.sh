@@ -93,8 +93,8 @@ processor = EdgeGenerator(edge_width=1)
 
 # Process CAMO training set
 stats = processor.process_dataset(
-    input_path="${GT_PATH}",
-    output_path="${EDGES_PATH}",
+    input_path="E:\mxt\C3Net\datasets\img3\train\GT",
+    output_path="E:\mxt\C3Net\datasets\img3\train",
     file_pattern="*.png"
 )
 
@@ -146,7 +146,7 @@ EOF
 echo "Starting dataset processing..."
 
 # Process each dataset
-for DATASET in "COD10K" "CAMO" "NC4K"; do
+for DATASET in "img3"; do
     check_dataset "$DATASET"
 done
 

@@ -1,0 +1,10 @@
+# Timing/evaluation config for E1 MobileNetV4 + legacy C3Net decoder.
+base_config: e1_mobilenetv4_legacy_decoder_clear100_seed42.yaml
+
+evaluation:
+  batch_size: 1
+  num_workers: 0
+
+prediction:
+  batch_size: 1
+

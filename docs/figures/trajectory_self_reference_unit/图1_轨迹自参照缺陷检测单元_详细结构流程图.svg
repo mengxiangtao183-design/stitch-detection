@@ -1,0 +1,228 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1050" viewBox="0 0 1800 1050">
+  <defs>
+    <style>
+      .font{font-family:'Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC',Arial,sans-serif}
+      .stage{font-size:25px;font-weight:600;fill:#243746;letter-spacing:.5px}
+      .small{font-size:18px;font-weight:500;fill:#425766}
+      .tiny{font-size:15px;font-weight:400;fill:#647785}
+      .symbol{font-size:24px;font-weight:600;fill:#1E5B70}
+      .node{fill:#F8FAFB;stroke:#9FB0BC;stroke-width:2}
+      .node2{fill:#EEF5F7;stroke:#6F97A6;stroke-width:2}
+      .line{fill:none;stroke:#667C8A;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+      .fine{fill:none;stroke:#9BAAB4;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+      .accent{fill:none;stroke:#1E7085;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+      .warn{fill:none;stroke:#C56E32;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+      .dash{fill:none;stroke:#9AAAB5;stroke-width:2;stroke-dasharray:8 7}
+      .chip{fill:#FFFFFF;stroke:#AAB8C2;stroke-width:1.5}
+      .num{fill:#1E7085}
+      .numtext{font-size:15px;font-weight:600;fill:white;text-anchor:middle;dominant-baseline:middle}
+    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#667C8A"/>
+    </marker>
+    <marker id="arrowAccent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#1E7085"/>
+    </marker>
+    <clipPath id="plotClip"><rect x="338" y="265" width="242" height="150" rx="4"/></clipPath>
+  </defs>
+
+  <rect width="1800" height="1050" fill="#FFFFFF"/>
+
+  <!-- stage headings -->
+  <g class="font">
+    <text class="stage" x="65" y="72">Ⅰ  输入</text>
+    <text class="stage" x="315" y="72">Ⅱ  轨迹建模</text>
+    <text class="stage" x="635" y="72">Ⅲ  单元定位</text>
+    <text class="stage" x="965" y="72">Ⅳ  特征表达</text>
+    <text class="stage" x="1270" y="72">Ⅴ  判定融合</text>
+    <text class="stage" x="1530" y="72">Ⅵ  输出</text>
+  </g>
+  <line x1="60" y1="91" x2="1740" y2="91" stroke="#D4DCE2" stroke-width="2"/>
+
+  <!-- main nodes -->
+  <rect class="node" x="60" y="125" width="205" height="440" rx="8"/>
+  <rect class="node" x="310" y="125" width="285" height="440" rx="8"/>
+  <rect class="node" x="640" y="125" width="285" height="440" rx="8"/>
+  <rect class="node" x="970" y="125" width="255" height="440" rx="8"/>
+  <rect class="node2" x="1270" y="125" width="205" height="440" rx="8"/>
+
+  <!-- arrows between nodes -->
+  <path class="line" d="M265 345 H310" marker-end="url(#arrow)"/>
+  <path class="line" d="M595 345 H640" marker-end="url(#arrow)"/>
+  <path class="line" d="M925 345 H970" marker-end="url(#arrow)"/>
+  <path class="line" d="M1225 345 H1270" marker-end="url(#arrow)"/>
+  <path class="line" d="M1475 345 H1515" marker-end="url(#arrow)"/>
+
+  <!-- input: binary stitch-mask icon -->
+  <g transform="translate(82 180)">
+    <rect x="0" y="0" width="160" height="250" rx="5" fill="#FFFFFF" stroke="#C1CCD3" stroke-width="1.5"/>
+    <g stroke="#E4E9EC" stroke-width="1">
+      <path d="M20 0V250 M40 0V250 M60 0V250 M80 0V250 M100 0V250 M120 0V250 M140 0V250"/>
+      <path d="M0 25H160 M0 50H160 M0 75H160 M0 100H160 M0 125H160 M0 150H160 M0 175H160 M0 200H160 M0 225H160"/>
+    </g>
+    <path d="M5 134 C20 126 31 126 43 131 S64 141 78 132 M91 130 C104 125 118 124 130 132 S146 141 156 130" stroke="#1E5B70" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <rect x="73" y="111" width="23" height="45" fill="none" stroke="#C56E32" stroke-width="2.5" stroke-dasharray="5 4"/>
+    <text class="font symbol" x="80" y="292" text-anchor="middle">B(x,y)</text>
+    <text class="font tiny" x="80" y="320" text-anchor="middle">320 × 320</text>
+  </g>
+  <g transform="translate(78 145)"><circle class="num" r="13"/><text class="font numtext">1</text></g>
+
+  <!-- trajectory modelling: projection + centerline -->
+  <g>
+    <rect x="333" y="165" width="247" height="70" rx="5" fill="#FFFFFF" stroke="#CBD4DA" stroke-width="1.5"/>
+    <g fill="#8BB0BC">
+      <rect x="346" y="205" width="7" height="17"/><rect x="358" y="194" width="7" height="28"/><rect x="370" y="183" width="7" height="39"/>
+      <rect x="382" y="176" width="7" height="46"/><rect x="394" y="189" width="7" height="33"/><rect x="406" y="198" width="7" height="24"/>
+      <rect x="418" y="202" width="7" height="20"/><rect x="430" y="190" width="7" height="32"/><rect x="442" y="181" width="7" height="41"/>
+      <rect x="454" y="175" width="7" height="47"/><rect x="466" y="186" width="7" height="36"/><rect x="478" y="197" width="7" height="25"/>
+      <rect x="490" y="201" width="7" height="21"/><rect x="502" y="194" width="7" height="28"/><rect x="514" y="182" width="7" height="40"/>
+      <rect x="526" y="177" width="7" height="45"/><rect x="538" y="190" width="7" height="32"/><rect x="550" y="199" width="7" height="23"/>
+    </g>
+    <text class="font small" x="456" y="155" text-anchor="middle">Σ<tspan baseline-shift="sub" font-size="13">y</tspan></text>
+    <text class="font symbol" x="456" y="254" text-anchor="middle">m(x)</text>
+    <g transform="translate(338 265)">
+      <rect x="0" y="0" width="242" height="150" fill="#FFFFFF"/>
+      <path d="M0 114 C19 105 38 92 57 98 S91 119 108 105 M126 99 C146 83 160 80 178 91 S213 111 242 82" class="accent"/>
+      <path d="M0 130 L242 65" stroke="#A9B6BF" stroke-width="2" stroke-dasharray="7 6"/>
+      <line x1="0" y1="138" x2="242" y2="138" stroke="#D8E0E5"/><line x1="11" y1="0" x2="11" y2="150" stroke="#D8E0E5"/>
+      <rect x="104" y="5" width="24" height="133" fill="#F8EDE5" opacity=".9"/>
+    </g>
+    <text class="font symbol" x="456" y="455" text-anchor="middle">y(x)</text>
+    <g transform="translate(326 145)"><circle class="num" r="13"/><text class="font numtext">2</text></g>
+    <g transform="translate(326 250)"><circle class="num" r="13"/><text class="font numtext">3</text></g>
+  </g>
+
+  <!-- unit localization: detrend and six logical units -->
+  <g>
+    <rect x="660" y="162" width="245" height="105" rx="5" fill="#FFFFFF" stroke="#CBD4DA" stroke-width="1.5"/>
+    <path d="M673 235 C700 219 725 202 749 207 S787 230 809 214 S847 189 892 180" class="accent"/>
+    <path d="M673 240 L892 177" class="fine" stroke-dasharray="7 6"/>
+    <text class="font symbol" x="785" y="292" text-anchor="middle">r(x)=y(x)−(ax+b)</text>
+    <rect x="660" y="320" width="245" height="132" rx="5" fill="#FFFFFF" stroke="#CBD4DA" stroke-width="1.5"/>
+    <g stroke="#A7B4BD" stroke-width="1.5" stroke-dasharray="4 4">
+      <line x1="696" y1="329" x2="696" y2="440"/><line x1="735" y1="329" x2="735" y2="440"/><line x1="775" y1="329" x2="775" y2="440"/>
+      <line x1="815" y1="329" x2="815" y2="440"/><line x1="855" y1="329" x2="855" y2="440"/>
+    </g>
+    <path d="M665 392 C679 384 686 381 696 384 C710 390 722 396 735 388 C749 378 761 377 775 386 C789 396 802 399 815 386 C829 373 844 376 855 388 C868 401 884 397 900 380" class="accent"/>
+    <g class="font tiny" text-anchor="middle"><text x="678" y="476">U1</text><text x="716" y="476">U2</text><text x="755" y="476">U3</text><text x="795" y="476">U4</text><text x="835" y="476">U5</text><text x="880" y="476">U6</text></g>
+    <path d="M660 330 L680 330 L660 350 Z M905 330 L885 330 L905 350 Z" fill="#C56E32" opacity=".85"/>
+    <text class="font tiny" x="782" y="520" text-anchor="middle">6 × U<tspan baseline-shift="sub" font-size="12">i</tspan></text>
+    <g transform="translate(656 145)"><circle class="num" r="13"/><text class="font numtext">4</text></g>
+    <g transform="translate(656 305)"><circle class="num" r="13"/><text class="font numtext">5</text></g>
+    <g transform="translate(895 305)"><circle class="num" r="13"/><text class="font numtext">6</text></g>
+  </g>
+
+  <!-- feature representation: four visual feature families -->
+  <g>
+    <g transform="translate(990 165)">
+      <rect class="chip" x="0" y="0" width="100" height="145" rx="5"/>
+      <path d="M16 74 H38 M58 74 H84" class="accent"/><path d="M40 60 V88 M55 60 V88" class="warn" stroke-dasharray="4 3"/>
+      <text class="font symbol" x="50" y="123" text-anchor="middle">C</text>
+    </g>
+    <g transform="translate(1105 165)">
+      <rect class="chip" x="0" y="0" width="100" height="145" rx="5"/>
+      <line x1="15" y1="74" x2="85" y2="74" class="fine"/><line x1="15" y1="59" x2="15" y2="89" class="fine"/><line x1="85" y1="59" x2="85" y2="89" class="fine"/>
+      <line x1="29" y1="50" x2="71" y2="50" class="accent"/><line x1="29" y1="40" x2="29" y2="60" class="accent"/><line x1="71" y1="40" x2="71" y2="60" class="accent"/>
+      <text class="font symbol" x="50" y="123" text-anchor="middle">L</text>
+    </g>
+    <g transform="translate(990 330)">
+      <rect class="chip" x="0" y="0" width="100" height="145" rx="5"/>
+      <line x1="16" y1="75" x2="84" y2="75" class="fine" stroke-dasharray="5 4"/>
+      <path d="M16 66 C36 105 66 105 84 66" class="accent"/>
+      <text class="font symbol" x="50" y="123" text-anchor="middle">G</text>
+    </g>
+    <g transform="translate(1105 330)">
+      <rect class="chip" x="0" y="0" width="100" height="145" rx="5"/>
+      <line x1="18" y1="90" x2="82" y2="48" class="accent"/>
+      <path d="M18 90 H82" class="fine"/>
+      <path d="M68 90 A50 50 0 0 0 79 52" class="warn"/>
+      <text class="font symbol" x="50" y="123" text-anchor="middle">D</text>
+    </g>
+    <text class="font tiny" x="1098" y="515" text-anchor="middle">f<tspan baseline-shift="sub" font-size="12">i</tspan> ∈ ℝ<tspan baseline-shift="super" font-size="12">12</tspan></text>
+    <g transform="translate(986 145)"><circle class="num" r="13"/><text class="font numtext">7</text></g>
+    <g transform="translate(1207 145)"><circle class="num" r="13"/><text class="font numtext">8</text></g>
+  </g>
+
+  <!-- decision fusion -->
+  <g>
+    <rect x="1293" y="168" width="158" height="155" rx="6" fill="#FFFFFF" stroke="#9FB5BF" stroke-width="1.5"/>
+    <g fill="#6D9DA9"><rect x="1318" y="270" width="18" height="31"/><rect x="1347" y="235" width="18" height="66"/><rect x="1376" y="199" width="18" height="102"/></g>
+    <line x1="1308" y1="226" x2="1435" y2="226" stroke="#C56E32" stroke-width="2" stroke-dasharray="6 5"/>
+    <text class="font symbol" x="1372" y="356" text-anchor="middle">q<tspan baseline-shift="sub" font-size="15">k</tspan>=s<tspan baseline-shift="sub" font-size="15">k</tspan>/τ<tspan baseline-shift="sub" font-size="15">k</tspan></text>
+    <path d="M1306 408 H1437" class="fine"/>
+    <path d="M1325 436 L1352 463 L1423 389" class="accent"/>
+    <text class="font tiny" x="1373" y="507" text-anchor="middle">max q<tspan baseline-shift="sub" font-size="12">k</tspan></text>
+    <g transform="translate(1288 145)"><circle class="num" r="13"/><text class="font numtext">9</text></g>
+    <g transform="translate(1452 145)"><circle class="num" r="13"/><text class="font numtext">10</text></g>
+  </g>
+
+  <!-- four output cards, mostly pictorial -->
+  <g class="font">
+    <g transform="translate(1518 128)"><rect class="chip" width="222" height="95" rx="5"/><path d="M18 47 H62 M91 47 H137" class="accent"/><rect x="66" y="31" width="20" height="32" fill="none" stroke="#C56E32" stroke-width="2" stroke-dasharray="4 3"/><text class="small" x="180" y="56" text-anchor="middle">跳线</text></g>
+    <g transform="translate(1518 242)"><rect class="chip" width="222" height="95" rx="5"/><path d="M18 47 H78 M103 47 H137" class="accent"/><path d="M84 37 L96 57 M96 37 L84 57" class="warn"/><text class="small" x="180" y="56" text-anchor="middle">断线</text></g>
+    <g transform="translate(1518 356)"><rect class="chip" width="222" height="95" rx="5"/><path d="M18 66 L137 30" class="accent"/><path d="M18 66 H137" class="fine"/><text class="small" x="180" y="56" text-anchor="middle">歪斜</text></g>
+    <g transform="translate(1518 470)"><rect class="chip" width="222" height="95" rx="5"/><path d="M18 37 C46 82 102 82 137 37" class="accent"/><path d="M18 37 H137" class="fine" stroke-dasharray="5 4"/><text class="small" x="180" y="56" text-anchor="middle">松线</text></g>
+    <g transform="translate(1532 145)"><circle class="num" r="13"/><text class="numtext">11</text></g>
+  </g>
+
+  <!-- offline learning lane -->
+  <rect x="60" y="625" width="1680" height="255" rx="8" fill="#FBFCFD" stroke="#A8B7C1" stroke-width="2" stroke-dasharray="10 8"/>
+  <g class="font"><text class="stage" x="82" y="666">离线建模</text><text class="tiny" x="220" y="666">（推理阶段参数冻结）</text></g>
+  <g transform="translate(95 700)">
+    <rect class="chip" x="0" y="0" width="150" height="120" rx="5"/>
+    <path d="M20 52 C38 39 55 42 69 51 M85 53 C102 44 116 43 132 54" class="accent"/>
+    <rect x="67" y="31" width="23" height="45" fill="none" stroke="#C56E32" stroke-width="2" stroke-dasharray="4 3"/>
+    <text class="small" x="75" y="102" text-anchor="middle">标注掩码</text>
+  </g>
+  <g transform="translate(285 700)">
+    <rect class="chip" x="0" y="0" width="150" height="120" rx="5"/>
+    <path d="M18 53 C42 45 60 48 76 54 S110 60 132 48" class="accent"/>
+    <text class="small" x="75" y="102" text-anchor="middle">正常参考</text>
+  </g>
+  <path class="line" d="M245 760 H282" marker-end="url(#arrow)"/><path class="line" d="M435 760 H472" marker-end="url(#arrow)"/>
+  <g transform="translate(475 700)">
+    <rect class="chip" width="180" height="120" rx="5"/>
+    <path d="M24 48 H66 M84 48 H126" class="accent"/><path d="M24 71 C52 101 101 101 146 70" class="fine"/>
+    <path d="M145 28 l12 12 -12 12" class="warn"/>
+    <text class="small" x="90" y="103" text-anchor="middle">受控增强</text>
+  </g>
+  <path class="line" d="M655 760 H692" marker-end="url(#arrow)"/>
+  <g transform="translate(695 700)">
+    <rect class="chip" width="195" height="120" rx="5"/>
+    <g fill="#6D9DA9"><circle cx="38" cy="46" r="8"/><circle cx="72" cy="65" r="8"/><circle cx="105" cy="36" r="8"/><circle cx="142" cy="58" r="8"/></g>
+    <line x1="30" y1="76" x2="160" y2="32" class="fine"/>
+    <text class="small" x="98" y="103" text-anchor="middle">特征样本</text>
+  </g>
+  <path class="line" d="M890 760 H927" marker-end="url(#arrow)"/>
+  <g transform="translate(930 700)">
+    <rect class="chip" width="195" height="120" rx="5"/>
+    <path d="M98 22 V45 M98 45 L55 72 M98 45 L141 72 M55 72 L37 96 M55 72 L74 96 M141 72 L122 96 M141 72 L159 96" class="accent"/>
+    <text class="small" x="98" y="110" text-anchor="middle">轻量分类</text>
+  </g>
+  <path class="line" d="M1125 760 H1162" marker-end="url(#arrow)"/>
+  <g transform="translate(1165 700)">
+    <rect class="chip" width="195" height="120" rx="5"/>
+    <g fill="#6D9DA9"><rect x="30" y="68" width="20" height="22"/><rect x="64" y="51" width="20" height="39"/><rect x="98" y="35" width="20" height="55"/><rect x="132" y="61" width="20" height="29"/></g>
+    <line x1="20" y1="48" x2="170" y2="48" stroke="#C56E32" stroke-width="2" stroke-dasharray="6 5"/>
+    <text class="small" x="98" y="110" text-anchor="middle">阈值校准</text>
+  </g>
+  <path class="accent" d="M1360 760 H1465 Q1495 760 1495 730 V595 Q1495 575 1475 575 H1370" marker-end="url(#arrowAccent)"/>
+  <g transform="translate(80 644)"><circle class="num" r="13"/><text class="font numtext">12</text></g>
+
+  <!-- compact numbered legend -->
+  <line x1="60" y1="918" x2="1740" y2="918" stroke="#D4DCE2" stroke-width="2"/>
+  <g class="font tiny">
+    <g transform="translate(70 960)"><circle class="num" r="12"/><text class="numtext">1</text><text x="20" y="6">掩码规范化</text></g>
+    <g transform="translate(215 960)"><circle class="num" r="12"/><text class="numtext">2</text><text x="20" y="6">列投影</text></g>
+    <g transform="translate(325 960)"><circle class="num" r="12"/><text class="numtext">3</text><text x="20" y="6">中心轨迹</text></g>
+    <g transform="translate(455 960)"><circle class="num" r="12"/><text class="numtext">4</text><text x="20" y="6">趋势分离</text></g>
+    <g transform="translate(585 960)"><circle class="num" r="12"/><text class="numtext">5</text><text x="20" y="6">六单元定位</text></g>
+    <g transform="translate(740 960)"><circle class="num" r="12"/><text class="numtext">6</text><text x="20" y="6">首尾保护</text></g>
+    <g transform="translate(870 960)"><circle class="num" r="12"/><text class="numtext">7</text><text x="20" y="6">连续/长度</text></g>
+    <g transform="translate(1015 960)"><circle class="num" r="12"/><text class="numtext">8</text><text x="20" y="6">形态/方向</text></g>
+    <g transform="translate(1160 960)"><circle class="num" r="12"/><text class="numtext">9</text><text x="20" y="6">类别得分</text></g>
+    <g transform="translate(1295 960)"><circle class="num" r="12"/><text class="numtext">10</text><text x="24" y="6">阈值互斥</text></g>
+    <g transform="translate(1445 960)"><circle class="num" r="12"/><text class="numtext">11</text><text x="25" y="6">类别+位置</text></g>
+    <g transform="translate(1595 960)"><circle class="num" r="12"/><text class="numtext">12</text><text x="25" y="6">离线冻结</text></g>
+  </g>
+</svg>

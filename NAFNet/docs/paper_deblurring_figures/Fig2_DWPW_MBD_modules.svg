@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <defs><marker id="a" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 Z" fill="#222"/></marker><style>.t{font-family:'Times New Roman','SimSun',serif;fill:#111}.h{font-size:29px;font-weight:bold}.m{font-size:22px}.s{font-size:18px}.b{fill:#fff;stroke:#222;stroke-width:2}.g{fill:#e8e8e8;stroke:#222;stroke-width:2}.d{fill:#c9c9c9;stroke:#111;stroke-width:2.5}.l{fill:none;stroke:#222;stroke-width:2;marker-end:url(#a)}.dash{fill:none;stroke:#555;stroke-width:2;stroke-dasharray:8 6;marker-end:url(#a)}</style></defs>
+  <rect width="1600" height="900" fill="white"/>
+  <text x="800" y="45" text-anchor="middle" class="t h">DWPW 通用恢复单元与 MBD 运动偏置模块</text>
+  <text x="30" y="95" class="t h">(a) DWPW Block</text>
+  <rect x="40" y="145" width="95" height="65" rx="4" class="b"/><text x="88" y="185" text-anchor="middle" class="t m">输入 X</text>
+  <rect x="175" y="145" width="110" height="65" rx="4" class="g"/><text x="230" y="185" text-anchor="middle" class="t m">LN</text>
+  <rect x="325" y="145" width="120" height="65" rx="4" class="g"/><text x="385" y="175" text-anchor="middle" class="t m">1×1</text><text x="385" y="199" text-anchor="middle" class="t s">通道扩展</text>
+  <rect x="485" y="145" width="120" height="65" rx="4" class="g"/><text x="545" y="175" text-anchor="middle" class="t m">3×3 DW</text><text x="545" y="199" text-anchor="middle" class="t s">局部混合</text>
+  <rect x="645" y="145" width="125" height="65" rx="4" class="d"/><text x="708" y="175" text-anchor="middle" class="t m">SimpleGate</text><text x="708" y="199" text-anchor="middle" class="t s">X₁⊙X₂</text>
+  <rect x="810" y="145" width="120" height="65" rx="4" class="g"/><text x="870" y="175" text-anchor="middle" class="t m">1×1</text><text x="870" y="199" text-anchor="middle" class="t s">通道投影</text>
+  <circle cx="985" cy="178" r="25" class="b"/><text x="985" y="187" text-anchor="middle" class="t h">+</text>
+  <rect x="1050" y="145" width="95" height="65" rx="4" class="b"/><text x="1098" y="185" text-anchor="middle" class="t m">Y</text>
+  <path d="M135 178 H175 M285 178 H325 M445 178 H485 M605 178 H645 M770 178 H810 M930 178 H960 M1010 178 H1050" class="l"/>
+  <path d="M88 210 V255 H985 V203" class="dash"/><text x="500" y="247" text-anchor="middle" class="t s">β（零初始化）缩放残差</text>
+  <rect x="175" y="305" width="110" height="65" rx="4" class="g"/><text x="230" y="345" text-anchor="middle" class="t m">LN</text>
+  <rect x="325" y="305" width="120" height="65" rx="4" class="g"/><text x="385" y="345" text-anchor="middle" class="t m">1×1 扩展</text>
+  <rect x="485" y="305" width="125" height="65" rx="4" class="d"/><text x="548" y="335" text-anchor="middle" class="t m">SimpleGate</text><text x="548" y="359" text-anchor="middle" class="t s">通道交互</text>
+  <rect x="650" y="305" width="120" height="65" rx="4" class="g"/><text x="710" y="345" text-anchor="middle" class="t m">1×1 投影</text>
+  <circle cx="830" cy="338" r="25" class="b"/><text x="830" y="347" text-anchor="middle" class="t h">+</text>
+  <rect x="895" y="305" width="105" height="65" rx="4" class="b"/><text x="948" y="345" text-anchor="middle" class="t m">输出 Z</text>
+  <path d="M1098 210 V275 H175 V305 M285 338 H325 M445 338 H485 M610 338 H650 M770 338 H805 M855 338 H895" class="l"/>
+  <path d="M1098 275 V410 H830 V363" class="dash"/><text x="1000" y="402" text-anchor="middle" class="t s">γ（零初始化）缩放残差</text>
+
+  <line x1="30" y1="455" x2="1570" y2="455" stroke="#777" stroke-width="1.5"/>
+  <text x="30" y="505" class="t h">(b) Motion-Biased Deblurring Block</text>
+  <rect x="35" y="610" width="100" height="70" rx="4" class="b"/><text x="85" y="652" text-anchor="middle" class="t m">输入 F</text>
+  <rect x="170" y="610" width="105" height="70" rx="4" class="g"/><text x="223" y="652" text-anchor="middle" class="t m">LN</text>
+  <rect x="320" y="520" width="165" height="70" rx="4" class="g"/><text x="403" y="550" text-anchor="middle" class="t m">通用分支</text><text x="403" y="575" text-anchor="middle" class="t s">3×3 DW</text>
+  <rect x="320" y="620" width="165" height="70" rx="4" class="g"/><text x="403" y="650" text-anchor="middle" class="t m">短程水平分支</text><text x="403" y="675" text-anchor="middle" class="t s">1×5 DW</text>
+  <rect x="320" y="720" width="165" height="70" rx="4" class="g"/><text x="403" y="750" text-anchor="middle" class="t m">长程水平分支</text><text x="403" y="775" text-anchor="middle" class="t s">1×5 DW, dilation=3</text>
+  <rect x="535" y="720" width="170" height="70" rx="4" class="b"/><text x="620" y="750" text-anchor="middle" class="t m">尺度路由</text><text x="620" y="775" text-anchor="middle" class="t s">Softmax(ωs, ωl)</text>
+  <rect x="755" y="645" width="170" height="70" rx="4" class="d"/><text x="840" y="675" text-anchor="middle" class="t m">水平支撑融合</text><text x="840" y="700" text-anchor="middle" class="t s">ωsHs + ωlHl</text>
+  <rect x="535" y="520" width="170" height="70" rx="4" class="b"/><text x="620" y="550" text-anchor="middle" class="t m">内容路由</text><text x="620" y="575" text-anchor="middle" class="t s">Sigmoid(α)</text>
+  <rect x="985" y="610" width="190" height="70" rx="4" class="d"/><text x="1080" y="640" text-anchor="middle" class="t m">局部软选择</text><text x="1080" y="665" text-anchor="middle" class="t s">(1−α)G + αH</text>
+  <rect x="1225" y="610" width="125" height="70" rx="4" class="g"/><text x="1288" y="640" text-anchor="middle" class="t m">1×1 投影</text><text x="1288" y="665" text-anchor="middle" class="t s">ρ 缩放</text>
+  <circle cx="1410" cy="645" r="27" class="b"/><text x="1410" y="654" text-anchor="middle" class="t h">+</text>
+  <rect x="1470" y="610" width="100" height="70" rx="4" class="b"/><text x="1520" y="652" text-anchor="middle" class="t m">Fout</text>
+  <path d="M135 645 H170 M275 645 H300 M300 645 V555 H320 M300 645 H320 M300 645 V755 H320 M485 655 H755 M485 755 H535 M705 755 H735 V700 H755 M925 680 H960 V645 H985 M705 555 H960 V630 H985 M1175 645 H1225 M1350 645 H1383 M1437 645 H1470" class="l"/>
+  <path d="M485 555 H535" class="l"/><path d="M223 680 V840 H1410 V672" class="dash"/><text x="800" y="832" text-anchor="middle" class="t s">恒等残差；ρ 零初始化保证模块从稳定映射开始学习</text>
+  <text x="1140" y="535" class="t s">α 为逐像素内容门控；(ωs,ωl) 为逐像素尺度权重</text>
+</svg>

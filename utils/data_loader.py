@@ -1,4 +1,4 @@
-"""
+﻿"""
 Camouflaged Object Detection (COD) Dataset and DataLoader Implementation
 
 This module provides dataset handling and loading functionalities for training and evaluating 
@@ -36,13 +36,13 @@ Typical Usage:
 
 Data Organization:
     Each dataset directory should have:
-    ├── train/
-    │   ├── Imgs/      # Training images (.jpg or .png)
-    │   ├── GT/        # Ground truth masks (.png)
-    │   └── Edges/     # Edge maps (.png)
-    └── test/
-        ├── Imgs/      # Test images (.jpg or .png)
-        └── GT/        # Ground truth masks (.png)
+    鈹溾攢鈹€ train/
+    鈹?  鈹溾攢鈹€ Imgs/      # Training images (.jpg or .png)
+    鈹?  鈹溾攢鈹€ GT/        # Ground truth masks (.png)
+    鈹?  鈹斺攢鈹€ Edges/     # Edge maps (.png)
+    鈹斺攢鈹€ test/
+        鈹溾攢鈹€ Imgs/      # Test images (.jpg or .png)
+        鈹斺攢鈹€ GT/        # Ground truth masks (.png)
 
 Returns:
     Training mode batches contain:
@@ -79,57 +79,71 @@ class CODDataset(Dataset):
     """
     
     def __init__(
-        self, 
+        self,
         root_dir: str,
         processor_params: Dict,
-        is_train: bool = True
+        is_train: bool = True,
+        image_subdir: str = 'Imgs',
+        edge_subdir: str = 'Edges',
+        max_samples: Optional[int] = None,
     ):
         """
         Initialize COD dataset.
-        
+
         Args:
-            root_dir: Path containing 'Imgs', 'GT', and optionally 'Edges' subdirectories
-            processor_params: Parameters for processor (target_size, normalize_mean, normalize_std, device)
-            is_train: If True, loads edge maps and enables training mode
+            root_dir: Path containing 'Imgs' (or image_subdir), 'GT', and optionally
+                      'Edges' subdirectories.
+            processor_params: Parameters for processor (target_size, normalize_mean,
+                              normalize_std, device).
+            is_train: If True, loads edge maps and enables training mode.
+            image_subdir: Subdirectory for input images. Default 'Imgs'.
+                          Set to 'clear' to train directly on clean images.
         """
         # Initialize paths and processor
         self.is_train = is_train
-        self.image_dir = os.path.join(root_dir, 'Imgs')
+        self.image_subdir = image_subdir
+        self.image_dir = os.path.join(root_dir, image_subdir)
         self.mask_dir = os.path.join(root_dir, 'GT')
-        self.edge_dir = os.path.join(root_dir, 'Edges') if is_train else None
-        
+        self.edge_dir = os.path.join(root_dir, edge_subdir) if is_train else None
         # Validate directories exist
         if not os.path.exists(self.image_dir) or not os.path.exists(self.mask_dir):
             raise FileNotFoundError(f"Required directories not found in {root_dir}")
         if is_train and not os.path.exists(self.edge_dir):
             raise FileNotFoundError(f"Edge directory not found for training in {root_dir}")
-            
+
         # Initialize image processor
         self.processor = CODImageProcessor(**processor_params)
-        
+
         # Get sorted filenames (only images with corresponding masks)
         self.filenames = self._get_valid_files()
+        if max_samples is not None:
+            if max_samples <= 0:
+                raise ValueError("max_samples must be a positive integer or None")
+            self.filenames = self.filenames[:max_samples]
+
         
     def _get_valid_files(self) -> List[str]:
         """Get list of image files that have corresponding masks/edges."""
         # Get all image files
-        image_files = {f.split('.')[0] for f in os.listdir(self.image_dir) 
+        image_files = {f.split('.')[0] for f in os.listdir(self.image_dir)
                       if f.endswith(('.jpg', '.png'))}
         # Get all mask files
         mask_files = {f.split('.')[0] for f in os.listdir(self.mask_dir)
                      if f.endswith('.png')}
-        
+
+        # Compute intersection of available references
+        valid_files = image_files & mask_files
+
         # For training, also check edge files
         if self.is_train:
             edge_files = {f.split('.')[0] for f in os.listdir(self.edge_dir)
                          if f.endswith('.png')}
-            valid_files = sorted(list(image_files & mask_files & edge_files))
-        else:
-            valid_files = sorted(list(image_files & mask_files))
-        
+            valid_files = valid_files & edge_files
+        valid_files = sorted(list(valid_files))
+
         if not valid_files:
             raise ValueError(f"No valid samples found in {self.image_dir}")
-        
+
         return valid_files
     
     def __len__(self) -> int:
@@ -138,7 +152,7 @@ class CODDataset(Dataset):
     def __getitem__(self, idx: int) -> Dict:
         """
         Get a processed sample.
-        
+
         Returns dict with:
             - 'image': Processed and normalized image tensor
             - 'mask': Binary mask tensor at original size
@@ -146,41 +160,41 @@ class CODDataset(Dataset):
             - 'name': Filename (testing only)
         """
         filename = self.filenames[idx]
-        
+
         # Construct full paths
         img_path = os.path.join(self.image_dir, f"{filename}.jpg")
         if not os.path.exists(img_path):  # Try png if jpg doesn't exist
             img_path = os.path.join(self.image_dir, f"{filename}.png")
         mask_path = os.path.join(self.mask_dir, f"{filename}.png")
         edge_path = os.path.join(self.edge_dir, f"{filename}.png") if self.is_train else None
-        
+
         # Process using image processor
         processed = self.processor(
             image_path=img_path,
             mask_path=mask_path,
             edge_path=edge_path
         )
-        
+
         # Construct return dictionary
         sample = {
             'image': processed.image,
             'mask': processed.mask
         }
-        
+
         if self.is_train:
             sample['edge'] = processed.edge
         else:
             sample['name'] = filename
-            
+
         return sample
 
 def collate_fn(batch: List[Dict]) -> Dict:
     """
     Custom collation function for variable size masks/edges.
-    
+
     Args:
         batch: List of dictionaries containing processed samples
-        
+
     Returns:
         Dictionary with:
         - 'images': Stacked image tensors [B, C, H, W]
@@ -190,25 +204,25 @@ def collate_fn(batch: List[Dict]) -> Dict:
     """
     if not batch:
         raise ValueError("Empty batch received")
-    
+
     # Stack images (all same size)
     images = torch.stack([item['image'] for item in batch])
-    
+
     # Collect masks as list (variable sizes)
     masks = [item['mask'] for item in batch]
-    
+
     # Construct output dictionary
     output = {
         'images': images,
         'masks': masks
     }
-    
+
     # Add edges for training or names for testing
     if 'edge' in batch[0]:
         output['edges'] = [item['edge'] for item in batch]
     else:
         output['names'] = [item['name'] for item in batch]
-        
+
     return output
 
 def get_training_loaders(
@@ -216,7 +230,10 @@ def get_training_loaders(
     model_config: Dict,
     batch_size: int = 16,
     num_workers: int = 4,
-    val_ratio: float = 0.1
+    val_ratio: float = 0.1,
+    max_samples_per_dataset: Optional[int] = None,
+    stratified_validation: bool = False,
+    split_seed: int = 42,
 ) -> Tuple[DataLoader, Optional[DataLoader]]:
     """
     Create training and validation data loaders.
@@ -243,43 +260,61 @@ def get_training_loaders(
         ValueError: If no valid training datasets found
     """
     # Extract processor parameters from config
+    img_proc_cfg = model_config['image_processing']
     processor_params = {
-        'target_size': model_config['image_processing']['target_size'],
-        'normalize_mean': tuple(model_config['image_processing']['normalize_mean']),
-        'normalize_std': tuple(model_config['image_processing']['normalize_std'])
+        'target_size': img_proc_cfg['target_size'],
+        'normalize_mean': tuple(img_proc_cfg['normalize_mean']),
+        'normalize_std': tuple(img_proc_cfg['normalize_std'])
     }
-    
+    image_subdir = img_proc_cfg.get('image_subdir', 'Imgs')
+    edge_subdir = img_proc_cfg.get('edge_subdir', 'Edges')
+
     # Create datasets from all training directories
     train_datasets = []
     for train_dir in dataset_dirs:
         train_path = os.path.join(train_dir, 'train')
         if not os.path.exists(train_path):
             continue
-            
+
         train_datasets.append(
             CODDataset(
                 root_dir=train_path,
                 processor_params=processor_params,
-                is_train=True
+                is_train=True,
+                image_subdir=image_subdir,
+                edge_subdir=edge_subdir,
+                max_samples=max_samples_per_dataset,
             )
         )
     
     if not train_datasets:
         raise ValueError("No valid training datasets found")
         
-    # Combine all training datasets
-    combined_dataset = ConcatDataset(train_datasets)
-    
     if val_ratio > 0:
-        # Split combined dataset
-        train_size = int((1 - val_ratio) * len(combined_dataset))
-        val_size = len(combined_dataset) - train_size
-        
-        train_subset, val_subset = torch.utils.data.random_split(
-            combined_dataset,
-            [train_size, val_size],
-            generator=torch.Generator().manual_seed(42)
-        )
+        if stratified_validation:
+            train_subsets, val_subsets = [], []
+            for dataset_idx, dataset in enumerate(train_datasets):
+                train_size = int((1 - val_ratio) * len(dataset))
+                val_size = len(dataset) - train_size
+                train_subset, val_subset = torch.utils.data.random_split(
+                    dataset,
+                    [train_size, val_size],
+                    generator=torch.Generator().manual_seed(split_seed + dataset_idx)
+                )
+                train_subsets.append(train_subset)
+                val_subsets.append(val_subset)
+            train_subset = ConcatDataset(train_subsets)
+            val_subset = ConcatDataset(val_subsets)
+        else:
+            # Historical behaviour: concatenate all sources before one split.
+            combined_dataset = ConcatDataset(train_datasets)
+            train_size = int((1 - val_ratio) * len(combined_dataset))
+            val_size = len(combined_dataset) - train_size
+            train_subset, val_subset = torch.utils.data.random_split(
+                combined_dataset,
+                [train_size, val_size],
+                generator=torch.Generator().manual_seed(split_seed)
+            )
         
         # Create loaders
         train_loader = DataLoader(
@@ -302,6 +337,7 @@ def get_training_loaders(
         
     else:
         # No validation split
+        combined_dataset = ConcatDataset(train_datasets)
         train_loader = DataLoader(
             combined_dataset,
             batch_size=batch_size,
@@ -344,6 +380,7 @@ def get_test_loaders(
         'normalize_mean': tuple(model_config['image_processing']['normalize_mean']),
         'normalize_std': tuple(model_config['image_processing']['normalize_std'])
     }
+    image_subdir = model_config['image_processing'].get('image_subdir', 'Imgs')
     
     test_loaders = {}
     for test_dir in dataset_dirs:
@@ -355,7 +392,8 @@ def get_test_loaders(
         test_dataset = CODDataset(
             root_dir=test_path,
             processor_params=processor_params,
-            is_train=False
+            is_train=False,
+            image_subdir=image_subdir,
         )
         
         test_loaders[dataset_name] = DataLoader(
@@ -370,3 +408,5 @@ def get_test_loaders(
         raise ValueError("No valid test datasets found")
         
     return test_loaders
+
+

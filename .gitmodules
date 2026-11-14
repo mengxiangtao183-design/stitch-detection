@@ -1,0 +1,48 @@
+[submodule "C3Netqing-baseline-dino"]
+	path = C3Netqing-baseline-dino
+	url = https://github.com/Baber-Jan/C3Net.git
+[submodule "MISCFilter"]
+	path = MISCFilter
+	url = https://github.com/ChengxuLiu/MISCFilter.git
+[submodule "com_models/third_party/PIDNet"]
+	path = com_models/third_party/PIDNet
+	url = https://github.com/XuJiacong/PIDNet.git
+[submodule "deblur_comparison_suite/third_party/AdaRevD"]
+	path = deblur_comparison_suite/third_party/AdaRevD
+	url = https://github.com/INVOKERer/AdaRevD.git
+[submodule "deblur_comparison_suite/third_party/BANet"]
+	path = deblur_comparison_suite/third_party/BANet
+	url = https://github.com/pp00704831/banet.git
+[submodule "deblur_comparison_suite/third_party/CascadedGaze"]
+	path = deblur_comparison_suite/third_party/CascadedGaze
+	url = https://github.com/Ascend-Research/CascadedGaze.git
+[submodule "deblur_comparison_suite/third_party/DarkIR"]
+	path = deblur_comparison_suite/third_party/DarkIR
+	url = https://github.com/cidautai/DarkIR.git
+[submodule "deblur_comparison_suite/third_party/FFTformer"]
+	path = deblur_comparison_suite/third_party/FFTformer
+	url = https://github.com/kkkls/FFTformer.git
+[submodule "deblur_comparison_suite/third_party/HINet_official"]
+	path = deblur_comparison_suite/third_party/HINet_official
+	url = https://github.com/megvii-model/HINet.git
+[submodule "deblur_comparison_suite/third_party/LoFormer"]
+	path = deblur_comparison_suite/third_party/LoFormer
+	url = https://github.com/INVOKERer/LoFormer.git
+[submodule "deblur_comparison_suite/third_party/LoFormer_index_only"]
+	path = deblur_comparison_suite/third_party/LoFormer_index_only
+	url = https://github.com/DeepMed-Lab-ECNU/Single-Image-Deblur.git
+[submodule "deblur_comparison_suite/third_party/MIMO-UNet"]
+	path = deblur_comparison_suite/third_party/MIMO-UNet
+	url = https://github.com/chosj95/MIMO-UNet.git
+[submodule "deblur_comparison_suite/third_party/Restormer"]
+	path = deblur_comparison_suite/third_party/Restormer
+	url = https://github.com/swz30/Restormer.git
+[submodule "deblur_comparison_suite/third_party/SFNet_official"]
+	path = deblur_comparison_suite/third_party/SFNet_official
+	url = https://github.com/c-yn/SFNet.git
+[submodule "deblur_comparison_suite/third_party/Stripformer"]
+	path = deblur_comparison_suite/third_party/Stripformer
+	url = https://github.com/pp00704831/Stripformer.git
+[submodule "deblur_comparison_suite/third_party/UFPDeblur"]
+	path = deblur_comparison_suite/third_party/UFPDeblur
+	url = https://github.com/Fangzhenxuan/UFPDeblur.git

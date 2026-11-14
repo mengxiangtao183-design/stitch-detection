@@ -1,0 +1,54 @@
+{
+  "source_id": "042",
+  "condition": "clear",
+  "outer_fold": 1,
+  "target_class": "break",
+  "oof_predicted_class": "break",
+  "oof_unit_2_break_probability": 0.9492430013067006,
+  "mask": "H:\\C3Netqing\\results\\prediction\\runs\\m6-afmguided-highres-mobilenetv4-fpn-full-150-seed42_20260915_152506\\results\\segmentation\\binary\\042.png",
+  "rgb": "H:\\DATASET\\quexian\\dataset_112_320\\images\\042.png",
+  "display_crop_xyxy": [
+    46,
+    98,
+    216,
+    178
+  ],
+  "display_adjustment": "crop and transparent binary-mask overlay only",
+  "detector_unit_bounds": [
+    [
+      0,
+      46
+    ],
+    [
+      46,
+      104
+    ],
+    [
+      104,
+      160
+    ],
+    [
+      160,
+      216
+    ],
+    [
+      216,
+      273
+    ],
+    [
+      273,
+      320
+    ]
+  ],
+  "longest_run_px": [
+    36,
+    45,
+    28,
+    41,
+    42,
+    39
+  ],
+  "unit_2_neighbor_mean_px": 43.0,
+  "unit_2_neighbor_ratio": 0.6511627906976745,
+  "claim_boundary": "illustrative real OOF example; ratio alone is not a decision rule"
+}

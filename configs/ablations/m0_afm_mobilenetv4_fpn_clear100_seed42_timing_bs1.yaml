@@ -1,0 +1,10 @@
+# Timing/evaluation config for M0-AFM clear100.
+base_config: m0_afm_mobilenetv4_fpn_clear100_seed42.yaml
+
+evaluation:
+  batch_size: 1
+  num_workers: 0
+
+prediction:
+  batch_size: 1
+

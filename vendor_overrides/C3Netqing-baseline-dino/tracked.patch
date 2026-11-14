@@ -1,0 +1,984 @@
+diff --git a/configs/default.yaml b/configs/default.yaml
+old mode 100755
+new mode 100644
+index cfcdb61..67dff05
+--- a/configs/default.yaml
++++ b/configs/default.yaml
+@@ -10,6 +10,7 @@ model:
+       # Decreasing size improves speed but likely harms performance. 392 offers the best balance found.
+     normalize_mean: [0.485, 0.456, 0.406] # Standard ImageNet mean for pre-trained backbone compatibility.
+     normalize_std: [0.229, 0.224, 0.225] # Standard ImageNet std dev.
++    image_subdir: "clear"
+ 
+   encoder:
+     # Using DINOv2-Large with registers - Provided best performance/efficiency balance.
+@@ -78,15 +79,19 @@ model:
+ 
+ # --- Training Configuration ---
+ training:
+-  num_epochs: 200 # Total training epochs. Adjust based on validation curve convergence.
+-  batch_size: 36 # Samples per GPU per step. Maximize based on GPU memory for stable gradients.
++  seed: 42
++  num_epochs: 150 # Full-data ablation budget.
++  batch_size: 2 # Matched to the MobileNet ablation runs for fair experiment setup.
+   use_amp: true # Use Automatic Mixed Precision (FP16). Highly recommended for speed/memory.
+   num_workers: 0 # DataLoader workers. Increase if data loading is a bottleneck, limited by CPU cores.
+   val_ratio: 0.1 # Fraction of training data for validation. Standard practice.
+-  save_freq: 20 # Save model checkpoint every N epochs. Balance disk space vs. recovery ability.
++  max_samples_per_dataset: null
++  save_best: true
++  save_freq: 30 # Save model checkpoint every N epochs. Balance disk space vs. recovery ability.
+   gradient_clip: 1.0 # Max norm for gradients. Prevents exploding gradients. Tune if clipping happens often or gradients vanish.
+-  early_stop_patience: 25 # Stop if validation metric doesn't improve for N epochs. Prevents overfitting/wasted time. Increase for noisy validation.
++  early_stop_patience: 151 # Do not stop before the requested 150-epoch budget.
+   min_delta: 0.0005 # Minimum change considered an improvement for early stopping. Prevents stopping due to tiny fluctuations.
++  monitor_metric: weighted_f
+ 
+   optimizer:
+     # AdamW is generally robust.
+@@ -133,17 +138,19 @@ training:
+     eps: 0.0000001 # 1e-7
+ 
+   datasets: # List of datasets used for training
+-    - "datasets/COD10K"
+-    - "datasets/CAMO"
++    - "H:/DATASET/DB"
++    - "H:/DATASET/XJ"
++    - "H:/DATASET/SD"
+ 
+ # --- Evaluation Configuration ---
+ evaluation:
+   batch_size: 2
+-  num_workers: 8
++  num_workers: 0
+   datasets: # Standard evaluation datasets
+-    - "datasets/COD10K"
+-    - "datasets/CAMO"
+-    - "datasets/NC4K"
++    - "H:/DATASET/DB"
++    - "H:/DATASET/XJ"
++    - "H:/DATASET/SD"
++    - "H:/DATASET/RX"
+ 
+ # --- Prediction Configuration ---
+ prediction:
+diff --git a/engine/distributed_trainer.py b/engine/distributed_trainer.py
+old mode 100755
+new mode 100644
+diff --git a/engine/evaluator.py b/engine/evaluator.py
+old mode 100755
+new mode 100644
+index ae9ee48..88686ed
+--- a/engine/evaluator.py
++++ b/engine/evaluator.py
+@@ -41,6 +41,7 @@ import time
+ import json
+ from typing import Dict, List, Tuple
+ from dataclasses import dataclass
++from collections import defaultdict
+ 
+ import torch
+ import torch.nn.functional as F
+@@ -420,13 +421,7 @@ class Evaluator:
+         - Memory usage monitoring
+         """
+         # Initialize metric tracking
+-        total_metrics = {
+-            's_alpha': 0.0,
+-            'weighted_f': 0.0,
+-            'mae': 0.0,
+-            'e_phi': 0.0,
+-            'mean_f': 0.0
+-        }
++        total_metrics = defaultdict(float)
+         
+         # Setup directories for this dataset
+         self.result_manager.setup_dataset_directories(dataset_name)
+@@ -508,22 +503,21 @@ class Evaluator:
+         masks = [m.to(self.device) for m in batch['masks']]
+         filenames = batch['names']
+         batch_size = len(filenames)
+-        torch.cuda.synchronize()  # Ensure data transfer is complete
+-        
+-        batch_metrics = {
+-            's_alpha': 0.0,
+-            'weighted_f': 0.0,
+-            'mae': 0.0,
+-            'e_phi': 0.0,
+-            'mean_f': 0.0
+-        }
++        if self.device.type == 'cuda':
++            torch.cuda.synchronize()  # Ensure data transfer is complete
+         
+-        # Model inference with timing
++        batch_metrics = defaultdict(float)
++        
++        # Model inference with per-image timing. CUDA operations are
++        # asynchronous, so a synchronization is required after the forward
++        # pass; otherwise the recorded value only measures CPU launch time.
+         with torch.inference_mode():
+-            inference_start = time.time()
++            inference_start = time.perf_counter()
+             outputs = self.model(images)
++            if self.device.type == 'cuda':
++                torch.cuda.synchronize()
+             self.timing_stats['inference_times'].append(
+-                time.time() - inference_start
++                (time.perf_counter() - inference_start) / max(batch_size, 1)
+             )
+ 
+             processed_output = {}
+@@ -549,7 +543,8 @@ class Evaluator:
+                 # Compute metrics (only segmentation metrics, no edge metrics)
+                 sample_metrics = self.metrics_processor.compute_metrics(
+                     seg_pred=[file_preds['final_mask']],
+-                    seg_gt=[masks[idx]]
++                    seg_gt=[masks[idx]],
++                    include_trajectory_metrics=True
+                 )
+ 
+                 # Update batch metrics
+@@ -581,7 +576,8 @@ class Evaluator:
+         
+         progress_bar.set_postfix({
+             'S-measure': f"{running_metrics['s_alpha']:.3f}",
+-            'F-measure': f"{running_metrics['weighted_f']:.3f}", 
++            'F-measure': f"{running_metrics['weighted_f']:.3f}",
++            'Traj-F': f"{running_metrics.get('trajectory_f1', 0.0):.3f}",
+             'Inf(ms)': f"{avg_inference:.1f}"
+         })
+ 
+@@ -648,6 +644,13 @@ class Evaluator:
+         logging.info(f"Enhanced-alignment (Eϕ): {metrics['e_phi']:.4f}")
+         logging.info(f"Mean F-measure (Fβm): {metrics['mean_f']:.4f}")
+         
++        if 'trajectory_f1' in metrics:
++            logging.info(f"Trajectory F1 @2px: {metrics['trajectory_f1']:.4f}")
++            logging.info(f"Trajectory F1 @1px: {metrics['trajectory_f1_1px']:.4f}")
++            logging.info(f"Trajectory F1 @3px: {metrics['trajectory_f1_3px']:.4f}")
++            logging.info(f"Binary IoU @0.5: {metrics['binary_iou']:.4f}")
++            logging.info(f"Binary F1 @0.5: {metrics['binary_f1']:.4f}")
++
+         logging.info("\nQuality Distribution:")
+         for category, count in categories['counts'].items():
+             percentage = (count / categories['total']) * 100
+diff --git a/engine/predictor.py b/engine/predictor.py
+old mode 100755
+new mode 100644
+diff --git a/engine/trainer.py b/engine/trainer.py
+old mode 100755
+new mode 100644
+index 1970256..3fe809b
+--- a/engine/trainer.py
++++ b/engine/trainer.py
+@@ -60,11 +60,12 @@ class TrainingMonitor:
+             best_metrics: Best performance records
+     """
+     
+-    def __init__(self, dir_manager: DirectoryManager):
++    def __init__(self, dir_manager: DirectoryManager, monitor_metric: str = 'weighted_f'):
+         """Initialize training monitor with directory structure."""
+         # Output paths
+         self.metrics_file = dir_manager.run_dirs.metrics_file
+         self.checkpoint_dir = dir_manager.run_dirs.checkpoints
++        self.monitor_metric = monitor_metric
+         
+         # Statistics tracking
+         self.batch_stats = defaultdict(lambda: {'sum': 0.0, 'count': 0})
+@@ -77,6 +78,7 @@ class TrainingMonitor:
+             "epochs": [],
+             "best_metrics": {
+                 "weighted_f": 0.0,
++                self.monitor_metric: 0.0,
+                 "s_alpha": 0.0,
+                 "mae": float("inf")
+             }
+@@ -125,7 +127,7 @@ class TrainingMonitor:
+         """
+         Determines if current model achieves best performance.
+         
+-        Compares current F-measure against historical best and
++        Compares the configured monitor metric against the historical best and
+         updates records if improved.
+         
+         Args:
+@@ -138,11 +140,16 @@ class TrainingMonitor:
+             - Best metrics history if improved
+             - Saves updated history to disk
+         """
+-        if current_metrics['weighted_f'] > self.history['best_metrics']['weighted_f']:
++        current_value = current_metrics.get(self.monitor_metric)
++        if current_value is None:
++            raise KeyError(
++                f"Configured monitor metric '{self.monitor_metric}' is absent from validation metrics."
++            )
++        if current_value > self.history['best_metrics'].get(self.monitor_metric, float('-inf')):
+             self.history['best_metrics'] = current_metrics.copy()
+             self.save_history()
+             logging.info(
+-                f"New best model -> F-Measure: {current_metrics['weighted_f']:.4f}"
++                f"New best model -> {self.monitor_metric}: {current_value:.4f}"
+             )
+             return True
+         return False
+@@ -152,7 +159,10 @@ class TrainingMonitor:
+         tmp_path = self.metrics_file.with_suffix('.tmp')
+         with open(tmp_path, 'w') as f:
+             json.dump(self.history, f, indent=2)
+-        tmp_path.rename(self.metrics_file)
++        # ``rename`` cannot overwrite an existing destination on Windows.
++        # ``replace`` keeps the temporary-file update semantics while working
++        # for every validation epoch after the first one.
++        tmp_path.replace(self.metrics_file)
+ 
+     def save_epoch(self, epoch: int, phase: str):
+         """
+@@ -243,11 +253,22 @@ class Trainer:
+         self.grad_clip = self.config.get('gradient_clip', 1.0)
+         self.early_stop_patience = self.config.get('early_stop_patience', 15)
+         self.save_freq = self.config.get('save_freq', 1)
++        self.save_best = self.config.get('save_best', True)
++        self.monitor_metric = self.config.get('monitor_metric', 'weighted_f')
++        self.include_trajectory_metrics = self.config.get(
++            'include_trajectory_metrics',
++            self.monitor_metric in {
++                'binary_iou',
++                'binary_f1',
++                'boundary_f1_1px',
++                'trajectory_f1',
++            },
++        )
+         
+         # Initialize components
+         self._setup_optimization()
+         self.criterion = C3NetLoss(**self.config['loss']).to(device)
+-        self.monitor = TrainingMonitor(dir_manager)
++        self.monitor = TrainingMonitor(dir_manager, self.monitor_metric)
+         self.metrics_processor = MetricsProcessor()
+         
+         # Mixed precision setup
+@@ -566,10 +587,11 @@ class Trainer:
+             with torch.no_grad():
+                 with torch.cuda.amp.autocast(enabled=self.use_amp):
+                     metrics = self.metrics_processor.compute_metrics(
+-                        seg_pred= resized_dict['final_mask'],
++                        seg_pred=resized_dict['final_mask'],
+                         seg_gt=masks,
+-                        edge_pred= resized_dict['edge_mask'],
+-                        edge_gt=edges
++                        edge_pred=resized_dict['edge_mask'],
++                        edge_gt=edges,
++                        include_trajectory_metrics=self.include_trajectory_metrics,
+                     )
+             metrics.update(loss_dict)
+             timing['metric_time'] = time.time() - metric_start
+@@ -656,6 +678,7 @@ class Trainer:
+             
+             pbar.set_postfix({
+                 'f_measure': f"{metrics['weighted_f']:.4f}",
++                'binary_iou': f"{metrics['binary_iou']:.4f}" if 'binary_iou' in metrics else 'n/a',
+                 's_alpha': f"{metrics['s_alpha']:.4f}",
+                 'mae': f"{metrics['mae']:.4f}",
+                 'loss': f"{metrics['loss']:.4f}",
+@@ -673,7 +696,10 @@ class Trainer:
+                 model_config=self.model_config,
+                 batch_size=self.batch_size,
+                 num_workers=self.config['num_workers'],
+-                val_ratio=self.config['val_ratio']
++                val_ratio=self.config['val_ratio'],
++                max_samples_per_dataset=self.config.get('max_samples_per_dataset'),
++                stratified_validation=self.config.get('stratified_validation', False),
++                split_seed=self.config.get('seed', 42),
+             )
+             
+             # Log setup
+@@ -682,7 +708,9 @@ class Trainer:
+                 logging.info(f"Validation samples: {len(val_loader.dataset)}")
+ 
+             # Initialize tracking variables
+-            best_weighted_f = self.monitor.history['best_metrics']['weighted_f']
++            best_monitor_metric = self.monitor.history['best_metrics'].get(
++                self.monitor_metric, float('-inf')
++            )
+             early_stop_counter = 0
+             min_delta = self.config.get('min_delta', 1e-4)
+ 
+@@ -698,14 +726,14 @@ class Trainer:
+                     self.monitor.save_epoch(epoch, 'val')
+                     
+                     # Learning rate adjustment
+-                    self.scheduler.step(val_metrics['weighted_f'])
++                    self.scheduler.step(val_metrics[self.monitor_metric])
+                     
+                     # Early stopping check using validation loss
+-                    if val_metrics['weighted_f'] - best_weighted_f > min_delta:
+-                        best_weighted_f = val_metrics['weighted_f']
++                    if val_metrics[self.monitor_metric] - best_monitor_metric > min_delta:
++                        best_monitor_metric = val_metrics[self.monitor_metric]
+                         early_stop_counter = 0
+                         # Save model if structure measure also improved
+-                        if self.monitor.check_best_model(val_metrics):
++                        if self.save_best and self.monitor.check_best_model(val_metrics):
+                             self._save_checkpoint(epoch, val_metrics, is_best=True)
+                     
+                     else:
+@@ -759,6 +787,7 @@ class Trainer:
+         # Atomic save
+         temp_path = save_path.with_suffix('.tmp')
+         torch.save(save_dict, temp_path)
+-        temp_path.rename(save_path)
++        # ``replace`` overwrites an existing best checkpoint on Windows.
++        temp_path.replace(save_path)
+ 
+-        logging.info(f"Saved checkpoint: {save_path}")
+\ No newline at end of file
++        logging.info(f"Saved checkpoint: {save_path}")
+diff --git a/main.py b/main.py
+old mode 100755
+new mode 100644
+index 59314b6..57096f7
+--- a/main.py
++++ b/main.py
+@@ -27,6 +27,8 @@ Example Usage:
+ 
+ import argparse
+ import logging
++import copy
++import random
+ import sys
+ import yaml
+ from pathlib import Path
+@@ -39,6 +41,7 @@ warnings.filterwarnings('ignore', category=UserWarning, module='py_sod_metrics.s
+ from ptflops import get_model_complexity_info
+ 
+ import torch
++import numpy as np
+ 
+ from engine.trainer import Trainer
+ from engine.evaluator import Evaluator
+@@ -51,16 +54,57 @@ from models.c3net import C3Net
+ DEFAULT_CONFIG_PATH = Path('./configs/default.yaml')
+ DEFAULT_MODEL_PATH = Path('./checkpoints/model_best.pth')
+ 
++
++def set_seed(seed: int) -> None:
++    """Make the short ablation runs reproducible across model variants."""
++    random.seed(seed)
++    np.random.seed(seed)
++    torch.manual_seed(seed)
++    if torch.cuda.is_available():
++        torch.cuda.manual_seed_all(seed)
++    torch.backends.cudnn.deterministic = True
++    torch.backends.cudnn.benchmark = False
++
+ class ConfigurationManager:
+-    """
+-    Manages configuration loading and validation.
+-    
+-    Features:
+-    - Hierarchical config loading
+-    - Path validation
+-    - Config merging
+-    - Default handling
+-    """
++    """Manage hierarchical configuration loading and validation."""
++
++    @staticmethod
++    def _deep_merge(base: Dict, override: Dict) -> Dict:
++        """Recursively merge an experiment override onto a base config."""
++        result = copy.deepcopy(base)
++        for key, value in override.items():
++            if isinstance(value, dict) and isinstance(result.get(key), dict):
++                result[key] = ConfigurationManager._deep_merge(result[key], value)
++            else:
++                result[key] = value
++        return result
++
++    @staticmethod
++    def _load_config_file(config_path: Path, seen: Optional[set] = None) -> Dict:
++        """Load a YAML config with optional relative base_config inheritance."""
++        resolved = config_path.resolve()
++        seen = set() if seen is None else seen
++        if resolved in seen:
++            raise RuntimeError(f"Circular base_config reference: {resolved}")
++        seen.add(resolved)
++
++        try:
++            with resolved.open('r', encoding='utf-8') as f:
++                config = yaml.safe_load(f) or {}
++        except yaml.YAMLError as e:
++            raise RuntimeError(f"Invalid configuration file: {resolved}") from e
++
++        base_name = config.pop('base_config', None)
++        if not base_name:
++            return config
++
++        base_path = (resolved.parent / base_name).resolve()
++        if not base_path.exists():
++            raise RuntimeError(f"base_config not found: {base_path}")
++
++        return ConfigurationManager._deep_merge(
++            ConfigurationManager._load_config_file(base_path, seen), config
++        )
+     
+     @staticmethod
+     def load_config(config_path: Optional[Path] = None) -> Dict:
+@@ -78,21 +122,11 @@ class ConfigurationManager:
+         """
+         # Try user config first
+         if config_path and config_path.exists():
+-            try:
+-                with open(config_path) as f:
+-                    return yaml.safe_load(f)
+-            except yaml.YAMLError as e:
+-                logging.error(f"Error in config file {config_path}: {e}")
+-                raise RuntimeError(f"Invalid configuration file: {config_path}")
++            return ConfigurationManager._load_config_file(config_path)
+         
+         # Try default config
+         if DEFAULT_CONFIG_PATH.exists():
+-            try:
+-                with open(DEFAULT_CONFIG_PATH) as f:
+-                    return yaml.safe_load(f)
+-            except yaml.YAMLError as e:
+-                logging.error(f"Error in default config: {e}")
+-                raise RuntimeError("Invalid default configuration file")
++            return ConfigurationManager._load_config_file(DEFAULT_CONFIG_PATH)
+                 
+         raise RuntimeError(
+             "No valid configuration found. Ensure either:\n"
+@@ -480,6 +514,10 @@ def main() -> None:
+         
+         # Load appropriate configurations
+         config = ConfigurationManager.load_config(args.config)
++        seed = config.get('training', {}).get('seed')
++        if seed is not None:
++            set_seed(int(seed))
++            logging.info(f"Random seed fixed to {seed}")
+ 
+         if args.mode in ['evaluate', 'predict']:
+             model_config = ConfigurationManager.load_model_config(args.model)
+@@ -510,4 +548,4 @@ def main() -> None:
+         sys.exit(1)
+ 
+ if __name__ == '__main__':
+-    main()
+\ No newline at end of file
++    main()
+diff --git a/models/backbone.py b/models/backbone.py
+old mode 100755
+new mode 100644
+index 33f1cf7..cf16902
+--- a/models/backbone.py
++++ b/models/backbone.py
+@@ -153,7 +153,11 @@ class DinoV2WithRegistersEncoder(nn.Module):
+         # Initialize backbone with register tokens
+         self.model = AutoBackbone.from_pretrained(
+             model_name,
+-            out_features=stage_features
++            out_features=stage_features,
++            # The experiment machine already has this model in its local
++            # Hugging Face cache.  Avoid a network metadata check before each
++            # short ablation run.
++            local_files_only=True,
+         )
+         
+         logger.info(
+@@ -221,4 +225,4 @@ class DinoV2WithRegistersEncoder(nn.Module):
+             f"  params={self.param_count:,}\n"
+             f"  model={self.model}\n"
+             f")"
+-        )
+\ No newline at end of file
++        )
+diff --git a/models/c3net.py b/models/c3net.py
+old mode 100755
+new mode 100644
+diff --git a/models/edge_branch.py b/models/edge_branch.py
+old mode 100755
+new mode 100644
+diff --git a/models/fusion_head.py b/models/fusion_head.py
+old mode 100755
+new mode 100644
+diff --git a/models/localization_branch.py b/models/localization_branch.py
+old mode 100755
+new mode 100644
+diff --git a/models/utils.py b/models/utils.py
+old mode 100755
+new mode 100644
+diff --git a/setup/environment.yml b/setup/environment.yml
+old mode 100755
+new mode 100644
+diff --git a/setup/setup.sh b/setup/setup.sh
+old mode 100755
+new mode 100644
+diff --git a/slurm_scripts/train_multi_gpu.slurm b/slurm_scripts/train_multi_gpu.slurm
+old mode 100755
+new mode 100644
+diff --git a/utils/data_loader.py b/utils/data_loader.py
+old mode 100755
+new mode 100644
+index b33ecfc..c77b795
+--- a/utils/data_loader.py
++++ b/utils/data_loader.py
+@@ -82,7 +82,9 @@ class CODDataset(Dataset):
+         self, 
+         root_dir: str,
+         processor_params: Dict,
+-        is_train: bool = True
++        is_train: bool = True,
++        image_subdir: str = 'Imgs',
++        max_samples: Optional[int] = None,
+     ):
+         """
+         Initialize COD dataset.
+@@ -94,7 +96,7 @@ class CODDataset(Dataset):
+         """
+         # Initialize paths and processor
+         self.is_train = is_train
+-        self.image_dir = os.path.join(root_dir, 'Imgs')
++        self.image_dir = os.path.join(root_dir, image_subdir)
+         self.mask_dir = os.path.join(root_dir, 'GT')
+         self.edge_dir = os.path.join(root_dir, 'Edges') if is_train else None
+         
+@@ -109,6 +111,10 @@ class CODDataset(Dataset):
+         
+         # Get sorted filenames (only images with corresponding masks)
+         self.filenames = self._get_valid_files()
++        if max_samples is not None:
++            if max_samples <= 0:
++                raise ValueError("max_samples must be a positive integer or None")
++            self.filenames = self.filenames[:max_samples]
+         
+     def _get_valid_files(self) -> List[str]:
+         """Get list of image files that have corresponding masks/edges."""
+@@ -216,7 +222,10 @@ def get_training_loaders(
+     model_config: Dict,
+     batch_size: int = 16,
+     num_workers: int = 4,
+-    val_ratio: float = 0.1
++    val_ratio: float = 0.1,
++    max_samples_per_dataset: Optional[int] = None,
++    stratified_validation: bool = False,
++    split_seed: int = 42,
+ ) -> Tuple[DataLoader, Optional[DataLoader]]:
+     """
+     Create training and validation data loaders.
+@@ -243,11 +252,13 @@ def get_training_loaders(
+         ValueError: If no valid training datasets found
+     """
+     # Extract processor parameters from config
++    image_cfg = model_config['image_processing']
+     processor_params = {
+-        'target_size': model_config['image_processing']['target_size'],
+-        'normalize_mean': tuple(model_config['image_processing']['normalize_mean']),
+-        'normalize_std': tuple(model_config['image_processing']['normalize_std'])
++        'target_size': image_cfg['target_size'],
++        'normalize_mean': tuple(image_cfg['normalize_mean']),
++        'normalize_std': tuple(image_cfg['normalize_std'])
+     }
++    image_subdir = image_cfg.get('image_subdir', 'Imgs')
+     
+     # Create datasets from all training directories
+     train_datasets = []
+@@ -260,26 +271,39 @@ def get_training_loaders(
+             CODDataset(
+                 root_dir=train_path,
+                 processor_params=processor_params,
+-                is_train=True
++                is_train=True,
++                image_subdir=image_subdir,
++                max_samples=max_samples_per_dataset,
+             )
+         )
+     
+     if not train_datasets:
+         raise ValueError("No valid training datasets found")
+         
+-    # Combine all training datasets
+-    combined_dataset = ConcatDataset(train_datasets)
+-    
+     if val_ratio > 0:
+-        # Split combined dataset
+-        train_size = int((1 - val_ratio) * len(combined_dataset))
+-        val_size = len(combined_dataset) - train_size
+-        
+-        train_subset, val_subset = torch.utils.data.random_split(
+-            combined_dataset,
+-            [train_size, val_size],
+-            generator=torch.Generator().manual_seed(42)
+-        )
++        if stratified_validation:
++            train_subsets, val_subsets = [], []
++            for dataset_idx, dataset in enumerate(train_datasets):
++                train_size = int((1 - val_ratio) * len(dataset))
++                val_size = len(dataset) - train_size
++                train_subset, val_subset = torch.utils.data.random_split(
++                    dataset,
++                    [train_size, val_size],
++                    generator=torch.Generator().manual_seed(split_seed + dataset_idx)
++                )
++                train_subsets.append(train_subset)
++                val_subsets.append(val_subset)
++            train_subset = ConcatDataset(train_subsets)
++            val_subset = ConcatDataset(val_subsets)
++        else:
++            combined_dataset = ConcatDataset(train_datasets)
++            train_size = int((1 - val_ratio) * len(combined_dataset))
++            val_size = len(combined_dataset) - train_size
++            train_subset, val_subset = torch.utils.data.random_split(
++                combined_dataset,
++                [train_size, val_size],
++                generator=torch.Generator().manual_seed(split_seed)
++            )
+         
+         # Create loaders
+         train_loader = DataLoader(
+@@ -302,6 +326,7 @@ def get_training_loaders(
+         
+     else:
+         # No validation split
++        combined_dataset = ConcatDataset(train_datasets)
+         train_loader = DataLoader(
+             combined_dataset,
+             batch_size=batch_size,
+@@ -339,11 +364,13 @@ def get_test_loaders(
+         ValueError: If no valid test datasets found
+     """
+     # Extract processor parameters from config
++    image_cfg = model_config['image_processing']
+     processor_params = {
+-        'target_size': model_config['image_processing']['target_size'],
+-        'normalize_mean': tuple(model_config['image_processing']['normalize_mean']),
+-        'normalize_std': tuple(model_config['image_processing']['normalize_std'])
++        'target_size': image_cfg['target_size'],
++        'normalize_mean': tuple(image_cfg['normalize_mean']),
++        'normalize_std': tuple(image_cfg['normalize_std'])
+     }
++    image_subdir = image_cfg.get('image_subdir', 'Imgs')
+     
+     test_loaders = {}
+     for test_dir in dataset_dirs:
+@@ -355,7 +382,8 @@ def get_test_loaders(
+         test_dataset = CODDataset(
+             root_dir=test_path,
+             processor_params=processor_params,
+-            is_train=False
++            is_train=False,
++            image_subdir=image_subdir,
+         )
+         
+         test_loaders[dataset_name] = DataLoader(
+@@ -369,4 +397,4 @@ def get_test_loaders(
+     if not test_loaders:
+         raise ValueError("No valid test datasets found")
+         
+-    return test_loaders
+\ No newline at end of file
++    return test_loaders
+diff --git a/utils/distributed_data_loader.py b/utils/distributed_data_loader.py
+old mode 100755
+new mode 100644
+diff --git a/utils/distributed_utils.py b/utils/distributed_utils.py
+old mode 100755
+new mode 100644
+diff --git a/utils/edge_generator.py b/utils/edge_generator.py
+old mode 100755
+new mode 100644
+diff --git a/utils/image_processor.py b/utils/image_processor.py
+old mode 100755
+new mode 100644
+diff --git a/utils/loss_functions.py b/utils/loss_functions.py
+old mode 100755
+new mode 100644
+diff --git a/utils/metrics.py b/utils/metrics.py
+old mode 100755
+new mode 100644
+index 225c0a8..8bc7c40
+--- a/utils/metrics.py
++++ b/utils/metrics.py
+@@ -80,6 +80,7 @@ Hardware Notes:
+ 
+ import torch
+ import numpy as np
++import cv2
+ from typing import Dict, List, Optional, Union, Tuple
+ from py_sod_metrics import (
+     Smeasure, Emeasure, WeightedFmeasure, MAE, Fmeasure
+@@ -138,9 +139,140 @@ class MetricsProcessor:
+             'mae': MAE(),
+             'fm': Fmeasure()
+         }
++
++    @staticmethod
++    def _f1_score(precision: float, recall: float) -> float:
++        """Compute F1 with stable handling for empty predictions/masks."""
++        denom = precision + recall
++        if denom <= 0:
++            return 0.0
++        return 2.0 * precision * recall / denom
++
++    @staticmethod
++    def _binary_prf(pred_bin: np.ndarray, gt_bin: np.ndarray) -> Tuple[float, float, float]:
++        """Compute exact binary precision/recall/F1 at the selected threshold."""
++        pred_sum = int(pred_bin.sum())
++        gt_sum = int(gt_bin.sum())
++
++        if pred_sum == 0 and gt_sum == 0:
++            return 1.0, 1.0, 1.0
++        if pred_sum == 0 or gt_sum == 0:
++            return 0.0, 0.0, 0.0
++
++        tp = np.logical_and(pred_bin, gt_bin).sum()
++        precision = float(tp / pred_sum)
++        recall = float(tp / gt_sum)
++        return precision, recall, MetricsProcessor._f1_score(precision, recall)
++
++    @staticmethod
++    def _tolerance_prf(
++        pred_bin: np.ndarray,
++        gt_bin: np.ndarray,
++        radius: int
++    ) -> Tuple[float, float, float]:
++        """
++        Compute trajectory precision/recall/F1 with spatial tolerance.
++
++        Precision asks whether predicted trajectory pixels land near the GT
++        trajectory. Recall asks whether GT trajectory pixels are covered by a
++        nearby prediction. This is better suited to thin stitch tracks than
++        exact pixel overlap.
++        """
++        pred_sum = int(pred_bin.sum())
++        gt_sum = int(gt_bin.sum())
++
++        if pred_sum == 0 and gt_sum == 0:
++            return 1.0, 1.0, 1.0
++        if pred_sum == 0 or gt_sum == 0:
++            return 0.0, 0.0, 0.0
++
++        if radius <= 0:
++            return MetricsProcessor._binary_prf(pred_bin, gt_bin)
++
++        kernel_size = 2 * radius + 1
++        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (kernel_size, kernel_size))
++        pred_u8 = pred_bin.astype(np.uint8)
++        gt_u8 = gt_bin.astype(np.uint8)
++
++        gt_near = cv2.dilate(gt_u8, kernel) > 0
++        pred_near = cv2.dilate(pred_u8, kernel) > 0
++
++        precision = float(np.logical_and(pred_bin, gt_near).sum() / pred_sum)
++        recall = float(np.logical_and(gt_bin, pred_near).sum() / gt_sum)
++        return precision, recall, MetricsProcessor._f1_score(precision, recall)
++
++    @staticmethod
++    def _mask_boundary(mask_bin: np.ndarray) -> np.ndarray:
++        """Extract a one-pixel binary boundary from a foreground mask."""
++        mask_u8 = mask_bin.astype(np.uint8)
++        if int(mask_u8.sum()) == 0:
++            return mask_u8.astype(bool)
++        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
++        eroded = cv2.erode(mask_u8, kernel, iterations=1)
++        return (mask_u8 - eroded) > 0
++
++    @staticmethod
++    def _compute_trajectory_metrics(
++        pred: np.ndarray,
++        gt: np.ndarray,
++        radii: Tuple[int, ...],
++        primary_radius: int,
++        threshold: float,
++    ) -> Dict[str, float]:
++        """Compute binary and tolerance-aware trajectory metrics."""
++        if np.issubdtype(pred.dtype, np.floating):
++            pred_bin = pred >= threshold
++        else:
++            pred_bin = pred >= int(round(threshold * 255.0))
++        gt_bin = gt >= 128
++
++        exact_p, exact_r, exact_f = MetricsProcessor._binary_prf(pred_bin, gt_bin)
++        intersection = int(np.logical_and(pred_bin, gt_bin).sum())
++        union = int(np.logical_or(pred_bin, gt_bin).sum())
++        # Use the same 0.5-thresholded masks as binary precision/recall/F1.
++        # The empty/empty convention is IoU=1, consistent with _binary_prf.
++        binary_iou = 1.0 if union == 0 else float(intersection / union)
++        results = {
++            "binary_precision": exact_p,
++            "binary_recall": exact_r,
++            "binary_f1": exact_f,
++            "binary_iou": binary_iou,
++        }
++
++        pred_boundary = MetricsProcessor._mask_boundary(pred_bin)
++        gt_boundary = MetricsProcessor._mask_boundary(gt_bin)
++        boundary_p, boundary_r, boundary_f1 = MetricsProcessor._tolerance_prf(
++            pred_boundary, gt_boundary, radius=1
++        )
++        results.update({
++            "boundary_precision_1px": boundary_p,
++            "boundary_recall_1px": boundary_r,
++            "boundary_f1_1px": boundary_f1,
++        })
++
++        for radius in radii:
++            precision, recall, f1 = MetricsProcessor._tolerance_prf(pred_bin, gt_bin, radius)
++            results[f"trajectory_precision_{radius}px"] = precision
++            results[f"trajectory_recall_{radius}px"] = recall
++            results[f"trajectory_f1_{radius}px"] = f1
++
++            if radius == primary_radius:
++                results["trajectory_precision"] = precision
++                results["trajectory_recall"] = recall
++                results["trajectory_f1"] = f1
++
++        if "trajectory_f1" not in results:
++            precision, recall, f1 = MetricsProcessor._tolerance_prf(
++                pred_bin, gt_bin, primary_radius
++            )
++            results["trajectory_precision"] = precision
++            results["trajectory_recall"] = recall
++            results["trajectory_f1"] = f1
++
++        return results
+         
+     @staticmethod
+-    def _process_single_sample(data: Tuple[np.ndarray, np.ndarray]) -> Dict[str, float]:
++    def _process_single_sample(data: Tuple[np.ndarray, np.ndarray, bool, Tuple[int, ...], int, float, Optional[np.ndarray]]) -> Dict[str, float]:
+         """
+         Process metrics for a single sample in a separate process.
+         
+@@ -150,7 +282,7 @@ class MetricsProcessor:
+         Returns:
+             Dictionary of computed metrics for the sample
+         """
+-        pred, gt = data
++        pred, gt, include_trajectory_metrics, radii, primary_radius, threshold, trajectory_pred = data
+         metrics = MetricsProcessor._initialize_metrics()
+         
+         # Update all metrics for this sample
+@@ -158,7 +290,7 @@ class MetricsProcessor:
+             metric.step(pred=pred, gt=gt)
+             
+         # Get results
+-        return {
++        results = {
+             "sm": metrics['sm'].get_results()["sm"],
+             "wfm": metrics['wfm'].get_results()["wfm"],
+             "mae": metrics['mae'].get_results()["mae"],
+@@ -166,13 +298,30 @@ class MetricsProcessor:
+             "fm": metrics['fm'].get_results()["fm"]["curve"].mean()
+         }
+ 
++        if include_trajectory_metrics:
++            results.update(
++                MetricsProcessor._compute_trajectory_metrics(
++                    pred=trajectory_pred if trajectory_pred is not None else pred,
++                    gt=gt,
++                    radii=radii,
++                    primary_radius=primary_radius,
++                    threshold=threshold,
++                )
++            )
++
++        return results
++
+     @torch.no_grad()
+     def compute_metrics(
+         self,
+         seg_pred: List[torch.Tensor],
+         seg_gt: List[torch.Tensor],
+         edge_pred: Optional[List[torch.Tensor]] = None,
+-        edge_gt: Optional[List[torch.Tensor]] = None
++        edge_gt: Optional[List[torch.Tensor]] = None,
++        include_trajectory_metrics: bool = False,
++        trajectory_radii: Tuple[int, ...] = (1, 2, 3, 5),
++        trajectory_primary_radius: int = 2,
++        trajectory_threshold: float = 0.5,
+     ) -> Dict[str, float]:
+         """
+         Compute metrics efficiently using multiprocessing.
+@@ -192,13 +341,19 @@ class MetricsProcessor:
+                       List[Tensor[1,H,W]]
+             edge_gt: Optional edge ground truth {0,1}
+                     List[Tensor[H,W]]
++            include_trajectory_metrics: If True, also compute thresholded
++                    exact and tolerance-aware trajectory metrics.
++            trajectory_radii: Pixel tolerances for trajectory F1.
++            trajectory_primary_radius: Radius exposed as trajectory_f1.
++            trajectory_threshold: Probability threshold for binary trajectory.
+                     
+         Returns:
+             Dictionary of averaged metrics
+         """
+         try:
+             # Prepare prepare predictions (convert to uint8)
+-            seg_pred_processed = [(p.sigmoid()  * 255).byte() for p in seg_pred]
++            seg_prob_processed = [p.sigmoid() for p in seg_pred]
++            seg_pred_processed = [(p * 255).byte() for p in seg_prob_processed]
+ 
+             # Prepare ground truth (convert to uint8)
+             seg_gt_processed = [(g * 255).byte() for g in seg_gt]
+@@ -206,10 +361,25 @@ class MetricsProcessor:
+             # Async transfer to CPU and convert to numpy
+             # Using non_blocking=True for async transfer
+             seg_pred_np = [p.cpu().numpy().squeeze() for p in seg_pred_processed]
++            seg_prob_np = [
++                p.cpu().numpy().squeeze()
++                for p in seg_prob_processed
++            ] if include_trajectory_metrics else [None] * len(seg_pred_processed)
+             seg_gt_np = [g.cpu().numpy().squeeze() for g in seg_gt_processed]
+             
+             # Create processing pairs
+-            seg_pairs = list(zip(seg_pred_np, seg_gt_np))
++            seg_pairs = [
++                (
++                    pred,
++                    gt,
++                    include_trajectory_metrics,
++                    trajectory_radii,
++                    trajectory_primary_radius,
++                    trajectory_threshold,
++                    traj_pred,
++                )
++                for pred, gt, traj_pred in zip(seg_pred_np, seg_gt_np, seg_prob_np)
++            ]
+             
+             # Process segmentation metrics in parallel
+             seg_results = self.pool.map(self._process_single_sample, seg_pairs)
+@@ -220,7 +390,10 @@ class MetricsProcessor:
+                 edge_gt_processed = [(g * 255).byte() for g in edge_gt]
+                 edge_pred_np = [p.cpu().numpy().squeeze() for p in edge_pred_processed]
+                 edge_gt_np = [g.cpu().numpy().squeeze() for g in edge_gt_processed]
+-                edge_pairs = list(zip(edge_pred_np, edge_gt_np))
++                edge_pairs = [
++                    (pred, gt, False, trajectory_radii, trajectory_primary_radius, trajectory_threshold, None)
++                    for pred, gt in zip(edge_pred_np, edge_gt_np)
++                ]
+                 edge_results = self.pool.map(self._process_single_sample, edge_pairs)
+             else:
+                 edge_results = None
+@@ -258,6 +431,11 @@ class MetricsProcessor:
+             "e_phi": sum(r["em"] for r in seg_results) / n_samples,
+             "mean_f": sum(r["fm"] for r in seg_results) / n_samples
+         }
++
++        metric_keys = {"sm", "wfm", "mae", "em", "fm"}
++        extra_keys = [k for k in seg_results[0].keys() if k not in metric_keys]
++        for key in extra_keys:
++            metrics[key] = sum(r[key] for r in seg_results) / n_samples
+         
+         # Add edge metrics if present
+         if edge_results:
+@@ -272,4 +450,4 @@ class MetricsProcessor:
+         """Cleanup process pool on deletion."""
+         if hasattr(self, 'pool'):
+             self.pool.close()
+-            self.pool.join()
+\ No newline at end of file
++            self.pool.join()
+diff --git a/utils/run_manager.py b/utils/run_manager.py
+old mode 100755
+new mode 100644
+diff --git a/utils/visualization.py b/utils/visualization.py
+old mode 100755
+new mode 100644

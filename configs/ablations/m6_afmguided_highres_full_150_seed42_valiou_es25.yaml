@@ -1,0 +1,15 @@
+# M6 full-data retraining with checkpoint selection aligned to the paper's
+# primary metric.  DB/XJ/SD are used for training; RX remains evaluation-only.
+base_config: m6_afm_guided_highres_full_150_seed42.yaml
+
+model:
+  name: "M6-AFMGuided-HighRes-Full150-Seed42-ValBinaryIoU-ES25"
+
+training:
+  # Save model_best.pth only when validation Binary IoU improves.
+  monitor_metric: binary_iou
+  include_trajectory_metrics: true
+  save_best: true
+  # Stop after 25 consecutive validation epochs without a Binary-IoU gain
+  # larger than the inherited min_delta; the maximum budget remains 150.
+  early_stop_patience: 25

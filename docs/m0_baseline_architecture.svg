@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1480" viewBox="0 0 1800 1480" role="img" aria-labelledby="title desc">
+  <title id="title">M0 MobileNetV4 FPN C3Net baseline architecture</title>
+  <desc id="desc">Detailed vector diagram of the M0 baseline with MobileNetV4 encoder, top-down FPN, edge and localization paths, AFM fusion, output scales and M0 losses.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#385067"/></marker>
+    <marker id="dashArrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#ad5b5b"/></marker>
+    <marker id="lossArrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#ac761c"/></marker>
+    <style>
+      .bg{fill:#f7fafc}.title{font:700 31px Arial,'Microsoft YaHei',sans-serif;fill:#162330}.subtitle{font:400 16px Arial,'Microsoft YaHei',sans-serif;fill:#536678}.section{font:700 18px Arial,'Microsoft YaHei',sans-serif;fill:#26394a}.note{font:400 13px Arial,'Microsoft YaHei',sans-serif;fill:#526778}.label{font:700 15px Arial,'Microsoft YaHei',sans-serif;fill:#182635;text-anchor:middle}.small{font:400 12px Arial,'Microsoft YaHei',sans-serif;fill:#40576a;text-anchor:middle}.tiny{font:400 11px Arial,'Microsoft YaHei',sans-serif;fill:#506779;text-anchor:middle}.box{stroke-width:1.5;rx:9}.input{fill:#e5f0ff;stroke:#4a86c9}.backbone{fill:#eae6fc;stroke:#7661b9}.fpn{fill:#e3f4ed;stroke:#408a70}.edge{fill:#fff0df;stroke:#c67c28}.loc{fill:#e4f4f5;stroke:#348e95}.afm{fill:#e8edff;stroke:#4d68b6}.output{fill:#e5f4e8;stroke:#468558}.disabled{fill:#f9e9e9;stroke:#b96060;stroke-dasharray:6 4}.loss{fill:#fff6dd;stroke:#b0781c}.band{fill:#fff;stroke:#d0dce6;stroke-width:1.2;rx:14}.arrow{stroke:#385067;stroke-width:2;fill:none;marker-end:url(#arrow)}.thin{stroke:#60798e;stroke-width:1.4;fill:none;marker-end:url(#arrow)}.dash{stroke:#ad5b5b;stroke-width:1.7;stroke-dasharray:7 5;fill:none;marker-end:url(#dashArrow)}.lossline{stroke:#ac761c;stroke-width:1.6;stroke-dasharray:5 4;fill:none;marker-end:url(#lossArrow)}.plus{font:700 23px Arial,sans-serif;fill:#35536b;text-anchor:middle}.legend{font:400 12px Arial,'Microsoft YaHei',sans-serif;fill:#43596a}
+    </style>
+  </defs>
+  <rect class="bg" width="1800" height="1480"/>
+  <text x="900" y="47" class="title" text-anchor="middle">M0 Baseline: MobileNetV4-FPN C3Net with AFM</text>
+  <text x="900" y="76" class="subtitle" text-anchor="middle">320 x 320 input | AFM is the final network head | HighRes / TCE / DySample / SGCL / D1 / BSDE are disabled</text>
+
+  <rect x="36" y="98" width="1728" height="244" class="band"/>
+  <text x="62" y="127" class="section">1. MobileNetV4 encoder and lateral projections</text>
+  <rect x="75" y="166" width="180" height="92" class="input box"/>
+  <text x="165" y="198" class="label">Input RGB image</text><text x="165" y="221" class="small">3 x 320 x 320</text><text x="165" y="242" class="tiny">ImageNet normalization</text>
+  <path d="M255 212 H312" class="arrow"/>
+  <rect x="312" y="148" width="270" height="128" class="backbone box"/>
+  <text x="447" y="185" class="label">MobileNetV4 Hybrid Medium</text><text x="447" y="209" class="small">pretrained feature encoder</text><text x="447" y="231" class="tiny">CoordAtt: OFF</text><text x="447" y="251" class="tiny">four hierarchy stages</text>
+  <rect x="668" y="142" width="188" height="58" class="backbone box"/><text x="762" y="166" class="label">C2</text><text x="762" y="186" class="small">48 x 80 x 80</text>
+  <rect x="908" y="142" width="188" height="58" class="backbone box"/><text x="1002" y="166" class="label">C3</text><text x="1002" y="186" class="small">80 x 40 x 40</text>
+  <rect x="1148" y="142" width="188" height="58" class="backbone box"/><text x="1242" y="166" class="label">C4</text><text x="1242" y="186" class="small">160 x 20 x 20</text>
+  <rect x="1388" y="142" width="188" height="58" class="backbone box"/><text x="1482" y="166" class="label">C5</text><text x="1482" y="186" class="small">960 x 10 x 10</text>
+  <path d="M582 180 H668" class="thin"/><path d="M582 196 H908" class="thin"/><path d="M582 212 H1148" class="thin"/><path d="M582 228 H1388" class="thin"/>
+  <rect x="668" y="238" width="188" height="58" class="fpn box"/><text x="762" y="262" class="label">L2: 1x1 ConvGNReLU</text><text x="762" y="282" class="small">192 x 80 x 80</text>
+  <rect x="908" y="238" width="188" height="58" class="fpn box"/><text x="1002" y="262" class="label">L3: 1x1 ConvGNReLU</text><text x="1002" y="282" class="small">192 x 40 x 40</text>
+  <rect x="1148" y="238" width="188" height="58" class="fpn box"/><text x="1242" y="262" class="label">L4: 1x1 ConvGNReLU</text><text x="1242" y="282" class="small">192 x 20 x 20</text>
+  <rect x="1388" y="238" width="188" height="58" class="fpn box"/><text x="1482" y="262" class="label">L5: 1x1 ConvGNReLU</text><text x="1482" y="282" class="small">192 x 10 x 10</text>
+  <path d="M762 200 V238" class="thin"/><path d="M1002 200 V238" class="thin"/><path d="M1242 200 V238" class="thin"/><path d="M1482 200 V238" class="thin"/>
+
+  <rect x="36" y="365" width="1728" height="338" class="band"/>
+  <text x="62" y="396" class="section">2. Original one-way top-down FPN</text>
+  <text x="62" y="417" class="note">Every resize is fixed bilinear interpolation. No dynamic upsampling, no cross-scale alignment, no bidirectional semantic-detail exchange.</text>
+  <rect x="1370" y="458" width="208" height="76" class="fpn box"/><text x="1474" y="486" class="label">P5</text><text x="1474" y="507" class="small">Smooth(L5)</text><text x="1474" y="525" class="tiny">192 x 10 x 10</text>
+  <rect x="1080" y="535" width="208" height="84" class="fpn box"/><text x="1184" y="563" class="label">P4</text><text x="1184" y="584" class="small">Smooth(L4 + up(P5))</text><text x="1184" y="603" class="tiny">192 x 20 x 20</text>
+  <rect x="790" y="615" width="208" height="84" class="fpn box"/><text x="894" y="643" class="label">P3</text><text x="894" y="664" class="small">Smooth(L3 + up(P4))</text><text x="894" y="683" class="tiny">192 x 40 x 40</text>
+  <rect x="500" y="615" width="208" height="84" class="fpn box"/><text x="604" y="643" class="label">P2</text><text x="604" y="664" class="small">Smooth(L2 + up(P3))</text><text x="604" y="683" class="tiny">192 x 80 x 80</text>
+  <path d="M1482 296 V434 H1474 V458" class="thin"/><path d="M1370 496 H1305 V577 H1288" class="arrow"/><path d="M1242 296 V505 H1184 V535" class="thin"/><text x="1305" y="545" class="tiny">bilinear x2</text><text x="1184" y="519" class="plus">+</text>
+  <path d="M1080 577 H1015 V657 H998" class="arrow"/><path d="M1002 296 V585 H894 V615" class="thin"/><text x="1015" y="625" class="tiny">bilinear x2</text><text x="894" y="599" class="plus">+</text>
+  <path d="M790 657 H725 V657 H708" class="arrow"/><path d="M762 296 V585 H604 V615" class="thin"/><text x="726" y="641" class="tiny">bilinear x2</text><text x="604" y="599" class="plus">+</text>
+  <rect x="1350" y="643" width="310" height="38" class="disabled box"/><text x="1505" y="668" class="small">D1 / D2 / BSDE: OFF in M0</text>
+
+  <rect x="36" y="728" width="820" height="408" class="band"/>
+  <text x="62" y="758" class="section">3a. Edge refinement path</text>
+  <rect x="78" y="804" width="174" height="70" class="edge box"/><text x="165" y="830" class="label">P2</text><text x="165" y="851" class="small">192 x 80 x 80</text>
+  <rect x="78" y="910" width="174" height="70" class="edge box"/><text x="165" y="936" class="label">up(P3)</text><text x="165" y="957" class="small">192 x 80 x 80</text>
+  <path d="M604 699 V804 H252" class="thin"/><path d="M894 699 V910 H252" class="thin"/>
+  <rect x="308" y="842" width="185" height="84" class="edge box"/><text x="400" y="871" class="label">Concatenate</text><text x="400" y="892" class="small">384 x 80 x 80</text><text x="400" y="911" class="tiny">P2 || up(P3)</text>
+  <path d="M252 839 H308" class="arrow"/><path d="M252 945 H280 V884 H308" class="arrow"/>
+  <rect x="536" y="842" width="174" height="84" class="edge box"/><text x="623" y="871" class="label">3x3 ConvGNReLU</text><text x="623" y="892" class="small">384 -&gt; 128</text><text x="623" y="911" class="tiny">edge adapter</text><path d="M493 884 H536" class="arrow"/>
+  <rect x="515" y="982" width="232" height="118" class="edge box"/><text x="631" y="1012" class="label">EdgeEnhanceBlock x1</text><text x="631" y="1034" class="small">DW context + Sobel + Laplacian</text><text x="631" y="1054" class="small">1x1 mix + ECA + residual</text><text x="631" y="1075" class="tiny">edge feature: 128 x 80 x 80</text><path d="M623 926 V982" class="arrow"/>
+  <rect x="91" y="1030" width="330" height="62" class="loss box"/><text x="256" y="1055" class="label">Edge loss</text><text x="256" y="1076" class="small">edge focal + regularization</text><path d="M515 1057 H421" class="lossline"/>
+
+  <rect x="888" y="728" width="876" height="408" class="band"/>
+  <text x="914" y="758" class="section">3b. Contextual localization path</text>
+  <rect x="932" y="806" width="180" height="74" class="loc box"/><text x="1022" y="833" class="label">P4</text><text x="1022" y="854" class="small">192 x 20 x 20</text><path d="M1184 619 V806 H1112" class="thin"/>
+  <rect x="1165" y="794" width="214" height="98" class="loc box"/><text x="1272" y="823" class="label">SemanticEnhanceBlock x1</text><text x="1272" y="844" class="small">context refinement</text><text x="1272" y="864" class="tiny">192 x 20 x 20</text><path d="M1112 843 H1165" class="arrow"/>
+  <rect x="1428" y="786" width="272" height="114" class="loc box"/><text x="1564" y="816" class="label">ICG: Image Context Guidance</text><text x="1564" y="837" class="small">RGB downsample + contrast guide</text><text x="1564" y="858" class="tiny">salient-background suppression</text><text x="1564" y="879" class="tiny">192 x 20 x 20</text><path d="M1379 843 H1428" class="arrow"/>
+  <rect x="1300" y="958" width="240" height="104" class="loc box"/><text x="1420" y="987" class="label">Context upsample + P2</text><text x="1420" y="1008" class="small">20 -&gt; 40 -&gt; 80, then add P2</text><text x="1420" y="1029" class="tiny">192 x 80 x 80</text><text x="1420" y="1049" class="tiny">bilinear x2, x2</text><path d="M1564 900 V958 H1540" class="arrow"/><path d="M604 699 V934 H1300" class="thin"/>
+  <rect x="1052" y="982" width="200" height="100" class="loc box"/><text x="1152" y="1012" class="label">Localization refine</text><text x="1152" y="1033" class="small">3x3 ConvGNReLU</text><text x="1152" y="1053" class="small">+ DW refine</text><text x="1152" y="1073" class="tiny">loc feature: 128 x 80 x 80</text><path d="M1300 1010 H1252" class="arrow"/>
+  <rect x="1570" y="1005" width="158" height="58" class="loss box"/><text x="1649" y="1029" class="label">Object loss</text><text x="1649" y="1049" class="small">loc mask, 80 x 80</text><path d="M1252 1032 H1570" class="lossline"/>
+
+  <rect x="36" y="1160" width="1728" height="270" class="band"/>
+  <text x="62" y="1190" class="section">4. AFM fusion head, M0 output and training objectives</text>
+  <rect x="218" y="1242" width="610" height="132" class="afm box"/>
+  <text x="523" y="1272" class="label">FinalFusionHead: Attentive Fusion Module (AFM)</text>
+  <text x="523" y="1295" class="small">edge 1x1: 128 -&gt; 128; loc 1x1: 128 -&gt; 128</text>
+  <text x="523" y="1318" class="small">loc feature -&gt; 64-channel attention generator -&gt; 1-channel spatial gate</text>
+  <text x="523" y="1340" class="small">gated edge || loc: 256 channels -&gt; ConvGNReLU x1 -&gt; 1x1 final logits</text>
+  <text x="523" y="1361" class="tiny">network final logits: 1 x 80 x 80</text>
+  <path d="M631 1100 V1220 H410 V1242" class="arrow"/><path d="M1152 1082 V1210 H648 V1242" class="arrow"/>
+  <rect x="920" y="1247" width="205" height="62" class="output box"/><text x="1022" y="1272" class="label">Final mask logits</text><text x="1022" y="1293" class="small">1 x 80 x 80</text><path d="M828 1308 H920" class="arrow"/>
+  <rect x="1180" y="1232" width="220" height="92" class="output box"/><text x="1290" y="1260" class="label">Evaluation / prediction resize</text><text x="1290" y="1281" class="small">bilinear align to image size</text><text x="1290" y="1302" class="tiny">final probability: 1 x 320 x 320</text><path d="M1125 1278 H1180" class="arrow"/>
+  <rect x="1455" y="1210" width="250" height="150" class="loss box"/><text x="1580" y="1238" class="label">M0 losses</text><text x="1580" y="1260" class="small">final: focal + Tversky + edge Dice</text><text x="1580" y="1282" class="small">location: focal + Tversky</text><text x="1580" y="1304" class="small">edge: focal + regularization</text><text x="1580" y="1327" class="tiny">centerline / topology / boundary = 0</text><text x="1580" y="1347" class="tiny">no SGCL supervision</text><path d="M1400 1278 H1455" class="lossline"/>
+  <rect x="72" y="1240" width="100" height="126" class="disabled box"/><text x="122" y="1268" class="label">M0 disabled</text><text x="122" y="1290" class="tiny">HighRes</text><text x="122" y="1308" class="tiny">TCE / CCTE</text><text x="122" y="1326" class="tiny">DySample</text><text x="122" y="1344" class="tiny">D1 / BSDE</text>
+
+  <rect x="36" y="1444" width="1728" height="30" class="band"/>
+  <line x1="68" y1="1459" x2="125" y2="1459" class="arrow"/><text x="140" y="1464" class="legend">active network path</text>
+  <line x1="360" y1="1459" x2="417" y2="1459" class="dash"/><text x="432" y="1464" class="legend">disabled innovation / optional path</text>
+  <line x1="750" y1="1459" x2="807" y2="1459" class="lossline"/><text x="822" y="1464" class="legend">training supervision only</text>
+  <text x="1740" y="1464" class="legend" text-anchor="end">M0 is the formal baseline for all ablations</text>
+</svg>

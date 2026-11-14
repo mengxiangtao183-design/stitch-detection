@@ -1,0 +1,69 @@
+{
+  "name": "Controlled-SynBlur-v1",
+  "base_manifest_dir": "H:\\C3Netqing\\MISCFilter\\manifests\\c3net_external_rx",
+  "output_subdir": "ImgsSynCtrlV1",
+  "seed": 42,
+  "angle_degrees": [
+    -15,
+    15
+  ],
+  "train_policy": "DB/XJ/SD train clear images are degraded into 3 variants per image.",
+  "val_policy": "Held-out DB/XJ/SD val clear images are degraded into 1 random-kernel variant per image.",
+  "internal_test_policy": "DB/XJ/SD test clear images are degraded into 1 random-kernel variant per image.",
+  "external_test_policy": "RX test clear images are degraded into 1 random-kernel variant per image and remain external test only.",
+  "train_variants": [
+    {
+      "suffix": "syn1",
+      "kernel_choices": [
+        5,
+        7
+      ]
+    },
+    {
+      "suffix": "syn2",
+      "kernel_choices": [
+        9,
+        11
+      ]
+    },
+    {
+      "suffix": "syn3",
+      "kernel_choices": [
+        13,
+        15
+      ]
+    }
+  ],
+  "one_variant_kernel_choices": [
+    5,
+    7,
+    9,
+    11,
+    13,
+    15
+  ],
+  "counts": {
+    "train": 3240,
+    "val": 120,
+    "DB": 100,
+    "XJ": 100,
+    "SD": 100,
+    "RX": 500
+  },
+  "generated_counts": {
+    "train": 3240,
+    "val": 120,
+    "test_DB": 100,
+    "test_XJ": 100,
+    "test_SD": 100,
+    "test_RX": 500
+  },
+  "skipped_counts": {
+    "train": 0,
+    "val": 0,
+    "test_DB": 0,
+    "test_XJ": 0,
+    "test_SD": 0,
+    "test_RX": 0
+  }
+}

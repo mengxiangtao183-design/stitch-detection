@@ -1,0 +1,13 @@
+﻿class,condition,auc,positive,negative
+skip,clear,0.9693877551020408,28,84
+skip,blur_direct,0.9175170068027211,28,84
+skip,deblur_then_aphnet,0.9727891156462585,28,84
+break,clear,0.9323979591836735,28,84
+break,blur_direct,0.8681972789115646,28,84
+break,deblur_then_aphnet,0.9413265306122449,28,84
+skew,clear,0.9970238095238095,28,84
+skew,blur_direct,0.9910714285714286,28,84
+skew,deblur_then_aphnet,0.9974489795918368,28,84
+loose,clear,0.9970238095238094,28,84
+loose,blur_direct,0.9183673469387755,28,84
+loose,deblur_then_aphnet,0.9851190476190477,28,84

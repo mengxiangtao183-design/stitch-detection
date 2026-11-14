@@ -1,0 +1,4 @@
+base_config: pidnet_s_full150.yaml
+evaluation:
+  batch_size: 1
+  num_workers: 0

@@ -1,0 +1,8 @@
+base_config: comparison_base_full150.yaml
+model:
+  name: COM-PIDNet-S-CVPR2023-Full150-Seed42
+  architecture: pidnet_s
+
+training:
+  use_amp: true
+  gradient_clip: 1.0

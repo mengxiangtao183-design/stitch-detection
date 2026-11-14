@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="780" viewBox="0 0 1600 780">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 Z" fill="#222"/></marker>
+    <style>
+      .t{font-family:'Times New Roman','SimSun',serif;fill:#111}.h{font-size:28px;font-weight:bold}.m{font-size:22px}.s{font-size:18px}
+      .b{fill:#fff;stroke:#222;stroke-width:2}.g1{fill:#f3f3f3;stroke:#222;stroke-width:2}.g2{fill:#dedede;stroke:#222;stroke-width:2}.mbd{fill:#c8c8c8;stroke:#111;stroke-width:2.5}
+      .a{fill:none;stroke:#222;stroke-width:2.2;marker-end:url(#arrow)}.skip{fill:none;stroke:#555;stroke-width:2;stroke-dasharray:8 6;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect width="1600" height="780" fill="white"/>
+  <text x="800" y="45" text-anchor="middle" class="t h">MBDNet-P+ 总体结构</text>
+  <text x="800" y="74" text-anchor="middle" class="t s">Motion-Biased Deblurring Network for Line-Trace Images</text>
+
+  <rect x="25" y="300" width="110" height="90" rx="5" class="b"/><text x="80" y="337" text-anchor="middle" class="t m">模糊 RGB</text><text x="80" y="365" text-anchor="middle" class="t s">H×W×3</text>
+  <rect x="165" y="300" width="110" height="90" rx="5" class="g1"/><text x="220" y="337" text-anchor="middle" class="t m">3×3 Stem</text><text x="220" y="365" text-anchor="middle" class="t s">H×W×64</text>
+  <rect x="305" y="280" width="150" height="130" rx="5" class="g1"/><text x="380" y="326" text-anchor="middle" class="t m">全分辨率编码</text><text x="380" y="355" text-anchor="middle" class="t m">3×DWPW</text><text x="380" y="384" text-anchor="middle" class="t s">H×W×64</text>
+  <rect x="485" y="300" width="90" height="90" rx="5" class="b"/><text x="530" y="337" text-anchor="middle" class="t m">↓2</text><text x="530" y="365" text-anchor="middle" class="t s">DWPW</text>
+  <rect x="605" y="255" width="170" height="180" rx="5" class="g2"/><text x="690" y="302" text-anchor="middle" class="t m">半分辨率编码</text><text x="690" y="335" text-anchor="middle" class="t m">4×DWPW</text><rect x="635" y="355" width="110" height="48" rx="4" class="mbd"/><text x="690" y="387" text-anchor="middle" class="t m">MBD</text><text x="690" y="425" text-anchor="middle" class="t s">H/2×W/2×128</text>
+  <rect x="805" y="300" width="90" height="90" rx="5" class="b"/><text x="850" y="337" text-anchor="middle" class="t m">↓2</text><text x="850" y="365" text-anchor="middle" class="t s">DWPW</text>
+  <rect x="925" y="175" width="265" height="340" rx="5" class="g2"/><text x="1057" y="215" text-anchor="middle" class="t m">低分辨率瓶颈</text><text x="1057" y="242" text-anchor="middle" class="t s">H/4×W/4×256</text><text x="1057" y="268" text-anchor="middle" class="t m">12×DWPW</text><rect x="960" y="282" width="195" height="45" rx="4" class="b"/><text x="1057" y="312" text-anchor="middle" class="t s">局部–空洞上下文 LRC</text><rect x="975" y="342" width="165" height="45" rx="4" class="mbd"/><text x="1057" y="372" text-anchor="middle" class="t m">MBD-1</text><rect x="975" y="409" width="165" height="45" rx="4" class="g1"/><text x="1057" y="439" text-anchor="middle" class="t s">2×DWPW 精炼</text><rect x="975" y="476" width="165" height="39" rx="4" class="mbd"/><text x="1057" y="503" text-anchor="middle" class="t m">MBD-2</text>
+
+  <rect x="1220" y="300" width="90" height="90" rx="5" class="b"/><text x="1265" y="337" text-anchor="middle" class="t m">↑2</text><text x="1265" y="365" text-anchor="middle" class="t s">PixelShuffle</text>
+  <rect x="1340" y="255" width="180" height="180" rx="5" class="g2"/><text x="1430" y="300" text-anchor="middle" class="t m">半分辨率解码</text><text x="1430" y="334" text-anchor="middle" class="t m">4×DWPW</text><rect x="1375" y="355" width="110" height="48" rx="4" class="mbd"/><text x="1430" y="387" text-anchor="middle" class="t m">MBD</text><text x="1430" y="425" text-anchor="middle" class="t s">H/2×W/2×128</text>
+
+  <rect x="1190" y="600" width="90" height="85" rx="5" class="b"/><text x="1235" y="635" text-anchor="middle" class="t m">↑2</text><text x="1235" y="663" text-anchor="middle" class="t s">PixelShuffle</text>
+  <rect x="960" y="585" width="190" height="115" rx="5" class="g1"/><text x="1055" y="625" text-anchor="middle" class="t m">全分辨率解码</text><text x="1055" y="657" text-anchor="middle" class="t m">3×DWPW</text><text x="1055" y="685" text-anchor="middle" class="t s">H×W×64</text>
+  <rect x="775" y="600" width="145" height="85" rx="5" class="g1"/><text x="848" y="635" text-anchor="middle" class="t m">3×3 重建</text><text x="848" y="663" text-anchor="middle" class="t s">H×W×3</text>
+  <circle cx="705" cy="642" r="27" class="b"/><text x="705" y="650" text-anchor="middle" class="t h">+</text>
+  <rect x="525" y="600" width="135" height="85" rx="5" class="b"/><text x="592" y="635" text-anchor="middle" class="t m">清晰输出</text><text x="592" y="663" text-anchor="middle" class="t s">H×W×3</text>
+
+  <path d="M135 345 H165" class="a"/><path d="M275 345 H305" class="a"/><path d="M455 345 H485" class="a"/><path d="M575 345 H605" class="a"/><path d="M775 345 H805" class="a"/><path d="M895 345 H925" class="a"/><path d="M1190 345 H1220" class="a"/><path d="M1310 345 H1340" class="a"/>
+  <path d="M1430 435 V550 H1235 V600" class="a"/><path d="M1190 642 H1150" class="a"/><path d="M960 642 H920" class="a"/><path d="M775 642 H732" class="a"/><path d="M678 642 H660" class="a"/>
+  <path d="M690 435 V545 H1340" class="skip"/><text x="1000" y="535" text-anchor="middle" class="t s">半分辨率跳跃连接（逐元素相加）</text>
+  <path d="M380 410 V735 H960 V700" class="skip"/><text x="650" y="727" text-anchor="middle" class="t s">全分辨率跳跃连接（逐元素相加）</text>
+  <path d="M80 390 V745 H705 V669" class="skip"/><text x="290" y="767" text-anchor="middle" class="t s">全局残差</text>
+  <text x="30" y="118" class="t s">说明：MBD 仅布置于 H/2 与 H/4 尺度，避免在高分辨率层对织物纹理、亮片及任意方向装饰边缘过度定向锐化。</text>
+  <rect x="1215" y="90" width="30" height="24" class="mbd"/><text x="1255" y="109" class="t s">运动偏置去模糊模块</text>
+  <rect x="1435" y="90" width="30" height="24" class="g1"/><text x="1475" y="109" class="t s">通用恢复单元</text>
+</svg>

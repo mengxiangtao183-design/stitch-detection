@@ -1,0 +1,6 @@
+base_config: comparison_base_full150.yaml
+model:
+  name: COM-Gated-SCNN-R50-Full150-Seed42
+  architecture: gated_scnn
+  pretrained: true
+

@@ -1,0 +1,8 @@
+base_config: comparison_base_full150.yaml
+model:
+  name: COM-SegFormer-B0-Full150-Seed42
+  architecture: segformer_b0
+  pretrained: true
+  pretrained_id: nvidia/mit-b0
+  pretrained_path: H:/C3Netqing/com_models/pretrained/mit-b0
+  decoder_channels: 256

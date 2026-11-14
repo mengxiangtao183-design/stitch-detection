@@ -1,0 +1,161 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="2280" viewBox="0 0 1800 2280" role="img" aria-labelledby="title desc">
+  <title id="title">TSR-Defect trajectory self-reference defect detection module</title>
+  <desc id="desc">A detailed vector workflow of the TSR-Defect post-segmentation module, from M6 binary mask to skip, break, skew and loose predictions.</desc>
+  <defs>
+    <style>
+      .bg{fill:#ffffff}.title{font-family:'Microsoft YaHei','Noto Sans CJK SC',Arial,sans-serif;font-size:38px;font-weight:700;fill:#17365d}.sub{font-family:'Microsoft YaHei','Noto Sans CJK SC',Arial,sans-serif;font-size:19px;fill:#5b6776}.h{font-family:'Microsoft YaHei','Noto Sans CJK SC',Arial,sans-serif;font-size:25px;font-weight:700;fill:#17365d}.p{font-family:'Microsoft YaHei','Noto Sans CJK SC',Arial,sans-serif;font-size:18px;fill:#1f2937}.s{font-family:'Microsoft YaHei','Noto Sans CJK SC',Arial,sans-serif;font-size:16px;fill:#44546a}.tiny{font-family:'Microsoft YaHei','Noto Sans CJK SC',Arial,sans-serif;font-size:14px;fill:#44546a}.white{font-family:'Microsoft YaHei','Noto Sans CJK SC',Arial,sans-serif;font-size:20px;font-weight:700;fill:#ffffff}.box{stroke-width:2}.flow{stroke:#597189;stroke-width:3;fill:none;marker-end:url(#arrow)}.dash{stroke:#8e9baa;stroke-width:2;stroke-dasharray:7 6;fill:none;marker-end:url(#arrow)}.note{fill:#f6f8fb;stroke:#aab7c4;stroke-width:1.5;stroke-dasharray:6 4}.chip{fill:#eef3f8;stroke:#b9c9d8;stroke-width:1}.num{font-family:Arial,sans-serif;font-size:19px;font-weight:700;fill:#ffffff;text-anchor:middle;dominant-baseline:middle}</style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#597189"/></marker>
+  </defs>
+  <rect class="bg" width="1800" height="2280"/>
+  <text x="900" y="66" text-anchor="middle" class="title">TSR-Defect：轨迹自参照缺陷检测单元结构流程</text>
+  <text x="900" y="102" text-anchor="middle" class="sub">Trajectory Self-Reference Defect Detection Module | 后分割、可解释、同图自参照的缺陷推理单元</text>
+
+  <!-- Input -->
+  <rect x="510" y="146" width="780" height="135" rx="16" fill="#295b90" class="box" stroke="#17365d"/>
+  <circle cx="558" cy="213" r="25" fill="#6f9ccc"/><text x="558" y="214" class="num">0</text>
+  <text x="610" y="196" class="white">M6 线迹分割输出</text>
+  <text x="610" y="229" class="white" style="font-size:17px;font-weight:400">输入：320 × 320 二值/概率掩码 M(x,y)；前景为线迹，背景为织物</text>
+  <path d="M900 281 L900 330" class="flow"/>
+  <rect x="86" y="158" width="330" height="105" rx="12" class="note"/>
+  <text x="110" y="191" class="h" style="font-size:20px">原 RGB 图像</text>
+  <text x="110" y="220" class="s">仅用于结果可视化与人工审阅</text>
+  <text x="110" y="246" class="s">不参与 TSR 规则决策</text>
+  <path d="M416 211 L500 211" class="dash"/>
+
+  <!-- stage1 -->
+  <rect x="120" y="336" width="1560" height="365" rx="18" fill="#eef5fc" stroke="#8db3d8" class="box"/>
+  <rect x="120" y="336" width="230" height="47" rx="18" fill="#3c78b5"/>
+  <text x="145" y="367" class="white" style="font-size:18px">阶段 1：轨迹构建</text>
+  <circle cx="166" cy="431" r="24" fill="#3c78b5"/><text x="166" y="432" class="num">1</text>
+  <rect x="214" y="402" width="405" height="234" rx="12" fill="#ffffff" stroke="#9dbbd7" class="box"/>
+  <text x="240" y="442" class="h">列前景质量与有效支持</text>
+  <text x="240" y="478" class="p">m(x) = Σᵧ M(x,y) / H</text>
+  <text x="240" y="510" class="s">m(x) ≥ min_column_mass 时，该列有效</text>
+  <text x="240" y="541" class="s">得到有效列 valid(x) 与连续支持区间</text>
+  <text x="240" y="582" class="tiny">作用：排除无前景列，保留线迹横向存在性</text>
+  <path d="M619 519 L689 519" class="flow"/>
+  <circle cx="715" cy="431" r="24" fill="#3c78b5"/><text x="715" y="432" class="num">2</text>
+  <rect x="763" y="402" width="405" height="234" rx="12" fill="#ffffff" stroke="#9dbbd7" class="box"/>
+  <text x="789" y="442" class="h">软一维轨迹估计</text>
+  <text x="789" y="478" class="p">y(x) = Σᵧ[y · M(x,y)] / Σᵧ M(x,y)</text>
+  <text x="789" y="510" class="s">每个有效 x 位置得到一个加权纵坐标</text>
+  <text x="789" y="541" class="s">不依赖连通域、针距或像素-毫米换算</text>
+  <text x="789" y="582" class="tiny">输出：线迹中心走向 y(x) 与支持质量 m(x)</text>
+  <path d="M1168 519 L1238 519" class="flow"/>
+  <circle cx="1264" cy="431" r="24" fill="#3c78b5"/><text x="1264" y="432" class="num">3</text>
+  <rect x="1312" y="402" width="300" height="234" rx="12" fill="#ffffff" stroke="#9dbbd7" class="box"/>
+  <text x="1338" y="442" class="h">趋势去除</text>
+  <text x="1338" y="478" class="p">ŷ(x) = ax + b</text>
+  <text x="1338" y="510" class="p">r(x) = y(x) − ŷ(x)</text>
+  <text x="1338" y="546" class="s">最小二乘全局斜率</text>
+  <text x="1338" y="573" class="s">分离全局倾斜与局部变形</text>
+  <path d="M900 701 L900 752" class="flow"/>
+
+  <!-- Stage2 -->
+  <rect x="120" y="758" width="1560" height="350" rx="18" fill="#f3f7ef" stroke="#a8c38d" class="box"/>
+  <rect x="120" y="758" width="270" height="47" rx="18" fill="#548235"/>
+  <text x="145" y="789" class="white" style="font-size:18px">阶段 2：自适应六段定位</text>
+  <circle cx="166" cy="854" r="24" fill="#548235"/><text x="166" y="855" class="num">4</text>
+  <rect x="214" y="825" width="410" height="224" rx="12" fill="#ffffff" stroke="#adc99b" class="box"/>
+  <text x="240" y="864" class="h">支持区间与去噪</text>
+  <text x="240" y="899" class="s">由 valid(x) 提取连续 support runs</text>
+  <text x="240" y="930" class="s">剔除短小孤立段（分割噪声斑点）</text>
+  <text x="240" y="961" class="s">保留主要线迹区间及其中心位置</text>
+  <text x="240" y="996" class="tiny">避免将微小前景噪声误认为一段线迹</text>
+  <path d="M624 937 L696 937" class="flow"/>
+  <circle cx="722" cy="854" r="24" fill="#548235"/><text x="722" y="855" class="num">5</text>
+  <rect x="770" y="825" width="410" height="224" rx="12" fill="#ffffff" stroke="#adc99b" class="box"/>
+  <text x="796" y="864" class="h">六个单元边界恢复</text>
+  <text x="796" y="899" class="s">相邻支持区间中心的中点作为边界</text>
+  <text x="796" y="930" class="s">缺失单元时，在最大间隙内插入虚拟中心</text>
+  <text x="796" y="961" class="s">始终输出有序的 U1 ... U6</text>
+  <text x="796" y="996" class="tiny">若轨迹过于模糊，则安全回退为等宽分段</text>
+  <path d="M1180 937 L1252 937" class="flow"/>
+  <circle cx="1278" cy="854" r="24" fill="#548235"/><text x="1278" y="855" class="num">6</text>
+  <rect x="1326" y="825" width="286" height="224" rx="12" fill="#ffffff" stroke="#adc99b" class="box"/>
+  <text x="1352" y="864" class="h">视野裁切保护</text>
+  <text x="1352" y="899" class="s">若 U1/U6 支持区贴图像边缘</text>
+  <text x="1352" y="930" class="s">标记 edge_truncated</text>
+  <text x="1352" y="961" class="s">跳线、断线分数置零</text>
+  <text x="1352" y="996" class="tiny">避免首末段拍摄不全误报</text>
+  <path d="M900 1108 L900 1159" class="flow"/>
+
+  <!-- Stage3 -->
+  <rect x="120" y="1165" width="1560" height="360" rx="18" fill="#fff7e9" stroke="#e6bf74" class="box"/>
+  <rect x="120" y="1165" width="300" height="47" rx="18" fill="#c88a1d"/>
+  <text x="145" y="1196" class="white" style="font-size:18px">阶段 3：单元轨迹特征提取</text>
+  <circle cx="168" cy="1261" r="24" fill="#c88a1d"/><text x="168" y="1262" class="num">7</text>
+  <rect x="216" y="1232" width="430" height="230" rx="12" fill="#ffffff" stroke="#e4c280" class="box"/>
+  <text x="242" y="1273" class="h">完整性与长度特征</text>
+  <text x="242" y="1308" class="p">coverage：单元有效列比例</text>
+  <text x="242" y="1339" class="p">gap_ratio：最大内部无效间隙比例</text>
+  <text x="242" y="1370" class="p">span_ratio：实际横向跨度 / 单元宽度</text>
+  <text x="242" y="1408" class="tiny">用于区分局部中断、部分残余与正常连续线迹</text>
+  <path d="M646 1346 L718 1346" class="flow"/>
+  <circle cx="744" cy="1261" r="24" fill="#c88a1d"/><text x="744" y="1262" class="num">8</text>
+  <rect x="792" y="1232" width="430" height="230" rx="12" fill="#ffffff" stroke="#e4c280" class="box"/>
+  <text x="818" y="1273" class="h">形态与局部趋势特征</text>
+  <text x="818" y="1308" class="p">arc_ratio：弧长 / 端点弦长</text>
+  <text x="818" y="1339" class="p">deviation：残差绝对偏移分位数</text>
+  <text x="818" y="1370" class="p">sag、bend_energy、local_slope</text>
+  <text x="818" y="1408" class="tiny">表征 U/S 弯曲、下垂和局部走向异常</text>
+  <path d="M1222 1346 L1294 1346" class="flow"/>
+  <circle cx="1320" cy="1261" r="24" fill="#c88a1d"/><text x="1320" y="1262" class="num">9</text>
+  <rect x="1368" y="1232" width="244" height="230" rx="12" fill="#ffffff" stroke="#e4c280" class="box"/>
+  <text x="1394" y="1273" class="h">输出特征向量</text>
+  <text x="1394" y="1310" class="s">Fᵢ = {coverage, gap,</text>
+  <text x="1394" y="1337" class="s">span, arc, deviation,</text>
+  <text x="1394" y="1364" class="s">sag, bend, slope}</text>
+  <text x="1394" y="1408" class="tiny">i ∈ {1,...,6}</text>
+  <path d="M900 1525 L900 1576" class="flow"/>
+
+  <!-- Stage4 -->
+  <rect x="120" y="1582" width="1560" height="225" rx="18" fill="#f4eff8" stroke="#b69bc8" class="box"/>
+  <rect x="120" y="1582" width="290" height="47" rx="18" fill="#785698"/>
+  <text x="145" y="1613" class="white" style="font-size:18px">阶段 4：同图鲁棒自参照</text>
+  <circle cx="168" cy="1672" r="24" fill="#785698"/><text x="168" y="1673" class="num">10</text>
+  <rect x="216" y="1643" width="560" height="105" rx="12" fill="#ffffff" stroke="#c4afd3" class="box"/>
+  <text x="242" y="1683" class="h">对每个 Uᵢ，使用其他五段的中位数作参考</text>
+  <text x="242" y="1718" class="s">ref(Fᵢ) = median({Fⱼ | j ≠ i})；对拍摄尺度、局部纹理和正常个体差异更稳健</text>
+  <path d="M776 1696 L850 1696" class="flow"/>
+  <circle cx="876" cy="1672" r="24" fill="#785698"/><text x="876" y="1673" class="num">11</text>
+  <rect x="924" y="1643" width="650" height="105" rx="12" fill="#ffffff" stroke="#c4afd3" class="box"/>
+  <text x="950" y="1683" class="h">特征相对异常量</text>
+  <text x="950" y="1718" class="s">shortfall、coverage_drop、excess_gap、arc_excess、deformation、sag_excess、global_slope_norm</text>
+  <path d="M900 1807 L900 1858" class="flow"/>
+
+  <!-- Stage5 defects -->
+  <rect x="60" y="1864" width="1680" height="315" rx="18" fill="#fcfcfc" stroke="#b8c2cc" class="box"/>
+  <rect x="60" y="1864" width="340" height="47" rx="18" fill="#566d83"/>
+  <text x="85" y="1895" class="white" style="font-size:18px">阶段 5：四类缺陷评分与判定</text>
+  <rect x="100" y="1930" width="372" height="188" rx="14" fill="#fff0f0" stroke="#d88585" class="box"/>
+  <text x="128" y="1970" class="h" fill="#9b2525">跳线 Skip（单元级）</text>
+  <text x="128" y="2005" class="s">内部 gap_ratio 异常升高</text>
+  <text x="128" y="2033" class="s">+ coverage_drop，且后方轨迹恢复</text>
+  <text x="128" y="2068" class="tiny">仅识别中间干扰；edge_truncated 时抑制</text>
+  <text x="128" y="2098" class="tiny">score_skip → 阈值比较</text>
+  <rect x="500" y="1930" width="372" height="188" rx="14" fill="#fff6e9" stroke="#ddaa57" class="box"/>
+  <text x="528" y="1970" class="h" fill="#995f00">断线 Break（单元级）</text>
+  <text x="528" y="2005" class="s">部分残余轨迹 + span/coverage 短缺</text>
+  <text x="528" y="2033" class="s">+ 内部缺口或弧长不足</text>
+  <text x="528" y="2068" class="tiny">高 arc_excess 抑制，避免将松线误判断线</text>
+  <text x="528" y="2098" class="tiny">score_break → 阈值比较</text>
+  <rect x="928" y="1930" width="372" height="188" rx="14" fill="#edf8ed" stroke="#83b984" class="box"/>
+  <text x="956" y="1970" class="h" fill="#256b2b">松线 Loose（单元级）</text>
+  <text x="956" y="2005" class="s">连续轨迹门控：coverage 与 span 足够</text>
+  <text x="956" y="2033" class="s">+ deviation / sag / arc_excess</text>
+  <text x="956" y="2068" class="tiny">识别 U、S 与非对称连续形变</text>
+  <text x="956" y="2098" class="tiny">score_loose → 阈值比较</text>
+  <rect x="1356" y="1930" width="342" height="188" rx="14" fill="#eff4fc" stroke="#84a5cf" class="box"/>
+  <text x="1384" y="1970" class="h" fill="#21578c">歪斜 Skew（图像级）</text>
+  <text x="1384" y="2005" class="s">global_slope_norm</text>
+  <text x="1384" y="2033" class="s">= |a|·W/H</text>
+  <text x="1384" y="2068" class="tiny">适用于已排除拍摄姿态影响的采集</text>
+  <text x="1384" y="2098" class="tiny">score_skew → 阈值比较</text>
+  <path d="M900 2179 L900 2230" class="flow"/>
+
+  <!-- Output -->
+  <rect x="190" y="2188" width="1420" height="70" rx="16" fill="#1f4d78" stroke="#17365d" class="box"/>
+  <text x="240" y="2217" class="white">输出：每个 U1 ... U6 的 {skip, break, loose} 分数、二值判定与审计特征；整图输出 skew 判定</text>
+  <text x="240" y="2243" class="white" style="font-size:15px;font-weight:400">阈值协议：4 折中仅由 36 张清晰校准图按类 F1 选择阈值；冻结后统一用于清晰、模糊与去模糊条件</text>
+</svg>

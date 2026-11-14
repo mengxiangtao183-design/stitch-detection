@@ -1,0 +1,7 @@
+base_config: comparison_base_full150.yaml
+model:
+  name: COM-DeepLabV3Plus-R50-Full150-Seed42
+  architecture: deeplabv3plus
+  pretrained: true
+  aspp_rates: [6, 12, 18]
+

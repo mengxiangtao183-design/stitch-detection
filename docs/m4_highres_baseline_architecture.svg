@@ -1,0 +1,143 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1580" viewBox="0 0 1800 1580" role="img" aria-labelledby="title desc">
+  <title id="title">M4 HighRes C3Net baseline architecture</title>
+  <desc id="desc">Detailed M4 MobileNetV4 FPN segmentation baseline with edge and localization branches, HighRes refinement, training outputs, and the bypassed AFM path.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#3d5366"/></marker>
+    <marker id="dashArrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#a75353"/></marker>
+    <marker id="lossArrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#b2781c"/></marker>
+    <style>
+      .bg{fill:#f7fafc}.title{font:700 31px Arial,'Microsoft YaHei',sans-serif;fill:#172330}.subtitle{font:400 16px Arial,'Microsoft YaHei',sans-serif;fill:#506174}.section{font:700 18px Arial,'Microsoft YaHei',sans-serif;fill:#26394a}.note{font:400 13px Arial,'Microsoft YaHei',sans-serif;fill:#53687a}.label{font:700 15px Arial,'Microsoft YaHei',sans-serif;fill:#172330;text-anchor:middle}.small{font:400 12px Arial,'Microsoft YaHei',sans-serif;fill:#405669;text-anchor:middle}.tiny{font:400 11px Arial,'Microsoft YaHei',sans-serif;fill:#526779;text-anchor:middle}.box{stroke-width:1.5;rx:9}.input{fill:#e5f0ff;stroke:#4d86c6}.backbone{fill:#e9e5fb;stroke:#7561b5}.fpn{fill:#e2f4ed;stroke:#438b71}.edge{fill:#fff0df;stroke:#c57b28}.loc{fill:#e4f4f5;stroke:#348b93}.highres{fill:#e8f0ff;stroke:#356aba}.output{fill:#e4f4e8;stroke:#478457}.disabled{fill:#f8e7e7;stroke:#b55d5d;stroke-dasharray:6 4}.loss{fill:#fff6db;stroke:#b2781c}.band{fill:#ffffff;stroke:#cfdae3;stroke-width:1.2;rx:14}.arrow{stroke:#3d5366;stroke-width:2;fill:none;marker-end:url(#arrow)}.thin{stroke:#61788d;stroke-width:1.45;fill:none;marker-end:url(#arrow)}.dash{stroke:#a75353;stroke-width:1.8;stroke-dasharray:7 5;fill:none;marker-end:url(#dashArrow)}.lossline{stroke:#b2781c;stroke-width:1.6;stroke-dasharray:5 4;fill:none;marker-end:url(#lossArrow)}.plus{font:700 23px Arial,sans-serif;fill:#35536b;text-anchor:middle}.legend{font:400 12px Arial,'Microsoft YaHei',sans-serif;fill:#435969}
+    </style>
+  </defs>
+
+  <rect class="bg" width="1800" height="1580"/>
+  <text x="900" y="48" class="title" text-anchor="middle">M4 HighRes Baseline: MobileNetV4-FPN C3Net</text>
+  <text x="900" y="76" class="subtitle" text-anchor="middle">320 x 320 input | no TCE | no SGCL | no DySample | one EdgeEnhanceBlock | HighResRefine enabled</text>
+
+  <rect x="36" y="98" width="1728" height="248" class="band"/>
+  <text x="62" y="126" class="section">1. Encoder and lateral projection</text>
+  <rect x="76" y="166" width="178" height="92" class="input box"/>
+  <text x="165" y="199" class="label">Input RGB image</text><text x="165" y="222" class="small">3 x 320 x 320</text><text x="165" y="242" class="tiny">normalized image</text>
+  <path d="M254 212 H312" class="arrow"/>
+  <rect x="312" y="148" width="268" height="128" class="backbone box"/>
+  <text x="446" y="186" class="label">MobileNetV4 Hybrid Medium</text><text x="446" y="210" class="small">pretrained backbone</text><text x="446" y="232" class="tiny">CoordAtt disabled in M4</text><text x="446" y="252" class="tiny">hierarchical feature extractor</text>
+
+  <rect x="668" y="142" width="190" height="58" class="backbone box"/>
+  <text x="763" y="166" class="label">C2</text><text x="763" y="186" class="small">48 x 80 x 80</text>
+  <rect x="910" y="142" width="190" height="58" class="backbone box"/>
+  <text x="1005" y="166" class="label">C3</text><text x="1005" y="186" class="small">80 x 40 x 40</text>
+  <rect x="1152" y="142" width="190" height="58" class="backbone box"/>
+  <text x="1247" y="166" class="label">C4</text><text x="1247" y="186" class="small">160 x 20 x 20</text>
+  <rect x="1394" y="142" width="190" height="58" class="backbone box"/>
+  <text x="1489" y="166" class="label">C5</text><text x="1489" y="186" class="small">960 x 10 x 10</text>
+  <path d="M580 180 H668" class="thin"/><path d="M580 196 H910" class="thin"/><path d="M580 212 H1152" class="thin"/><path d="M580 228 H1394" class="thin"/>
+  <rect x="668" y="238" width="190" height="58" class="fpn box"/>
+  <text x="763" y="262" class="label">L2: 1x1 ConvGNReLU</text><text x="763" y="282" class="small">192 x 80 x 80</text>
+  <rect x="910" y="238" width="190" height="58" class="fpn box"/>
+  <text x="1005" y="262" class="label">L3: 1x1 ConvGNReLU</text><text x="1005" y="282" class="small">192 x 40 x 40</text>
+  <rect x="1152" y="238" width="190" height="58" class="fpn box"/>
+  <text x="1247" y="262" class="label">L4: 1x1 ConvGNReLU</text><text x="1247" y="282" class="small">192 x 20 x 20</text>
+  <rect x="1394" y="238" width="190" height="58" class="fpn box"/>
+  <text x="1489" y="262" class="label">L5: 1x1 ConvGNReLU</text><text x="1489" y="282" class="small">192 x 10 x 10</text>
+  <path d="M763 200 V238" class="thin"/><path d="M1005 200 V238" class="thin"/><path d="M1247 200 V238" class="thin"/><path d="M1489 200 V238" class="thin"/>
+
+  <rect x="36" y="370" width="1728" height="348" class="band"/>
+  <text x="62" y="400" class="section">2. Top-down Mobile FPN decoder</text>
+  <text x="62" y="421" class="note">Every top-down resize is fixed bilinear interpolation; each output is refined by DepthwiseSeparableRefine.</text>
+  <rect x="1370" y="462" width="208" height="76" class="fpn box"/>
+  <text x="1474" y="490" class="label">P5</text><text x="1474" y="511" class="small">Smooth(L5)</text><text x="1474" y="529" class="tiny">192 x 10 x 10</text>
+  <rect x="1080" y="540" width="208" height="84" class="fpn box"/>
+  <text x="1184" y="568" class="label">P4</text><text x="1184" y="589" class="small">Smooth(L4 + up(P5))</text><text x="1184" y="608" class="tiny">192 x 20 x 20</text>
+  <rect x="790" y="620" width="208" height="84" class="fpn box"/>
+  <text x="894" y="648" class="label">P3</text><text x="894" y="669" class="small">Smooth(L3 + up(P4))</text><text x="894" y="688" class="tiny">192 x 40 x 40</text>
+  <rect x="500" y="620" width="208" height="84" class="fpn box"/>
+  <text x="604" y="648" class="label">P2</text><text x="604" y="669" class="small">Smooth(L2 + up(P3))</text><text x="604" y="688" class="tiny">192 x 80 x 80</text>
+  <path d="M1489 296 V438 H1474 V462" class="thin"/>
+  <path d="M1370 500 H1305 V582 H1288" class="arrow"/>
+  <path d="M1247 296 V510 H1184 V540" class="thin"/>
+  <text x="1305" y="550" class="tiny">bilinear x2</text><text x="1184" y="524" class="plus">+</text>
+  <path d="M1080 582 H1015 V662 H998" class="arrow"/>
+  <path d="M1005 296 V590 H894 V620" class="thin"/>
+  <text x="1015" y="630" class="tiny">bilinear x2</text><text x="894" y="604" class="plus">+</text>
+  <path d="M790 662 H725 V662 H708" class="arrow"/>
+  <path d="M763 296 V590 H604 V620" class="thin"/>
+  <text x="726" y="646" class="tiny">bilinear x2</text><text x="604" y="604" class="plus">+</text>
+  <rect x="1345" y="650" width="315" height="40" class="disabled box"/>
+  <text x="1502" y="675" class="small">D1 alignment is OFF in M4 baseline</text>
+
+  <rect x="36" y="742" width="820" height="426" class="band"/>
+  <text x="62" y="773" class="section">3a. Edge refinement pathway</text>
+  <rect x="78" y="815" width="174" height="72" class="edge box"/>
+  <text x="165" y="842" class="label">P2</text><text x="165" y="863" class="small">192 x 80 x 80</text>
+  <rect x="78" y="928" width="174" height="72" class="edge box"/>
+  <text x="165" y="955" class="label">up(P3)</text><text x="165" y="976" class="small">192 x 80 x 80</text>
+  <path d="M604 704 V815 H252" class="thin"/><path d="M894 704 V928 H252" class="thin"/>
+  <rect x="308" y="853" width="185" height="84" class="edge box"/>
+  <text x="400" y="882" class="label">Concatenate</text><text x="400" y="903" class="small">384 x 80 x 80</text><text x="400" y="922" class="tiny">P2 || up(P3)</text>
+  <path d="M252 851 H308" class="arrow"/><path d="M252 964 H280 V896 H308" class="arrow"/>
+  <rect x="536" y="853" width="174" height="84" class="edge box"/>
+  <text x="623" y="882" class="label">3x3 ConvGNReLU</text><text x="623" y="903" class="small">384 -&gt; 128</text><text x="623" y="922" class="tiny">edge adapter</text>
+  <path d="M493 895 H536" class="arrow"/>
+  <rect x="518" y="1008" width="228" height="118" class="edge box"/>
+  <text x="632" y="1038" class="label">EdgeEnhanceBlock x1</text><text x="632" y="1060" class="small">DW context + Sobel + Laplacian</text><text x="632" y="1080" class="small">1x1 mix + ECA + residual</text><text x="632" y="1101" class="tiny">edge feature: 128 x 80 x 80</text>
+  <path d="M623 937 V1008" class="arrow"/>
+  <rect x="92" y="1060" width="334" height="66" class="loss box"/>
+  <text x="259" y="1086" class="label">Edge supervision</text><text x="259" y="1107" class="small">edge focal + edge regularization</text>
+  <path d="M518 1080 H426" class="lossline"/>
+
+  <rect x="888" y="742" width="876" height="426" class="band"/>
+  <text x="914" y="773" class="section">3b. Contextual localization pathway</text>
+  <rect x="931" y="824" width="185" height="76" class="loc box"/>
+  <text x="1023" y="852" class="label">P4</text><text x="1023" y="873" class="small">192 x 20 x 20</text>
+  <rect x="1166" y="812" width="214" height="100" class="loc box"/>
+  <text x="1273" y="841" class="label">SemanticEnhanceBlock</text><text x="1273" y="862" class="small">context refinement</text><text x="1273" y="883" class="tiny">192 x 20 x 20</text>
+  <path d="M1116 862 H1166" class="arrow"/><path d="M1184 624 V824 H1116" class="thin"/>
+  <rect x="1430" y="804" width="270" height="116" class="loc box"/>
+  <text x="1565" y="834" class="label">ICG: Image Context Guidance</text><text x="1565" y="855" class="small">RGB downsample + contrast guide</text><text x="1565" y="876" class="tiny">salient-background suppression</text><text x="1565" y="897" class="tiny">192 x 20 x 20</text>
+  <path d="M1380 862 H1430" class="arrow"/>
+  <rect x="1301" y="982" width="238" height="106" class="loc box"/>
+  <text x="1420" y="1012" class="label">Context upsample + P2</text><text x="1420" y="1033" class="small">20 -&gt; 40 -&gt; 80, then add P2</text><text x="1420" y="1054" class="tiny">192 x 80 x 80</text><text x="1420" y="1074" class="tiny">bilinear x2, x2</text>
+  <path d="M1565 920 V982 H1539" class="arrow"/><path d="M604 704 V950 H1301" class="thin"/>
+  <rect x="1055" y="1008" width="198" height="100" class="loc box"/>
+  <text x="1154" y="1038" class="label">Localization refine</text><text x="1154" y="1059" class="small">3x3 ConvGNReLU</text><text x="1154" y="1079" class="small">+ DW refine</text><text x="1154" y="1099" class="tiny">loc feature: 128 x 80 x 80</text>
+  <path d="M1301 1035 H1253" class="arrow"/>
+  <rect x="1570" y="1018" width="158" height="58" class="loss box"/>
+  <text x="1649" y="1042" class="label">Object loss</text><text x="1649" y="1062" class="small">loc mask, 80 x 80</text>
+  <path d="M1253 1058 H1570" class="lossline"/>
+
+  <rect x="36" y="1192" width="1728" height="292" class="band"/>
+  <text x="62" y="1223" class="section">4. M4 HighRes stitch refinement and outputs</text>
+  <rect x="96" y="1272" width="210" height="98" class="disabled box"/>
+  <text x="201" y="1301" class="label">FinalFusionHead (AFM)</text><text x="201" y="1322" class="small">edge + loc attention fusion</text><text x="201" y="1342" class="tiny">coarse logits: 1 x 80 x 80</text><text x="201" y="1360" class="tiny">computed, then bypassed</text>
+  <path d="M632 1126 V1248 H306" class="dash"/><path d="M1154 1108 V1234 H306" class="dash"/>
+  <rect x="385" y="1260" width="625" height="154" class="highres box"/>
+  <text x="697" y="1290" class="label">HighResStitchRefineHead</text>
+  <text x="697" y="1313" class="small">edge_proj(128 -&gt; 48), loc_proj(128 -&gt; 48), image_proj(RGB: 3 -&gt; 16)</text>
+  <text x="697" y="1336" class="small">upsample edge / loc to 320 x 320; concatenate 48 + 48 + 16 = 112 channels</text>
+  <text x="697" y="1359" class="small">1x1 fuse: 112 -&gt; 48; DepthwiseSeparableRefine x1</text>
+  <text x="697" y="1382" class="tiny">final_pred, edge_pred, centerline_pred at input resolution</text>
+  <path d="M632 1126 V1260 H550" class="arrow"/><path d="M1154 1108 V1228 H840 V1260" class="arrow"/>
+  <path d="M165 258 V1210 H697 V1260" class="thin"/>
+  <text x="332" y="1201" class="tiny">original RGB image</text>
+  <rect x="1080" y="1250" width="202" height="64" class="output box"/>
+  <text x="1181" y="1276" class="label">Final mask</text><text x="1181" y="1297" class="small">1 x 320 x 320</text>
+  <rect x="1080" y="1342" width="202" height="64" class="output box"/>
+  <text x="1181" y="1368" class="label">Edge mask</text><text x="1181" y="1389" class="small">1 x 320 x 320</text>
+  <rect x="1080" y="1434" width="202" height="38" class="disabled box"/>
+  <text x="1181" y="1459" class="small">Centerline mask: no M4 loss</text>
+  <path d="M1010 1292 H1080" class="arrow"/><path d="M1010 1334 H1045 V1374 H1080" class="arrow"/><path d="M1010 1380 H1035 V1453 H1080" class="dash"/>
+  <rect x="1360" y="1250" width="318" height="154" class="loss box"/>
+  <text x="1519" y="1278" class="label">M4 training objectives</text>
+  <text x="1519" y="1300" class="small">final: focal + Tversky + edge Dice</text>
+  <text x="1519" y="1322" class="small">edge: edge focal + regularization</text>
+  <text x="1519" y="1344" class="small">location: focal + Tversky</text>
+  <text x="1519" y="1367" class="tiny">centerline / topology / boundary weights = 0</text>
+  <text x="1519" y="1387" class="tiny">no SGCL supervision in M4</text>
+  <path d="M1282 1282 H1360" class="lossline"/><path d="M1282 1374 H1360" class="lossline"/>
+
+  <rect x="36" y="1512" width="1728" height="42" class="band"/>
+  <line x1="70" y1="1532" x2="130" y2="1532" class="arrow"/><text x="143" y="1537" class="legend">active inference path</text>
+  <line x1="365" y1="1532" x2="425" y2="1532" class="dash"/><text x="438" y="1537" class="legend">computed but bypassed / disabled path</text>
+  <line x1="755" y1="1532" x2="815" y2="1532" class="lossline"/><text x="828" y="1537" class="legend">training supervision only</text>
+  <text x="1750" y="1537" class="legend" text-anchor="end">M4 = M0 + HighResStitchRefineHead</text>
+</svg>

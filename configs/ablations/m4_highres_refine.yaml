@@ -1,0 +1,7 @@
+base_config: mobile_base_320_clear100.yaml
+model:
+  name: "M4-MobileNetV4-FPN-plus-HighResRefine-320"
+  decoder:
+    mobile_fpn:
+      high_res_refine:
+        enable: true

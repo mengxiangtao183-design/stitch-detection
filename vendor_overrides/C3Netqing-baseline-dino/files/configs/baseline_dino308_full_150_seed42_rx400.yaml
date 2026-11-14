@@ -1,0 +1,22 @@
+# Original C3Net baseline under the same DB/XJ/SD/RX 360/40/100 protocol.
+base_config: baseline_dino308_full_150_seed42.yaml
+
+model:
+  name: "Original-C3Net-DINO308-RX400-Full-150-Seed42"
+
+training:
+  stratified_validation: true
+  early_stop_patience: 25
+  min_delta: 0.0001
+  datasets:
+    - "H:/DATASET/DB"
+    - "H:/DATASET/XJ"
+    - "H:/DATASET/SD"
+    - "H:/DATASET/RX_segmentation_400_100"
+
+evaluation:
+  datasets:
+    - "H:/DATASET/DB"
+    - "H:/DATASET/XJ"
+    - "H:/DATASET/SD"
+    - "H:/DATASET/RX_segmentation_400_100"

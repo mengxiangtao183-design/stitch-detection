@@ -1,0 +1,31 @@
+# M26 / semantic-guided weak-stitch evidence recovery (SG-WER).
+#
+# The M6 AFM-guided HighRes output path is retained unchanged.  M26 adds a
+# localization-side branch only: P4 semantic context queries local P2/P3 detail
+# evidence before loc_pred, then a zero-start residual enters the original loc
+# feature stream.  No RGB, edge logits, deformable offsets, AFM changes, or
+# post-mask residual are introduced.
+base_config: m6_afm_guided_highres_clear100_seed42.yaml
+
+model:
+  name: "M26-SGWER-AFMGuided-HighRes-Clear100-Seed42"
+  decoder:
+    mobile_fpn:
+      weak_stitch_recovery:
+        enable: true
+        hidden_channels: 32
+        window_size: 5
+        residual_scale_init: 0.0
+
+training:
+  # Keep checkpoint selection identical to the existing M6 Clear100 control.
+  # This changes only how model_best.pth is selected, not optimization.
+  monitor_metric: weighted_f
+  loss:
+    # Candidate receives full-mask supervision, but the entire auxiliary term
+    # stays off for the first five epochs.  Afterwards it adds a small
+    # positive-only emphasis to GT pixels missed by the detached loc branch.
+    weak_stitch_weight: 0.10
+    weak_stitch_hard_positive_weight: 0.25
+    weak_stitch_warmup_epochs: 5
+    weak_stitch_visibility_threshold: 0.50

@@ -1,0 +1,174 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2600" height="1700" viewBox="0 0 2600 1700">
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="10" refX="11" refY="5" orient="auto"><path d="M0,0 L12,5 L0,10 Z" fill="#303030"/></marker>
+    <marker id="arrowBlue" markerWidth="12" markerHeight="10" refX="11" refY="5" orient="auto"><path d="M0,0 L12,5 L0,10 Z" fill="#58a6d8"/></marker>
+    <marker id="arrowOrange" markerWidth="12" markerHeight="10" refX="11" refY="5" orient="auto"><path d="M0,0 L12,5 L0,10 Z" fill="#ed9a64"/></marker>
+    <marker id="arrowGreen" markerWidth="12" markerHeight="10" refX="11" refY="5" orient="auto"><path d="M0,0 L12,5 L0,10 Z" fill="#55b47c"/></marker>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="2" dy="3" stdDeviation="3" flood-color="#777" flood-opacity="0.22"/></filter>
+    <style>
+      .txt{font-family:'Times New Roman','SimSun',serif;fill:#202020}.title{font-size:42px;font-weight:bold}.sub{font-size:22px}.h1{font-size:29px;font-weight:bold}.h2{font-size:23px;font-weight:bold}.body{font-size:20px}.small{font-size:17px}.tiny{font-size:15px}
+      .box{fill:#fff;stroke:#3a3a3a;stroke-width:2}.stem{fill:#cfe8f6;stroke:#4e8fb4;stroke-width:2}.dwpw{fill:#ffe1d3;stroke:#d48762;stroke-width:2}.mbd{fill:#fff0ad;stroke:#c69b28;stroke-width:2}.context{fill:#d9efd8;stroke:#5b9a5c;stroke-width:2}.sample{fill:#eadcf4;stroke:#9470aa;stroke-width:2}.head{fill:#d8e7f7;stroke:#608cb5;stroke-width:2}.route{fill:#d9f0e3;stroke:#55a274;stroke-width:2}.gate{fill:#f9d7e4;stroke:#bd6f8c;stroke-width:2}.op{fill:#edf1f5;stroke:#65717b;stroke-width:1.8}
+      .panelBlue{fill:#eff9ff;stroke:#62b3e3;stroke-width:3;stroke-dasharray:12 9}.panelOrange{fill:#fff4eb;stroke:#ef9b69;stroke-width:3;stroke-dasharray:12 9}.panelGreen{fill:#effaf1;stroke:#58b978;stroke-width:3;stroke-dasharray:12 9}.panelPurple{fill:#f8f1fc;stroke:#9872ad;stroke-width:3;stroke-dasharray:12 9}
+      .line{fill:none;stroke:#303030;stroke-width:2.4;marker-end:url(#arrow)}.thin{fill:none;stroke:#555;stroke-width:1.8;marker-end:url(#arrow)}.skip{fill:none;stroke:#666;stroke-width:2.3;stroke-dasharray:8 6;marker-end:url(#arrow)}.blueCall{fill:none;stroke:#58a6d8;stroke-width:2.5;stroke-dasharray:8 6;marker-end:url(#arrowBlue)}.orangeCall{fill:none;stroke:#ed9a64;stroke-width:2.5;stroke-dasharray:8 6;marker-end:url(#arrowOrange)}.greenCall{fill:none;stroke:#55b47c;stroke-width:2.5;stroke-dasharray:8 6;marker-end:url(#arrowGreen)}
+    </style>
+  </defs>
+  <rect width="2600" height="1700" fill="white"/>
+  <text x="1300" y="55" text-anchor="middle" class="txt title">MBDNet-P+：面向工业线迹图像的局部运动偏置去模糊网络</text>
+  <text x="1300" y="88" text-anchor="middle" class="txt sub">Detailed Architecture of Motion-Biased Deblurring Network — RGB-only inference, no domain label, mask or degradation parameter</text>
+
+  <!-- DWPW inset -->
+  <rect x="35" y="120" width="770" height="430" rx="28" class="panelBlue"/>
+  <text x="65" y="158" class="txt h1">(a) DWPW 通用恢复单元</text>
+  <text x="65" y="188" class="txt small">空间混合子层</text>
+  <rect x="60" y="215" width="92" height="54" rx="8" class="box"/><text x="106" y="249" text-anchor="middle" class="txt body">输入 X</text>
+  <rect x="184" y="215" width="78" height="54" rx="8" class="op"/><text x="223" y="249" text-anchor="middle" class="txt body">LN</text>
+  <rect x="294" y="205" width="112" height="74" rx="8" class="stem"/><text x="350" y="236" text-anchor="middle" class="txt body">1×1 Conv</text><text x="350" y="262" text-anchor="middle" class="txt small">C→4C</text>
+  <rect x="438" y="205" width="118" height="74" rx="8" class="dwpw"/><text x="497" y="236" text-anchor="middle" class="txt body">3×3 DW</text><text x="497" y="262" text-anchor="middle" class="txt small">groups=4C</text>
+  <rect x="588" y="205" width="112" height="74" rx="8" class="gate"/><text x="644" y="234" text-anchor="middle" class="txt body">SimpleGate</text><text x="644" y="260" text-anchor="middle" class="txt small">X₁ ⊙ X₂</text>
+  <rect x="725" y="215" width="55" height="54" rx="8" class="stem"/><text x="752" y="239" text-anchor="middle" class="txt tiny">1×1</text><text x="752" y="258" text-anchor="middle" class="txt tiny">2C→C</text>
+  <path d="M152 242 H184 M262 242 H294 M406 242 H438 M556 242 H588 M700 242 H725" class="thin"/>
+  <circle cx="690" cy="326" r="22" class="box"/><text x="690" y="335" text-anchor="middle" class="txt h1">+</text>
+  <path d="M752 269 V326 H712" class="thin"/><path d="M106 269 V326 H668" class="skip"/>
+  <rect x="720" y="300" width="60" height="52" rx="8" class="box"/><text x="750" y="333" text-anchor="middle" class="txt body">Y</text>
+  <path d="M712 326 H720" class="thin"/><text x="395" y="317" text-anchor="middle" class="txt small">β（逐通道、零初始化）</text>
+  <text x="65" y="382" class="txt small">通道混合子层</text>
+  <rect x="184" y="405" width="78" height="54" rx="8" class="op"/><text x="223" y="439" text-anchor="middle" class="txt body">LN</text>
+  <rect x="294" y="395" width="112" height="74" rx="8" class="stem"/><text x="350" y="426" text-anchor="middle" class="txt body">1×1 Conv</text><text x="350" y="452" text-anchor="middle" class="txt small">C→4C</text>
+  <rect x="438" y="395" width="118" height="74" rx="8" class="gate"/><text x="497" y="424" text-anchor="middle" class="txt body">SimpleGate</text><text x="497" y="450" text-anchor="middle" class="txt small">通道交互</text>
+  <rect x="588" y="405" width="112" height="54" rx="8" class="stem"/><text x="644" y="438" text-anchor="middle" class="txt body">1×1 Conv</text>
+  <circle cx="735" cy="432" r="22" class="box"/><text x="735" y="441" text-anchor="middle" class="txt h1">+</text>
+  <path d="M750 352 V372 H223 V405 M262 432 H294 M406 432 H438 M556 432 H588 M700 432 H713" class="thin"/>
+  <path d="M750 372 V505 H735 V454" class="skip"/><text x="610" y="498" class="txt small">γ（逐通道、零初始化）</text>
+  <text x="65" y="525" class="txt small">Y=X+β·Spatial(X)，Z=Y+γ·Channel(Y)；无自注意力，空间复杂度 O(HWC)</text>
+
+  <!-- MBD inset -->
+  <rect x="835" y="120" width="1730" height="430" rx="28" class="panelOrange"/>
+  <text x="865" y="158" class="txt h1">(b) MBD 局部运动偏置去模糊模块</text>
+  <rect x="865" y="305" width="90" height="62" rx="8" class="box"/><text x="910" y="342" text-anchor="middle" class="txt body">输入 F</text>
+  <rect x="990" y="305" width="78" height="62" rx="8" class="op"/><text x="1029" y="342" text-anchor="middle" class="txt body">LN</text>
+  <path d="M955 336 H990" class="thin"/>
+  <rect x="1120" y="195" width="170" height="70" rx="9" class="op"/><text x="1205" y="224" text-anchor="middle" class="txt body">通用分支 G</text><text x="1205" y="251" text-anchor="middle" class="txt small">3×3 DW Conv</text>
+  <rect x="1120" y="300" width="170" height="70" rx="9" class="dwpw"/><text x="1205" y="329" text-anchor="middle" class="txt body">短程分支 Hs</text><text x="1205" y="356" text-anchor="middle" class="txt small">1×5 DW Conv</text>
+  <rect x="1120" y="405" width="170" height="70" rx="9" class="dwpw"/><text x="1205" y="433" text-anchor="middle" class="txt body">长程分支 Hl</text><text x="1205" y="460" text-anchor="middle" class="txt small">1×5 DW, dilation=3</text>
+  <path d="M1068 336 H1090 V230 H1120 M1090 336 H1120 M1090 336 V440 H1120" class="thin"/>
+  <rect x="1360" y="195" width="175" height="70" rx="9" class="route"/><text x="1448" y="224" text-anchor="middle" class="txt body">路由上下文 C</text><text x="1448" y="251" text-anchor="middle" class="txt small">3×3 DW Conv</text>
+  <path d="M1068 336 H1325 V230 H1360" class="thin"/>
+  <rect x="1595" y="180" width="180" height="80" rx="9" class="gate"/><text x="1685" y="211" text-anchor="middle" class="txt body">内容路由</text><text x="1685" y="238" text-anchor="middle" class="txt small">α=Sigmoid(1×1 C)</text>
+  <rect x="1595" y="385" width="180" height="80" rx="9" class="gate"/><text x="1685" y="416" text-anchor="middle" class="txt body">尺度路由</text><text x="1685" y="443" text-anchor="middle" class="txt small">Softmax(ωs,ωl)</text>
+  <path d="M1535 230 H1595 M1535 230 V425 H1595" class="thin"/>
+  <rect x="1840" y="330" width="205" height="86" rx="9" class="mbd"/><text x="1943" y="363" text-anchor="middle" class="txt body">水平支撑融合 H</text><text x="1943" y="392" text-anchor="middle" class="txt small">ωs⊙Hs + ωl⊙Hl</text>
+  <path d="M1290 335 H1800 V360 H1840 M1290 440 H1800 V390 H1840 M1775 425 H1815 V403 H1840" class="thin"/>
+  <rect x="2100" y="260" width="210" height="100" rx="9" class="mbd"/><text x="2205" y="294" text-anchor="middle" class="txt body">局部软选择 M</text><text x="2205" y="324" text-anchor="middle" class="txt small">(1−α)⊙G + α⊙H</text><text x="2205" y="347" text-anchor="middle" class="txt tiny">α 可逐像素否决方向先验</text>
+  <path d="M1290 230 H2065 V286 H2100 M2045 373 H2065 V334 H2100 M1775 220 H2065 V300 H2100" class="thin"/>
+  <rect x="2360" y="280" width="92" height="62" rx="8" class="stem"/><text x="2406" y="307" text-anchor="middle" class="txt body">1×1</text><text x="2406" y="331" text-anchor="middle" class="txt tiny">投影</text>
+  <circle cx="2500" cy="311" r="25" class="box"/><text x="2500" y="320" text-anchor="middle" class="txt h1">+</text>
+  <path d="M2310 311 H2360 M2452 311 H2475" class="thin"/><path d="M910 367 V500 H2500 V336" class="skip"/>
+  <text x="1730" y="495" text-anchor="middle" class="txt small">ρ（逐通道、零初始化）：Fout = F + ρ⊙P(M)</text>
+  <text x="865" y="525" class="txt small">两级路由：内容门控决定“是否使用运动偏置”，尺度门控决定“使用短程还是长程水平支撑”</text>
+
+  <!-- main network -->
+  <text x="80" y="625" class="txt h1">(c) MBDNet-P+ 主网络流程</text>
+  <text x="2520" y="625" text-anchor="end" class="txt small">默认宽度 64；28×DWPW；4×MBD；13.70 M 参数</text>
+
+  <!-- Input feature stack -->
+  <polygon points="55,740 128,720 128,875 55,895" fill="#fcecf6" stroke="#956b89" stroke-width="2"/>
+  <polygon points="68,727 141,707 141,862 68,882" fill="#f7e5f0" stroke="#956b89" stroke-width="2"/>
+  <polygon points="81,714 154,694 154,849 81,869" fill="#fff6fb" stroke="#956b89" stroke-width="2"/>
+  <text x="105" y="930" text-anchor="middle" class="txt h2">模糊 RGB</text><text x="105" y="956" text-anchor="middle" class="txt small">H×W×3</text>
+  <rect x="190" y="735" width="130" height="110" rx="8" class="stem" filter="url(#shadow)"/><text x="255" y="772" text-anchor="middle" class="txt h2">Stem</text><text x="255" y="802" text-anchor="middle" class="txt body">3×3 Conv</text><text x="255" y="830" text-anchor="middle" class="txt small">H×W×64</text>
+  <path d="M154 790 H190" class="line"/>
+  <rect x="355" y="705" width="175" height="170" rx="10" class="dwpw" filter="url(#shadow)"/><text x="443" y="742" text-anchor="middle" class="txt h2">Stage E0</text><text x="443" y="778" text-anchor="middle" class="txt body">3×DWPW</text><text x="443" y="813" text-anchor="middle" class="txt small">全分辨率通用恢复</text><text x="443" y="845" text-anchor="middle" class="txt small">H×W×64</text><text x="443" y="868" text-anchor="middle" class="txt tiny">保存 skip F0</text>
+  <path d="M320 790 H355" class="line"/>
+  <rect x="570" y="735" width="120" height="110" rx="8" class="sample" filter="url(#shadow)"/><text x="630" y="770" text-anchor="middle" class="txt h2">Down-1</text><text x="630" y="801" text-anchor="middle" class="txt small">3×3 DW,s=2</text><text x="630" y="827" text-anchor="middle" class="txt small">1×1, 64→128</text>
+  <path d="M530 790 H570" class="line"/>
+  <rect x="730" y="680" width="190" height="220" rx="10" class="dwpw" filter="url(#shadow)"/><text x="825" y="716" text-anchor="middle" class="txt h2">Stage E1</text><text x="825" y="754" text-anchor="middle" class="txt body">4×DWPW</text><rect x="760" y="778" width="130" height="58" rx="7" class="mbd"/><text x="825" y="814" text-anchor="middle" class="txt body">MBD-E</text><text x="825" y="868" text-anchor="middle" class="txt small">H/2×W/2×128</text><text x="825" y="893" text-anchor="middle" class="txt tiny">保存 skip F1</text>
+  <path d="M690 790 H730" class="line"/>
+  <rect x="960" y="735" width="120" height="110" rx="8" class="sample" filter="url(#shadow)"/><text x="1020" y="770" text-anchor="middle" class="txt h2">Down-2</text><text x="1020" y="801" text-anchor="middle" class="txt small">3×3 DW,s=2</text><text x="1020" y="827" text-anchor="middle" class="txt small">1×1,128→256</text>
+  <path d="M920 790 H960" class="line"/>
+  <rect x="1120" y="650" width="430" height="300" rx="14" fill="#fff8d8" stroke="#c69b28" stroke-width="2.5" filter="url(#shadow)"/>
+  <text x="1335" y="688" text-anchor="middle" class="txt h2">Quarter-resolution Bottleneck</text>
+  <text x="1335" y="716" text-anchor="middle" class="txt small">H/4×W/4×256</text>
+  <rect x="1150" y="744" width="150" height="66" rx="8" class="dwpw"/><text x="1225" y="783" text-anchor="middle" class="txt body">12×DWPW</text>
+  <rect x="1335" y="744" width="180" height="66" rx="8" class="context"/><text x="1425" y="773" text-anchor="middle" class="txt body">LRC</text><text x="1425" y="798" text-anchor="middle" class="txt tiny">局部/空洞上下文</text>
+  <rect x="1150" y="844" width="115" height="62" rx="8" class="mbd"/><text x="1207" y="882" text-anchor="middle" class="txt body">MBD-1</text>
+  <rect x="1295" y="844" width="105" height="62" rx="8" class="dwpw"/><text x="1348" y="872" text-anchor="middle" class="txt small">2×DWPW</text><text x="1348" y="893" text-anchor="middle" class="txt tiny">Refine</text>
+  <rect x="1430" y="844" width="85" height="62" rx="8" class="mbd"/><text x="1473" y="882" text-anchor="middle" class="txt body">MBD-2</text>
+  <path d="M1080 790 H1120 M1300 777 H1335 M1425 810 V828 H1207 V844 M1265 875 H1295 M1400 875 H1430" class="line"/>
+  <rect x="1590" y="735" width="120" height="110" rx="8" class="sample" filter="url(#shadow)"/><text x="1650" y="770" text-anchor="middle" class="txt h2">Up-1</text><text x="1650" y="801" text-anchor="middle" class="txt small">1×1 Expand</text><text x="1650" y="827" text-anchor="middle" class="txt small">PixelShuffle×2</text>
+  <path d="M1515 875 H1565 V790 H1590" class="line"/>
+  <circle cx="1745" cy="790" r="28" class="box"/><text x="1745" y="800" text-anchor="middle" class="txt h1">+</text><path d="M1710 790 H1717" class="line"/>
+  <rect x="1805" y="680" width="190" height="220" rx="10" class="dwpw" filter="url(#shadow)"/><text x="1900" y="716" text-anchor="middle" class="txt h2">Stage D1</text><text x="1900" y="754" text-anchor="middle" class="txt body">4×DWPW</text><rect x="1835" y="778" width="130" height="58" rx="7" class="mbd"/><text x="1900" y="814" text-anchor="middle" class="txt body">MBD-D</text><text x="1900" y="868" text-anchor="middle" class="txt small">H/2×W/2×128</text>
+  <path d="M1773 790 H1805" class="line"/>
+  <rect x="2030" y="735" width="120" height="110" rx="8" class="sample" filter="url(#shadow)"/><text x="2090" y="770" text-anchor="middle" class="txt h2">Up-2</text><text x="2090" y="801" text-anchor="middle" class="txt small">1×1 Expand</text><text x="2090" y="827" text-anchor="middle" class="txt small">PixelShuffle×2</text>
+  <path d="M1995 790 H2030" class="line"/>
+  <circle cx="2190" cy="790" r="28" class="box"/><text x="2190" y="800" text-anchor="middle" class="txt h1">+</text><path d="M2150 790 H2162" class="line"/>
+  <rect x="2250" y="705" width="160" height="170" rx="10" class="dwpw" filter="url(#shadow)"/><text x="2330" y="742" text-anchor="middle" class="txt h2">Stage D0</text><text x="2330" y="778" text-anchor="middle" class="txt body">3×DWPW</text><text x="2330" y="813" text-anchor="middle" class="txt small">全分辨率精炼</text><text x="2330" y="845" text-anchor="middle" class="txt small">H×W×64</text>
+  <path d="M2218 790 H2250" class="line"/>
+  <rect x="2440" y="735" width="105" height="110" rx="8" class="head" filter="url(#shadow)"/><text x="2492" y="770" text-anchor="middle" class="txt h2">Head</text><text x="2492" y="801" text-anchor="middle" class="txt small">3×3 Conv</text><text x="2492" y="827" text-anchor="middle" class="txt small">64→3</text>
+  <path d="M2410 790 H2440" class="line"/>
+  <circle cx="2492" cy="925" r="27" class="box"/><text x="2492" y="935" text-anchor="middle" class="txt h1">+</text>
+  <path d="M2492 845 V898" class="line"/>
+  <polygon points="2420,1000 2493,980 2493,1085 2420,1105" fill="#eaf4ff" stroke="#608cb5" stroke-width="2"/>
+  <polygon points="2433,987 2506,967 2506,1072 2433,1092" fill="#dcecff" stroke="#608cb5" stroke-width="2"/>
+  <polygon points="2446,974 2519,954 2519,1059 2446,1079" fill="#f4f9ff" stroke="#608cb5" stroke-width="2"/>
+  <path d="M2492 952 V965" class="line"/><text x="2470" y="1138" text-anchor="middle" class="txt h2">清晰输出 Î</text><text x="2470" y="1165" text-anchor="middle" class="txt small">裁回 H×W×3</text>
+
+  <!-- skip links -->
+  <path d="M825 680 V615 H1745 V762" class="skip"/><text x="1285" y="606" text-anchor="middle" class="txt small">F1：半分辨率编码—解码跳跃连接（逐元素相加）</text>
+  <path d="M443 705 V575 H2190 V762" class="skip"/><text x="1300" y="566" text-anchor="middle" class="txt small">F0：全分辨率编码—解码跳跃连接（逐元素相加）</text>
+  <path d="M105 895 V975 H2492 V952" class="skip"/><text x="1300" y="968" text-anchor="middle" class="txt small">全局图像残差：Î = Conv₃×₃(FD0) + Ib；网络重点学习模糊残差，保留低频颜色与亮度</text>
+
+  <!-- callouts -->
+  <path d="M443 705 C430 630,330 610,300 550" class="blueCall"/><path d="M1900 680 C1840 590,1700 580,1685 550" class="orangeCall"/>
+  <path d="M1425 744 C1390 660,760 660,720 1090" class="greenCall"/>
+
+  <!-- bottom-left LRC and sampling inset -->
+  <rect x="35" y="1085" width="1040" height="560" rx="28" class="panelGreen"/>
+  <text x="65" y="1125" class="txt h1">(d) 低分辨率上下文与尺度变换</text>
+  <text x="65" y="1160" class="txt h2">LRC：仅在 H/4×W/4 瓶颈使用</text>
+  <rect x="65" y="1205" width="95" height="62" rx="8" class="box"/><text x="112" y="1243" text-anchor="middle" class="txt body">输入 Q</text>
+  <rect x="200" y="1205" width="78" height="62" rx="8" class="op"/><text x="239" y="1243" text-anchor="middle" class="txt body">LN</text>
+  <rect x="330" y="1165" width="165" height="70" rx="8" class="context"/><text x="412" y="1194" text-anchor="middle" class="txt body">局部分支</text><text x="412" y="1221" text-anchor="middle" class="txt small">3×3 DW</text>
+  <rect x="330" y="1270" width="165" height="70" rx="8" class="context"/><text x="412" y="1299" text-anchor="middle" class="txt body">空洞分支</text><text x="412" y="1326" text-anchor="middle" class="txt small">3×3 DW, d=2</text>
+  <path d="M160 1236 H200 M278 1236 H305 V1200 H330 M305 1236 V1305 H330" class="thin"/>
+  <rect x="550" y="1200" width="140" height="78" rx="8" class="route"/><text x="620" y="1230" text-anchor="middle" class="txt body">Concat</text><text x="620" y="1257" text-anchor="middle" class="txt small">1×1 Fuse</text>
+  <path d="M495 1200 H550 M495 1305 H520 V1250 H550" class="thin"/>
+  <circle cx="755" cy="1239" r="24" class="box"/><text x="755" y="1248" text-anchor="middle" class="txt h1">+</text><path d="M690 1239 H731" class="thin"/><path d="M112 1267 V1380 H755 V1263" class="skip"/><text x="440" y="1372" text-anchor="middle" class="txt small">零初始化 scale：Qout=Q+s·Fuse([Local,Dilated])</text>
+  <rect x="820" y="1205" width="190" height="62" rx="8" class="box"/><text x="915" y="1243" text-anchor="middle" class="txt body">多尺度上下文 Qout</text>
+  <path d="M779 1239 H820" class="thin"/>
+  <line x1="65" y1="1425" x2="1020" y2="1425" stroke="#7aa987" stroke-width="1.5"/>
+  <rect x="80" y="1465" width="400" height="120" rx="12" class="sample"/><text x="280" y="1498" text-anchor="middle" class="txt h2">DownsampleDWPW</text><text x="280" y="1532" text-anchor="middle" class="txt body">3×3 Depthwise, stride=2</text><text x="280" y="1564" text-anchor="middle" class="txt body">→ 1×1 Pointwise, C→2C</text>
+  <rect x="565" y="1465" width="400" height="120" rx="12" class="sample"/><text x="765" y="1498" text-anchor="middle" class="txt h2">UpsampleDWPW</text><text x="765" y="1532" text-anchor="middle" class="txt body">1×1 Expand, C→2C</text><text x="765" y="1564" text-anchor="middle" class="txt body">→ PixelShuffle(2), C→C/2</text>
+
+  <!-- bottom-right details and legend -->
+  <rect x="1105" y="1195" width="620" height="450" rx="22" class="panelPurple"/>
+  <text x="1135" y="1235" class="txt h1">(e) 尺度配置与模块布置原则</text>
+  <text x="1140" y="1282" class="txt body">• 输入尺寸：</text><text x="1325" y="1282" class="txt body">任意 H×W，复制填充至 4 的倍数</text>
+  <text x="1140" y="1323" class="txt body">• 通道宽度：</text><text x="1325" y="1323" class="txt body">64 → 128 → 256 → 128 → 64</text>
+  <text x="1140" y="1364" class="txt body">• DWPW 数量：</text><text x="1325" y="1364" class="txt body">3 / 4 / 12 / 2 / 4 / 3，共 28 个</text>
+  <text x="1140" y="1405" class="txt body">• MBD 数量：</text><text x="1325" y="1405" class="txt body">E1×1、瓶颈×2、D1×1，共 4 个</text>
+  <text x="1140" y="1446" class="txt body">• 全分辨率：</text><text x="1325" y="1446" class="txt body">不放置 MBD，保护织纹、亮片与斜向装饰</text>
+  <text x="1140" y="1487" class="txt body">• 推理输入：</text><text x="1325" y="1487" class="txt body">仅 RGB；不读取 GT、掩膜、域标签或退化参数</text>
+  <text x="1140" y="1528" class="txt body">• 参数量：</text><text x="1325" y="1528" class="txt body">13,699,791（约 13.70 M）</text>
+  <text x="1140" y="1569" class="txt body">• 输出策略：</text><text x="1325" y="1569" class="txt body">残差重建 + 原尺寸裁剪</text>
+  <text x="1140" y="1610" class="txt small">设计核心：方向信息是可被内容门控否决的局部软偏置，而非全图固定方向假设。</text>
+
+  <rect x="1760" y="1195" width="805" height="450" rx="22" fill="#fbfbfb" stroke="#555" stroke-width="2" stroke-dasharray="7 5"/>
+  <text x="1790" y="1235" class="txt h1">图例 / Legend</text>
+  <rect x="1800" y="1270" width="65" height="36" rx="5" class="stem"/><text x="1885" y="1296" class="txt body">Stem / 1×1、3×3 普通卷积</text>
+  <rect x="1800" y="1320" width="65" height="36" rx="5" class="dwpw"/><text x="1885" y="1346" class="txt body">DWPW 通用恢复单元</text>
+  <rect x="1800" y="1370" width="65" height="36" rx="5" class="mbd"/><text x="1885" y="1396" class="txt body">MBD 运动偏置去模糊模块</text>
+  <rect x="1800" y="1420" width="65" height="36" rx="5" class="context"/><text x="1885" y="1446" class="txt body">LRC 局部—空洞上下文</text>
+  <rect x="1800" y="1470" width="65" height="36" rx="5" class="sample"/><text x="1885" y="1496" class="txt body">下采样 / PixelShuffle 上采样</text>
+  <circle cx="1832" cy="1540" r="19" class="box"/><text x="1832" y="1548" text-anchor="middle" class="txt h2">+</text><text x="1885" y="1547" class="txt body">逐元素相加（skip / global residual）</text>
+  <path d="M1800 1590 H1865" class="skip"/><text x="1885" y="1597" class="txt body">跳跃连接或恒等残差</text>
+  <text x="2260" y="1295" class="txt h2">关键符号</text>
+  <text x="2260" y="1335" class="txt body">DW：Depthwise Conv</text>
+  <text x="2260" y="1375" class="txt body">LN：LayerNorm2d</text>
+  <text x="2260" y="1415" class="txt body">⊙：逐元素乘法</text>
+  <text x="2260" y="1455" class="txt body">β,γ,ρ,s：零初始化残差尺度</text>
+  <text x="2260" y="1495" class="txt body">α：内容门控</text>
+  <text x="2260" y="1535" class="txt body">ωs,ωl：尺度路由权重</text>
+  <text x="2260" y="1575" class="txt body">d：卷积膨胀率</text>
+  <text x="1300" y="1680" text-anchor="middle" class="txt small">Fig. X. Detailed architecture of MBDNet-P+.  主图与放大模块均与最终实现 MBDNetPPlus 保持一致。</text>
+</svg>

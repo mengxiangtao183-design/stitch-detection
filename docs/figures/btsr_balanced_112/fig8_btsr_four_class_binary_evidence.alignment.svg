@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="792.0pt" height="345.59999999999997pt" viewBox="0 0 792.0 345.59999999999997">
+<rect width="100%" height="100%" fill="white"/>
+<rect x="15.840" y="41.472" width="185.402" height="86.930" fill="none" stroke="#2c7bb6" stroke-width="1.2"/>
+<text x="17.840" y="51.472" font-family="Arial, sans-serif" font-size="8" fill="#2c7bb6">a</text>
+<rect x="211.439" y="41.472" width="185.402" height="86.930" fill="none" stroke="#2c7bb6" stroke-width="1.2"/>
+<text x="213.439" y="51.472" font-family="Arial, sans-serif" font-size="8" fill="#2c7bb6">b</text>
+<rect x="407.039" y="41.472" width="185.402" height="86.930" fill="none" stroke="#2c7bb6" stroke-width="1.2"/>
+<text x="409.039" y="51.472" font-family="Arial, sans-serif" font-size="8" fill="#2c7bb6">c</text>
+<rect x="602.638" y="41.472" width="185.402" height="86.930" fill="none" stroke="#2c7bb6" stroke-width="1.2"/>
+<text x="604.638" y="51.472" font-family="Arial, sans-serif" font-size="8" fill="#2c7bb6">d</text>
+<rect x="15.840" y="139.703" width="185.402" height="86.930" fill="none" stroke="#2c7bb6" stroke-width="1.2"/>
+<text x="17.840" y="149.703" font-family="Arial, sans-serif" font-size="8" fill="#2c7bb6">e</text>
+<rect x="211.439" y="139.703" width="185.402" height="86.930" fill="none" stroke="#2c7bb6" stroke-width="1.2"/>
+<text x="213.439" y="149.703" font-family="Arial, sans-serif" font-size="8" fill="#2c7bb6">f</text>
+<rect x="407.039" y="139.703" width="185.402" height="86.930" fill="none" stroke="#2c7bb6" stroke-width="1.2"/>
+<text x="409.039" y="149.703" font-family="Arial, sans-serif" font-size="8" fill="#2c7bb6">g</text>
+<rect x="602.638" y="139.703" width="185.402" height="86.930" fill="none" stroke="#2c7bb6" stroke-width="1.2"/>
+<text x="604.638" y="149.703" font-family="Arial, sans-serif" font-size="8" fill="#2c7bb6">h</text>
+<rect x="15.840" y="237.934" width="185.402" height="86.930" fill="none" stroke="#2c7bb6" stroke-width="1.2"/>
+<text x="17.840" y="247.934" font-family="Arial, sans-serif" font-size="8" fill="#2c7bb6">i</text>
+<rect x="211.439" y="237.934" width="185.402" height="86.930" fill="none" stroke="#2c7bb6" stroke-width="1.2"/>
+<text x="213.439" y="247.934" font-family="Arial, sans-serif" font-size="8" fill="#2c7bb6">j</text>
+<rect x="407.039" y="237.934" width="185.402" height="86.930" fill="none" stroke="#2c7bb6" stroke-width="1.2"/>
+<text x="409.039" y="247.934" font-family="Arial, sans-serif" font-size="8" fill="#2c7bb6">k</text>
+<rect x="602.638" y="237.934" width="185.402" height="86.930" fill="none" stroke="#2c7bb6" stroke-width="1.2"/>
+<text x="604.638" y="247.934" font-family="Arial, sans-serif" font-size="8" fill="#2c7bb6">l</text>
+<text x="4" y="340.600" font-family="Arial, sans-serif" font-size="7" fill="#333">PASS: 0 fail, 0 warn</text>
+</svg>

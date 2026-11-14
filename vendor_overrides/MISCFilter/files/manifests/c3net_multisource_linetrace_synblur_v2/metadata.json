@@ -1,0 +1,63 @@
+{
+  "name": "MultiSource-Controlled-LineTrace-SynBlur-v2",
+  "seed": 42,
+  "base_manifest_dir": "H:\\C3Netqing\\MISCFilter\\manifests\\c3net_external_rx",
+  "output_subdir": "ImgsSynLineV2MS",
+  "primary_degradation": "line-evidence-weighted, three-horizontal-stripe non-uniform motion blur",
+  "source_domains": [
+    "DB",
+    "XJ",
+    "SD",
+    "RX"
+  ],
+  "external_domains": [
+    "RXHF",
+    "TJML"
+  ],
+  "source_split_policy": {
+    "DB/XJ/SD": "preserved base 360/40/100 clear-image split",
+    "RX": "deterministic 360/40/100 split by clear-image identity before degradation"
+  },
+  "train_policy": "Every source-domain train clear image receives three V2 variants.",
+  "validation_and_internal_test_policy": "Every source-domain val/test clear image receives one deterministic V2 input.",
+  "external_test_policy": "RXHF and TJML each receive one deterministic V2 input per clear image and never enter training, validation, selection, or degradation tuning.",
+  "no_leakage_rule": "Clear-image identities are disjoint across RX train/val/test; external clear images are test-only.",
+  "counts": {
+    "train": 4320,
+    "val": 160,
+    "DB": 100,
+    "XJ": 100,
+    "SD": 100,
+    "RX": 100,
+    "RXHF": 50,
+    "TJML": 50
+  },
+  "generated_counts": {
+    "train": 0,
+    "val": 0,
+    "test_DB": 0,
+    "test_XJ": 0,
+    "test_SD": 0,
+    "test_RX": 0,
+    "test_RXHF": 50,
+    "test_TJML": 0
+  },
+  "skipped_counts": {
+    "train": 4320,
+    "val": 160,
+    "test_DB": 100,
+    "test_XJ": 100,
+    "test_SD": 100,
+    "test_RX": 100,
+    "test_RXHF": 0,
+    "test_TJML": 50
+  },
+  "degradation_params": "H:\\C3Netqing\\MISCFilter\\manifests\\c3net_multisource_linetrace_synblur_v2\\degradation_params.jsonl",
+  "external_image_size": [
+    320,
+    320
+  ],
+  "last_external_refresh": [
+    "RXHF"
+  ]
+}

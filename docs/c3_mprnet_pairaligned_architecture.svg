@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="2200" viewBox="0 0 1600 2200" role="img" aria-labelledby="title desc">
+  <title id="title">C3-MPRNet with TriStripe Stage 1 and PairAligned Stage 2</title>
+  <desc id="desc">Detailed architecture flowchart showing the three-stripe first stage, pair-aligned second stage, full-resolution ORSNet third stage, and edge-guided refinement.</desc>
+  <defs>
+    <linearGradient id="stage1" x1="0" x2="1"><stop stop-color="#17395d"/><stop offset="1" stop-color="#225d8a"/></linearGradient>
+    <linearGradient id="stage2" x1="0" x2="1"><stop stop-color="#51366f"/><stop offset="1" stop-color="#80539c"/></linearGradient>
+    <linearGradient id="stage3" x1="0" x2="1"><stop stop-color="#355846"/><stop offset="1" stop-color="#4c7a5f"/></linearGradient>
+    <linearGradient id="edge" x1="0" x2="1"><stop stop-color="#80582b"/><stop offset="1" stop-color="#b58138"/></linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#000" flood-opacity=".34"/></filter>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#d8e1eb"/></marker>
+    <marker id="orangeArrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#f2bc61"/></marker>
+    <style>
+      .bg{fill:#171a20}.title{font:700 30px 'Microsoft YaHei','Noto Sans CJK SC',Arial,sans-serif;fill:#f2f6fa}.subtitle{font:400 16px 'Microsoft YaHei','Noto Sans CJK SC',Arial,sans-serif;fill:#aebdcb}.stage-title{font:700 22px 'Microsoft YaHei','Noto Sans CJK SC',Arial,sans-serif;fill:#fff}.stage-note{font:400 14px 'Microsoft YaHei','Noto Sans CJK SC',Arial,sans-serif;fill:#d5e1ec}.box{stroke:#a9bbc9;stroke-width:1.4;rx:12;filter:url(#shadow)}.node{fill:#242b35}.node2{fill:#202732}.nodeText{font:600 16px 'Microsoft YaHei','Noto Sans CJK SC',Arial,sans-serif;fill:#eef4fa;text-anchor:middle}.small{font:400 13px 'Microsoft YaHei','Noto Sans CJK SC',Arial,sans-serif;fill:#c3d0dc;text-anchor:middle}.tiny{font:400 12px 'Microsoft YaHei','Noto Sans CJK SC',Arial,sans-serif;fill:#c3d0dc;text-anchor:middle}.arrow{stroke:#d8e1eb;stroke-width:2.2;fill:none;marker-end:url(#arrow)}.dash{stroke:#8fb6db;stroke-width:1.8;stroke-dasharray:7 6;fill:none;marker-end:url(#arrow)}.loss{stroke:#f2bc61;stroke-width:1.7;stroke-dasharray:6 5;fill:none;marker-end:url(#orangeArrow)}.label{font:600 13px 'Microsoft YaHei','Noto Sans CJK SC',Arial,sans-serif;fill:#dce7f0}.legend{font:400 13px 'Microsoft YaHei','Noto Sans CJK SC',Arial,sans-serif;fill:#bdcad5}.pill{fill:#141920;stroke:#5f7181;stroke-width:1;rx:13}.plus{font:700 25px Arial,sans-serif;fill:#f7f9fc;text-anchor:middle}.input{fill:#32475d;stroke:#9ec4e6;stroke-width:1.5;rx:12}.output{fill:#42654d;stroke:#b3deb8;stroke-width:1.5;rx:12}
+    </style>
+  </defs>
+  <rect class="bg" width="1600" height="2200"/>
+
+  <text x="800" y="54" class="title" text-anchor="middle">C3-MPRNet 基础骨干：TriStripe Stage 1 + PairAligned Stage 2 + Edge-guided Stage 3</text>
+  <text x="800" y="82" class="subtitle" text-anchor="middle">MPRNet 原始 U-Net / CSFF / SAM / ORSNet 主干保留；虚线仅表示跨阶段特征或训练监督，不是额外推理分支</text>
+
+  <!-- Input -->
+  <rect x="625" y="112" width="350" height="64" class="input"/>
+  <text x="800" y="141" class="nodeText">退化输入图像 I</text><text x="800" y="163" class="small">3 × H × W</text>
+  <path d="M800 176 V210" class="arrow"/>
+
+  <!-- stage 1 -->
+  <rect x="55" y="215" width="1490" height="575" rx="18" fill="url(#stage1)" opacity=".43" stroke="#74b4e5" stroke-width="1.5"/>
+  <text x="84" y="250" class="stage-title">Stage 1 — 重叠三条带渐进复原（共享权重）</text>
+  <text x="84" y="274" class="stage-note">沿高度划分：S1 / S2 / S3；每条全宽，20% overlap。相邻条带在解码前构成 [S1+S2] 与 [S2+S3] 两个共享配对。</text>
+
+  <rect x="100" y="315" width="235" height="80" class="node box"/>
+  <text x="217" y="345" class="nodeText">三带切分</text><text x="217" y="369" class="small">S1、S2、S3；20% 重叠</text>
+  <path d="M800 210 V290 H217 V315" class="arrow"/>
+
+  <rect x="420" y="305" width="300" height="100" class="node box"/>
+  <text x="570" y="338" class="nodeText">共享浅层特征 F¹</text><text x="570" y="362" class="small">3×3 Conv (3→96) + CAB</text><text x="570" y="383" class="tiny">分别处理 S1、S2、S3</text>
+  <path d="M335 355 H420" class="arrow"/>
+
+  <rect x="805" y="295" width="335" height="122" class="node box"/>
+  <text x="972" y="326" class="nodeText">共享 Stage-1 Encoder</text><text x="972" y="350" class="small">U-Net：CAB×2 / level</text><text x="972" y="372" class="tiny">96 → 144 → 192 ch；双线性下采样 + 1×1 Conv</text><text x="972" y="394" class="tiny">输出三尺度编码特征 e¹</text>
+  <path d="M720 355 H805" class="arrow"/>
+
+  <rect x="1215" y="305" width="275" height="100" class="node box"/>
+  <text x="1352" y="338" class="nodeText">相邻配对特征拼接</text><text x="1352" y="362" class="small">P₁₂ = [S1 + S2]</text><text x="1352" y="383" class="small">P₂₃ = [S2 + S3]</text>
+  <path d="M1140 355 H1215" class="arrow"/>
+
+  <rect x="190" y="505" width="330" height="120" class="node box"/>
+  <text x="355" y="537" class="nodeText">共享 Stage-1 Decoder</text><text x="355" y="561" class="small">192 → 144 → 96 ch；CAB×2 / level</text><text x="355" y="583" class="tiny">Skip CAB + 双线性上采样；得到 d¹₁₂、d¹₂₃</text><text x="355" y="604" class="tiny">两路均使用同一 Decoder</text>
+  <path d="M1352 405 V455 H355 V505" class="arrow"/>
+
+  <rect x="635" y="515" width="245" height="100" class="node box"/>
+  <text x="757" y="547" class="nodeText">SAM₁₂（共享）</text><text x="757" y="571" class="small">特征注意 + 局部复原</text><text x="757" y="593" class="tiny">产生 a¹₁₂/a¹₂₃ 与 Î¹₁₂/Î¹₂₃</text>
+  <path d="M520 565 H635" class="arrow"/>
+
+  <rect x="1010" y="505" width="380" height="120" class="node box"/>
+  <text x="1200" y="537" class="nodeText">重叠区线性加权融合</text><text x="1200" y="561" class="small">融合 P₁₂、P₂₃ 的图像 / SAM / 多尺度特征</text><text x="1200" y="583" class="tiny">输出：全图 Î¹、a¹、feat¹=[e¹₁,e¹₂,e¹₃]、res¹=[d¹₁,d¹₂,d¹₃]</text><text x="1200" y="604" class="tiny">同时保留 P₁₂、P₂₃ 的配对上下文，供 Stage 2 对齐使用</text>
+  <path d="M880 565 H1010" class="arrow"/>
+  <rect x="1080" y="665" width="240" height="44" class="pill"/>
+  <text x="1200" y="693" class="small">Stage-1 辅助输出：Î¹</text>
+  <path d="M1200 625 V665" class="arrow"/>
+
+  <!-- stage 2 -->
+  <rect x="55" y="830" width="1490" height="615" rx="18" fill="url(#stage2)" opacity=".43" stroke="#c093e2" stroke-width="1.5"/>
+  <text x="84" y="866" class="stage-title">Stage 2 — PairAligned 跨条带对齐复原（共享双分支）</text>
+  <text x="84" y="890" class="stage-note">不再按“上半图 / 下半图”切分；分别在 [S1+S2]、[S2+S3] 上编码，使完整中条带在两路都可见，再融合中条带重叠区。</text>
+
+  <rect x="92" y="938" width="285" height="112" class="node box"/>
+  <text x="234" y="969" class="nodeText">PairAligned 输入构造</text><text x="234" y="993" class="small">原始配对裁块 I₁₂、I₂₃</text><text x="234" y="1015" class="tiny">F² = shallow₂(Ipair) ⊕ 对应 a¹pair</text><text x="234" y="1036" class="tiny">concat12：192 → 96 ch</text>
+  <path d="M1200 625 V850 H234 V938" class="arrow"/>
+
+  <rect x="460" y="920" width="365" height="145" class="node box"/>
+  <text x="642" y="951" class="nodeText">共享 Stage-2 Encoder（两路）</text><text x="642" y="975" class="small">对 P₁₂ 与 P₂₃ 分别编码：96 → 144 → 192 ch</text><text x="642" y="998" class="tiny">每尺度 CAB×2；双线性下采样 + 1×1 Conv</text><text x="642" y="1020" class="tiny">CSFF：注入对应 Stage-1 配对 enc / dec 特征</text><text x="642" y="1041" class="tiny">输出 e²₁₂、e²₂₃</text>
+  <path d="M377 994 H460" class="arrow"/>
+
+  <rect x="910" y="932" width="310" height="120" class="node box"/>
+  <text x="1065" y="963" class="nodeText">多尺度 PairAligned 融合</text><text x="1065" y="987" class="small">在完整 S2 重叠区线性加权融合</text><text x="1065" y="1009" class="tiny">融合 e²₁₂/e²₂₃ → 全图 feat²</text><text x="1065" y="1030" class="tiny">保持 S1↔S2、S2↔S3 连续性</text>
+  <path d="M825 993 H910" class="arrow"/>
+
+  <rect x="1265" y="932" width="225" height="120" class="node box"/>
+  <text x="1377" y="963" class="nodeText">Stage-2 Decoder</text><text x="1377" y="987" class="small">全图共享解码</text><text x="1377" y="1009" class="tiny">192 → 144 → 96 ch</text><text x="1377" y="1030" class="tiny">输出 res²</text>
+  <path d="M1220 993 H1265" class="arrow"/>
+
+  <rect x="465" y="1190" width="300" height="105" class="node box"/>
+  <text x="615" y="1221" class="nodeText">SAM₂₃</text><text x="615" y="1245" class="small">res² + 原图 I → a² 与 Î²</text><text x="615" y="1267" class="tiny">全图 Stage-2 中间复原结果</text>
+  <path d="M1377 1052 V1140 H615 V1190" class="arrow"/>
+  <rect x="965" y="1220" width="230" height="44" class="pill"/>
+  <text x="1080" y="1248" class="small">Stage-2 辅助输出：Î²</text>
+  <path d="M765 1242 H965" class="arrow"/>
+
+  <!-- CSFF dashed -->
+  <path d="M1200 625 V750 H590 V920" class="dash"/>
+  <text x="660" y="735" class="label">CSFF：Stage-1 feat¹ / res¹</text>
+
+  <!-- stage 3 -->
+  <rect x="55" y="1485" width="1490" height="535" rx="18" fill="url(#stage3)" opacity=".45" stroke="#8dcc9c" stroke-width="1.5"/>
+  <text x="84" y="1521" class="stage-title">Stage 3 — 原始全图 ORSNet + C3 边缘引导细化</text>
+  <text x="84" y="1545" class="stage-note">恢复全局图像一致性；边缘分支仅对 Stage-3 深层特征作门控残差细化，保留原图残差输出。</text>
+
+  <rect x="95" y="1590" width="285" height="112" class="node box"/>
+  <text x="237" y="1621" class="nodeText">全图 Stage-3 输入</text><text x="237" y="1645" class="small">shallow₃(I)：3×3 Conv + CAB，96 ch</text><text x="237" y="1667" class="tiny">与 a² concat23：192 → 128 ch</text><text x="237" y="1688" class="tiny">输入为全图，不再分块</text>
+  <path d="M615 1295 V1510 H237 V1590" class="arrow"/>
+
+  <rect x="475" y="1575" width="405" height="145" class="node box"/>
+  <text x="677" y="1606" class="nodeText">ORSNet（原始多尺度全分辨率细化）</text><text x="677" y="1630" class="small">ORB₁ → ORB₂ → ORB₃；每个 ORB 含 CAB×8</text><text x="677" y="1652" class="tiny">工作通道：128 = 96 + 32</text><text x="677" y="1674" class="tiny">逐级注入上采样后的 feat² / res² 三尺度特征</text><text x="677" y="1696" class="tiny">输出 x³：128 ch 全图细化特征</text>
+  <path d="M380 1646 H475" class="arrow"/>
+
+  <rect x="975" y="1566" width="250" height="162" fill="url(#edge)" class="box"/>
+  <text x="1100" y="1597" class="nodeText">C3 边缘引导模块</text><text x="1100" y="1621" class="small">Edge head：3×3 Conv 128→24</text><text x="1100" y="1643" class="tiny">PReLU → 1×1 Conv → Sigmoid</text><text x="1100" y="1665" class="tiny">预测 ê：1×H×W</text><text x="1100" y="1687" class="tiny">concat[x³, ê] → refine → residual</text><text x="1100" y="1709" class="tiny">σ(1×1 Conv(ê)) 逐通道门控</text>
+  <path d="M880 1646 H975" class="arrow"/>
+
+  <rect x="1310" y="1590" width="185" height="112" class="node box"/>
+  <text x="1402" y="1621" class="nodeText">输出残差复原</text><text x="1402" y="1645" class="small">Tail：3×3 Conv</text><text x="1402" y="1667" class="tiny">128 → 3 ch</text><text x="1402" y="1688" class="tiny">Î = Tail(x³) + I</text>
+  <path d="M1225 1646 H1310" class="arrow"/>
+
+  <rect x="1235" y="1775" width="335" height="68" class="output"/>
+  <text x="1402" y="1804" class="nodeText">最终复原图 Î</text><text x="1402" y="1827" class="small">3 × H × W</text>
+  <path d="M1402 1702 V1775" class="arrow"/>
+  <path d="M800 176 V1738 H1310" class="arrow"/>
+  <text x="988" y="1728" class="label">全局残差：+ I</text>
+
+  <!-- supervision -->
+  <rect x="95" y="1882" width="1095" height="106" rx="14" fill="#1e242d" stroke="#586a7a" stroke-width="1.2"/>
+  <text x="642" y="1914" class="nodeText">训练时监督（推理时不启用）</text>
+  <text x="642" y="1941" class="small">L = 1.00 · Lcharbonnier(Î, GT) + 0.50 · Lcharbonnier(Î², GT) + 0.25 · Lcharbonnier(Î¹, GT) + 0.02 · Ledge(ê, EdgeGT)</text>
+  <text x="642" y="1967" class="tiny">当前基础骨干不包含蒸馏、频率残差、Transformer、Gated-CSFF、Dual-domain ORS 或光照自适应。</text>
+  <path d="M1402 1843 V1910 H1190" class="loss"/>
+  <path d="M1080 1264 V1882" class="loss"/>
+  <path d="M1200 709 V1882" class="loss"/>
+  <path d="M1100 1728 V1882" class="loss"/>
+
+  <!-- legend -->
+  <rect x="95" y="2070" width="1410" height="74" rx="14" fill="#1e242d" stroke="#586a7a" stroke-width="1.2"/>
+  <path d="M145 2101 H230" class="arrow"/><text x="250" y="2106" class="legend">主前向数据流</text>
+  <path d="M465 2101 H550" class="dash"/><text x="570" y="2106" class="legend">跨阶段特征注入 / CSFF</text>
+  <path d="M855 2101 H940" class="loss"/><text x="960" y="2106" class="legend">仅训练期监督</text>
+  <text x="1230" y="2106" class="legend">⊕：concat 后 1×1/3×3 映射；所有 Stage-1/2 分支均共享权重</text>
+</svg>

@@ -1,0 +1,105 @@
+GPU: [0]
+
+VERBOSE: True
+
+# TPT-Net: Tri-Pair Trajectory Network.
+# Structural baseline for all subsequent trajectory-aware ablations.
+# It intentionally contains no edge or frequency refinement modules.
+MODEL:
+  MODE: 'Deblurring'
+  # Use a fresh directory: the earlier non-finetuned run was randomly initialized.
+  SESSION: 'MPRNet_TriStripe_PairAligned_GatedCSFF_Fast100_FT'
+  N_FEAT: 96
+  SCALE_UNETFEATS: 48
+  SCALE_ORSNETFEATS: 32
+  NUM_CAB: 8
+
+  # Keep the Stage-3 ORSNet unchanged; proposed heads are evaluated separately.
+  EDGE_REFINE: False
+  FREQUENCY_REFINE: False
+  LIGHT_ADAPT: False
+  TRAJECTORY_LIGHTWEIGHT: False
+
+  # Trajectory-aware spatial backbone.
+  STAGE1_TRISTRIPE: True
+  STAGE1_STRIPES: 3
+  STAGE1_OVERLAP: 0.20
+  STAGE2_OVERLAP: 0.0
+  STAGE2_PAIR_ALIGNED: True
+
+  # TCFM: Trajectory-Calibrated Feature Modulation.
+  # Replaces unconditional cross-stage injection with horizontal-context gates.
+  GATED_CSFF: True
+  GATED_CSFF_HORIZONTAL_KERNEL: 7
+
+OPTIM:
+  BATCH_SIZE: 2
+  NUM_EPOCHS: 25
+  LR_INITIAL: 1.0e-5
+  LR_MIN: 1.0e-6
+  ACCUM_ITERS: 4
+
+TRAINING:
+  VAL_AFTER_EVERY: 3
+  CHECKPOINT_EVERY: 5
+  DO_VALIDATE: True
+  RESUME: true
+  # Load compatible original-MPRNet weights; new TriStripe/Pair/Gated modules
+  # retain their initialized parameters and are trained from this task-domain parent.
+  FINETUNE: true
+  PRETRAINED_PATH: 'H:/C3Netqing/Deblurring/checkpoints/train/Deblurring/models/MPRNet/model_latest.pth'
+  TRAIN_PS: 320
+  VAL_PS: 320
+  TRAIN_DIR: ''
+  VAL_DIR: ''
+  TRAIN_DIRS:
+    - 'H:/DATASET/DB/train'
+    - 'H:/DATASET/XJ/train'
+    - 'H:/DATASET/SD/train'
+  VAL_DIRS: []
+  INPUT_SUBDIR: 'Imgs1'
+  TARGET_SUBDIR: 'clear'
+  EDGE_SUBDIR: ''
+  MAX_IMAGES_PER_TRAIN_DIR: 100
+  VAL_SPLIT: 0.1
+  NUM_WORKERS: 0
+  SEED: 42
+  USE_AMP: True
+  CUDNN_BENCHMARK: False
+  CUDNN_DETERMINISTIC: True
+  SAVE_BEST: True
+  SAVE_BEST_EVERY: 1
+  SAVE_OPTIMIZER: True
+  SAVE_DIR: 'H:/C3Netqing/Deblurring/checkpoints/train'
+
+AUGMENT:
+  ENABLE: True
+  COLOR_PROB: 0.3
+  BRIGHTNESS: 0.15
+  CONTRAST: 0.15
+  SATURATION: 0.15
+  HUE: 0.02
+  GAMMA_PROB: 0.3
+  GAMMA_MIN: 0.85
+  GAMMA_MAX: 1.20
+  INPUT_NOISE_PROB: 0.10
+  INPUT_NOISE_STD: 0.010
+  LOW_LIGHT_PROB: 0.0
+
+LOSS:
+  STAGE_WEIGHTS: [1.0, 0.5, 0.25]
+  EDGE_WEIGHT: 0.00
+  DISTILL_WEIGHT: 0.00
+  STRIPE_CONSISTENCY_WEIGHT: 0.00
+  FREQUENCY_CONSISTENCY_WEIGHT: 0.00
+
+DISTILL:
+  ENABLE: False
+  TEACHER_WEIGHTS: ''
+  TEACHER_N_FEAT: 96
+  TEACHER_SCALE_UNETFEATS: 48
+  TEACHER_SCALE_ORSNETFEATS: 32
+  TEACHER_NUM_CAB: 8
+  TEACHER_EDGE_REFINE: False
+  TEACHER_EDGE_REFINE_MID: 24
+  TEACHER_AMP: False

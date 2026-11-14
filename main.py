@@ -9,7 +9,7 @@ This module provides a command-line interface for:
 Directory Structure:
     ./
     ├── configs/
-    │   └── default.yaml    # Default configuration
+    │   └── default.    # Default configuration
     ├── checkpoints/
     │   └── model_best.pth  # Default model checkpoint
     └── results/            # Operation outputs
@@ -26,13 +26,27 @@ Example Usage:
 """
 
 import argparse
+import copy
 import logging
+import os
+import random
 import sys
+
+# Must be set before NumPy/PyTorch import their OpenMP runtimes.  The Windows
+# c3net environment otherwise intermittently crashes in python310.dll after
+# several training/checkpoint cycles.
+os.environ.setdefault('OMP_NUM_THREADS', '1')
+os.environ.setdefault('MKL_NUM_THREADS', '1')
+os.environ.setdefault('KMP_DUPLICATE_LIB_OK', 'TRUE')
+
 import yaml
 from pathlib import Path
 from typing import Dict, Optional
 import json
 import warnings
+import numpy
+import torch.serialization
+
 
 warnings.filterwarnings('ignore', category=UserWarning, module='py_sod_metrics.sod_metrics')
 
@@ -45,11 +59,34 @@ from engine.evaluator import Evaluator
 from engine.predictor import Predictor
 from utils.data_loader import get_test_loaders
 from utils.run_manager import DirectoryManager
-from models.c3net import C3Net
+from com_models.registry import build_model
+from utils.checkpoint_utils import load_model_checkpoint
+
+
+'''
+import compare models
+'''
+# from com_models.OPNet_model import OPNet_Wrapper as OPNet   
+# from com_models.fselnet_model import fselnet_Wrapper as fselnet
+# from com_models.PVTNet_model import Model as PVTNet   
+# from com_models.sam2_model import SAM2_Wrapper as SAM2
+
+
 
 # Constants for default paths
 DEFAULT_CONFIG_PATH = Path('./configs/default.yaml')
 DEFAULT_MODEL_PATH = Path('./checkpoints/model_best.pth')
+
+
+def set_seed(seed: int) -> None:
+    """Make controlled ablation runs reproducible."""
+    random.seed(seed)
+    numpy.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
 
 class ConfigurationManager:
     """
@@ -62,6 +99,41 @@ class ConfigurationManager:
     - Default handling
     """
     
+    @staticmethod
+    def _deep_merge(base: Dict, override: Dict) -> Dict:
+        """Recursively merge a small experiment override onto a base config."""
+        result = copy.deepcopy(base)
+        for key, value in override.items():
+            if isinstance(value, dict) and isinstance(result.get(key), dict):
+                result[key] = ConfigurationManager._deep_merge(result[key], value)
+            else:
+                result[key] = value
+        return result
+
+    @staticmethod
+    def _load_config_file(config_path: Path, seen: Optional[set] = None) -> Dict:
+        """Load a YAML config with optional relative ``base_config`` inheritance."""
+        resolved = config_path.resolve()
+        seen = set() if seen is None else seen
+        if resolved in seen:
+            raise RuntimeError(f"Circular base_config reference: {resolved}")
+        seen.add(resolved)
+        try:
+            with resolved.open('r', encoding='utf-8') as f:
+                config = yaml.safe_load(f) or {}
+        except yaml.YAMLError as e:
+            raise RuntimeError(f"Invalid configuration file: {resolved}") from e
+
+        base_name = config.pop('base_config', None)
+        if not base_name:
+            return config
+        base_path = (resolved.parent / base_name).resolve()
+        if not base_path.exists():
+            raise RuntimeError(f"base_config not found: {base_path}")
+        return ConfigurationManager._deep_merge(
+            ConfigurationManager._load_config_file(base_path, seen), config
+        )
+
     @staticmethod
     def load_config(config_path: Optional[Path] = None) -> Dict:
         """
@@ -79,20 +151,18 @@ class ConfigurationManager:
         # Try user config first
         if config_path and config_path.exists():
             try:
-                with open(config_path) as f:
-                    return yaml.safe_load(f)
-            except yaml.YAMLError as e:
+                return ConfigurationManager._load_config_file(config_path)
+            except (yaml.Error, RuntimeError) as e:
                 logging.error(f"Error in config file {config_path}: {e}")
-                raise RuntimeError(f"Invalid configuration file: {config_path}")
+                raise
         
         # Try default config
         if DEFAULT_CONFIG_PATH.exists():
             try:
-                with open(DEFAULT_CONFIG_PATH) as f:
-                    return yaml.safe_load(f)
-            except yaml.YAMLError as e:
+                return ConfigurationManager._load_config_file(DEFAULT_CONFIG_PATH)
+            except (yaml.YAMLError, RuntimeError) as e:
                 logging.error(f"Error in default config: {e}")
-                raise RuntimeError("Invalid default configuration file")
+                raise RuntimeError("Invalid default configuration file") from e
                 
         raise RuntimeError(
             "No valid configuration found. Ensure either:\n"
@@ -125,7 +195,7 @@ class ConfigurationManager:
             )
             
         try:
-            checkpoint = torch.load(checkpoint_path, map_location='cpu')
+            checkpoint = load_model_checkpoint(checkpoint_path, map_location='cpu')
             if 'config' not in checkpoint:
                 raise ValueError("Checkpoint does not contain configuration")
             return checkpoint['config']
@@ -153,8 +223,10 @@ def parse_args() -> argparse.Namespace:
     )
     
     parser.add_argument('mode', 
+                        nargs='?',
                        choices=['train', 'evaluate', 'predict'],
-                       help='Operation mode')
+                       help='Operation mode',
+                       default='train')
     
     parser.add_argument('--config',
                        type=Path,
@@ -236,7 +308,7 @@ def train(config: Dict, model_path: Optional[Path], dir_manager: DirectoryManage
             
     # Load model configuration from checkpoint if resuming
     if mode_type == 'resume' and training_mode['checkpoint_path']:
-        checkpoint = torch.load(training_mode['checkpoint_path'], map_location='cpu')
+        checkpoint = load_model_checkpoint(training_mode['checkpoint_path'], map_location='cpu')
         if 'config' in checkpoint:
             logging.info("Updating configuration from checkpoint for resume mode")
             # Update only model and training configuration
@@ -308,7 +380,8 @@ def evaluate(config: Dict, model_path: Path, dir_manager: DirectoryManager) -> N
         model_config=config['model'],
         dir_manager=dir_manager,
         device=device,
-        batch_size=config['evaluation']['batch_size']
+        batch_size=config['evaluation']['batch_size'],
+        branch_diagnostics=config['evaluation'].get('branch_diagnostics', {}),
     )
     
     all_metrics = {}
@@ -324,8 +397,13 @@ def evaluate(config: Dict, model_path: Path, dir_manager: DirectoryManager) -> N
         logging.info(f"Structure measure (Sα): {metrics['s_alpha']:.4f}")
         logging.info(f"Weighted F-measure (Fβw): {metrics['weighted_f']:.4f}")
         logging.info(f"Mean Absolute Error (M): {metrics['mae']:.4f}")
-        logging.info(f"Enhanced-alignment (Eϕ): {metrics['e_phi']:.4f}")
+        logging.info(f"Enhanced-alignment (E_phi): {metrics['e_phi']:.4f}")
         logging.info(f"Mean F-measure (Fβm): {metrics['mean_f']:.4f}")
+
+        if 'trajectory_f1' in metrics:
+            logging.info(f"Trajectory F1 @2px: {metrics['trajectory_f1']:.4f}")
+            logging.info(f"Trajectory F1 @1px: {metrics['trajectory_f1_1px']:.4f}")
+            logging.info(f"Binary F1 @0.5: {metrics['binary_f1']:.4f}")
 
     # Save overall metrics summary
     metrics_path = dir_manager.run_dirs.root / 'metrics_summary.json'
@@ -403,10 +481,15 @@ def print_model_info(config: Dict) -> None:
     logging.info("Analyzing model architecture and complexity...")
     
     try:
-        # Initialize on appropriate device
+        # Initialize on appropriate device11111111111111111111111111111111111111111111111111111111111111
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        model = C3Net(config['model']).to(device)
+
+
+        model = build_model(config['model']).to(device)
         model.eval()
+
+
+
         
         # Print model architecture
         logging.info("\nModel Architecture:")
@@ -457,9 +540,9 @@ def main() -> None:
        - Optional paths
     
     2. Configuration Loading:
-       - User config or default
+       - User config or default配置文件
        - Model config from checkpoint
-       - Setting validation
+       - Setting validation验证
     
     3. Directory Setup:
        - Output organization
@@ -471,22 +554,28 @@ def main() -> None:
        - predict: Image processing
     """
     try:
-        # Parse arguments
+        # Parse arguments解析参数
         args = parse_args()
-        
-        # Setup directory manager
-        dir_manager = DirectoryManager(args.mode)
-        setup_logging(dir_manager)
-        
-        # Load appropriate configurations
-        config = ConfigurationManager.load_config(args.config)
 
-        if args.mode in ['evaluate', 'predict']:
+        # Load appropriate configurations
+        config = ConfigurationManager.load_config(args.config)#指定的配置文件（或默认路径）加载项目的核心配置，比如模型参数、数据路径、训练超参数等
+
+        if args.mode in ['evaluate', 'predict']:#从已训练的模型断点（args.model）中加载模型配置
             model_config = ConfigurationManager.load_model_config(args.model)
             # Update model settings from checkpoint
             config['model'].update(model_config['model'])
 
-        # Log configuration
+        # Keep every log, metric file, and checkpoint in a directory named
+        # after the experiment structure rather than an opaque timestamp.
+        dir_manager = DirectoryManager(args.mode, config.get('model', {}).get('name'))
+        setup_logging(dir_manager)
+
+        seed = config.get('training', {}).get('seed')
+        if seed is not None:
+            set_seed(int(seed))
+            logging.info(f"Random seed fixed to {seed}")
+
+        # Log configuration记录当前运行模式和完整配置
         logging.info(f"Running in {args.mode} mode")
         logging.info("Configuration:")
         logging.info(yaml.dump(config, default_flow_style=False))
@@ -508,6 +597,7 @@ def main() -> None:
     except Exception as e:
         logging.error(f"Error occurred: {str(e)}", exc_info=True)
         sys.exit(1)
+
 
 if __name__ == '__main__':
     main()

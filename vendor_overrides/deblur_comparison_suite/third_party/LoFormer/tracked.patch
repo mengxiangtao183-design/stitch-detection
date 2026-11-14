@@ -1,0 +1,22 @@
+diff --git a/basicsr/models/archs/LoFormer_arch.py b/basicsr/models/archs/LoFormer_arch.py
+index 1567f0a..bbfe84c 100644
+--- a/basicsr/models/archs/LoFormer_arch.py
++++ b/basicsr/models/archs/LoFormer_arch.py
+@@ -5,8 +5,8 @@ from basicsr.models.archs.dct_util import *
+ from basicsr.models.archs.up_down import *
+ from einops import rearrange
+ # import kornia
+-import seaborn as sns
+-import matplotlib.pyplot as plt
++# Optional visualization dependencies are only needed by the repository's
++# debugging utilities, never by LoFormer's forward/training path.
+ 
+ class DFFN(nn.Module):
+     def __init__(self, dim, ffn_expansion_factor, bias):
+@@ -1131,4 +1131,4 @@ if __name__=='__main__':
+     # # macs = float(macs[:-4])
+     #
+     # print('FLOPs: ', macs)
+-    # print('params: ', params)
+\ No newline at end of file
++    # print('params: ', params)

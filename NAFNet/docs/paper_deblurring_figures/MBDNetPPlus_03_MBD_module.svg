@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="1400" viewBox="0 0 2400 1400">
+  <defs><marker id="a" markerWidth="12" markerHeight="10" refX="11" refY="5" orient="auto"><path d="M0,0 L12,5 L0,10 Z" fill="#333"/></marker><style>.t{font-family:'Times New Roman','SimSun',serif;fill:#202020}.title{font-size:43px;font-weight:bold}.sub{font-size:22px}.h{font-size:28px;font-weight:bold}.m{font-size:22px}.s{font-size:18px}.xs{font-size:15px}.box{fill:#fff;stroke:#333;stroke-width:2}.norm{fill:#edf1f5;stroke:#65717b;stroke-width:2}.generic{fill:#d8e7f7;stroke:#608cb5;stroke-width:2}.motion{fill:#ffe1d3;stroke:#d48762;stroke-width:2}.route{fill:#d9efd8;stroke:#5b9a5c;stroke-width:2}.gate{fill:#f7d5e4;stroke:#bd6f8c;stroke-width:2}.mix{fill:#fff0ad;stroke:#c69b28;stroke-width:2.3}.note{fill:#fffaf0;stroke:#c69b28;stroke-width:2}.panel{fill:#fff5ec;stroke:#ef9b69;stroke-width:3;stroke-dasharray:12 9}.line{fill:none;stroke:#333;stroke-width:2.5;marker-end:url(#a)}.skip{fill:none;stroke:#666;stroke-width:2.3;stroke-dasharray:9 7;marker-end:url(#a)}.w{stroke:#aaa;stroke-width:1}</style></defs>
+  <rect width="2400" height="1400" fill="white"/>
+  <text x="1200" y="55" text-anchor="middle" class="t title">MBD 局部运动偏置去模糊模块</text><text x="1200" y="91" text-anchor="middle" class="t sub">Motion-Biased Deblurring Block with content routing and support-scale routing</text>
+  <rect x="35" y="125" width="2330" height="850" rx="30" class="panel"/>
+
+  <rect x="75" y="470" width="120" height="82" rx="9" class="box"/><text x="135" y="509" text-anchor="middle" class="t m">输入 F</text><text x="135" y="536" text-anchor="middle" class="t xs">B×C×H×W</text>
+  <rect x="245" y="470" width="105" height="82" rx="9" class="norm"/><text x="298" y="508" text-anchor="middle" class="t m">LN</text><text x="298" y="536" text-anchor="middle" class="t xs">Fₙ=LN(F)</text><path d="M195 511 H245" class="line"/>
+
+  <!-- branches -->
+  <text x="415" y="185" class="t h">恢复候选分支</text>
+  <rect x="420" y="235" width="220" height="105" rx="10" class="generic"/><text x="530" y="270" text-anchor="middle" class="t m">通用各向同性分支 G</text><text x="530" y="303" text-anchor="middle" class="t s">3×3 Depthwise Conv</text><text x="530" y="328" text-anchor="middle" class="t xs">C→C, groups=C</text>
+  <rect x="420" y="425" width="220" height="105" rx="10" class="motion"/><text x="530" y="460" text-anchor="middle" class="t m">短程水平分支 Hₛ</text><text x="530" y="493" text-anchor="middle" class="t s">1×5 Depthwise Conv</text><text x="530" y="518" text-anchor="middle" class="t xs">有效水平支撑=5</text>
+  <rect x="420" y="615" width="220" height="105" rx="10" class="motion"/><text x="530" y="650" text-anchor="middle" class="t m">长程水平分支 Hₗ</text><text x="530" y="683" text-anchor="middle" class="t s">1×5 DW, dilation=(1,3)</text><text x="530" y="708" text-anchor="middle" class="t xs">有效水平支撑=13</text>
+  <path d="M350 511 H385 V287 H420 M385 511 H420 M385 511 V667 H420" class="line"/>
+
+  <!-- receptive field icons -->
+  <g transform="translate(690,220)"><text x="0" y="-15" class="t s">3×3 采样</text><rect x="0" y="0" width="105" height="105" fill="#fff" stroke="#777"/><path d="M35 0 V105 M70 0 V105 M0 35 H105 M0 70 H105" class="w"/><circle cx="17.5" cy="17.5" r="5" fill="#608cb5"/><circle cx="52.5" cy="17.5" r="5" fill="#608cb5"/><circle cx="87.5" cy="17.5" r="5" fill="#608cb5"/><circle cx="17.5" cy="52.5" r="5" fill="#608cb5"/><circle cx="52.5" cy="52.5" r="5" fill="#608cb5"/><circle cx="87.5" cy="52.5" r="5" fill="#608cb5"/><circle cx="17.5" cy="87.5" r="5" fill="#608cb5"/><circle cx="52.5" cy="87.5" r="5" fill="#608cb5"/><circle cx="87.5" cy="87.5" r="5" fill="#608cb5"/></g>
+  <g transform="translate(680,430)"><text x="0" y="-15" class="t s">1×5 连续支撑</text><rect x="0" y="0" width="170" height="42" fill="#fff" stroke="#777"/><line x1="34" y1="0" x2="34" y2="42" class="w"/><line x1="68" y1="0" x2="68" y2="42" class="w"/><line x1="102" y1="0" x2="102" y2="42" class="w"/><line x1="136" y1="0" x2="136" y2="42" class="w"/><circle cx="17" cy="21" r="5" fill="#d48762"/><circle cx="51" cy="21" r="5" fill="#d48762"/><circle cx="85" cy="21" r="5" fill="#d48762"/><circle cx="119" cy="21" r="5" fill="#d48762"/><circle cx="153" cy="21" r="5" fill="#d48762"/></g>
+  <g transform="translate(680,620)"><text x="0" y="-15" class="t s">1×5, d=3（有效 1×13）</text><rect x="0" y="0" width="221" height="42" fill="#fff" stroke="#777"/><g class="w"><line x1="17" y1="0" x2="17" y2="42"/><line x1="34" y1="0" x2="34" y2="42"/><line x1="51" y1="0" x2="51" y2="42"/><line x1="68" y1="0" x2="68" y2="42"/><line x1="85" y1="0" x2="85" y2="42"/><line x1="102" y1="0" x2="102" y2="42"/><line x1="119" y1="0" x2="119" y2="42"/><line x1="136" y1="0" x2="136" y2="42"/><line x1="153" y1="0" x2="153" y2="42"/><line x1="170" y1="0" x2="170" y2="42"/><line x1="187" y1="0" x2="187" y2="42"/><line x1="204" y1="0" x2="204" y2="42"/></g><circle cx="8.5" cy="21" r="5" fill="#d48762"/><circle cx="59.5" cy="21" r="5" fill="#d48762"/><circle cx="110.5" cy="21" r="5" fill="#d48762"/><circle cx="161.5" cy="21" r="5" fill="#d48762"/><circle cx="212.5" cy="21" r="5" fill="#d48762"/></g>
+
+  <!-- routing -->
+  <text x="965" y="185" class="t h">逐像素路由分支</text>
+  <rect x="970" y="255" width="230" height="105" rx="10" class="route"/><text x="1085" y="290" text-anchor="middle" class="t m">路由上下文 Cᵣ</text><text x="1085" y="323" text-anchor="middle" class="t s">3×3 Depthwise Conv</text><text x="1085" y="348" text-anchor="middle" class="t xs">Cᵣ∈Rᴮ×ᶜ×ᴴ×ᵂ</text>
+  <path d="M350 511 H930 V308 H970" class="line"/>
+  <rect x="1270" y="215" width="260" height="120" rx="10" class="gate"/><text x="1400" y="252" text-anchor="middle" class="t m">内容门控 α</text><text x="1400" y="286" text-anchor="middle" class="t s">α=Sigmoid(Conv₁×₁(Cᵣ))</text><text x="1400" y="317" text-anchor="middle" class="t xs">B×1×H×W；每个位置独立</text>
+  <rect x="1270" y="430" width="260" height="120" rx="10" class="gate"/><text x="1400" y="467" text-anchor="middle" class="t m">尺度门控 (ωₛ,ωₗ)</text><text x="1400" y="501" text-anchor="middle" class="t s">Softmax(Conv₁×₁(Cᵣ))</text><text x="1400" y="532" text-anchor="middle" class="t xs">B×2×H×W；ωₛ+ωₗ=1</text>
+  <path d="M1200 308 H1235 V275 H1270 M1235 308 V490 H1270" class="line"/>
+
+  <!-- scale mixture -->
+  <rect x="1605" y="500" width="300" height="135" rx="12" class="mix"/><text x="1755" y="541" text-anchor="middle" class="t m">水平支撑尺度融合 H</text><text x="1755" y="580" text-anchor="middle" class="t m">H = ωₛ⊙Hₛ + ωₗ⊙Hₗ</text><text x="1755" y="615" text-anchor="middle" class="t xs">按像素选择轻拖影或长拖影</text>
+  <path d="M640 478 H1560 V540 H1605 M640 668 H1560 V595 H1605 M1530 490 H1575 V610 H1605" class="line"/>
+
+  <!-- content mixture -->
+  <rect x="1990" y="335" width="300" height="160" rx="12" class="mix"/><text x="2140" y="377" text-anchor="middle" class="t m">内容软选择 M</text><text x="2140" y="418" text-anchor="middle" class="t m">M=(1−α)⊙G + α⊙H</text><text x="2140" y="452" text-anchor="middle" class="t xs">α≈0：保护非定向织纹/装饰</text><text x="2140" y="478" text-anchor="middle" class="t xs">α≈1：使用近水平运动恢复</text>
+  <path d="M640 287 H1945 V375 H1990 M1905 567 H1945 V445 H1990 M1530 275 H1945 V405 H1990" class="line"/>
+  <rect x="2010" y="590" width="140" height="85" rx="10" fill="#cfe8f6" stroke="#4e8fb4" stroke-width="2"/><text x="2080" y="624" text-anchor="middle" class="t m">1×1 Conv</text><text x="2080" y="653" text-anchor="middle" class="t xs">Project C→C</text>
+  <rect x="2190" y="595" width="130" height="75" rx="10" class="note"/><text x="2255" y="627" text-anchor="middle" class="t m">ρ⊙P(M)</text><text x="2255" y="653" text-anchor="middle" class="t xs">ρ: 1×C×1×1</text>
+  <circle cx="2210" cy="780" r="30" class="box"/><text x="2210" y="791" text-anchor="middle" class="t h">+</text>
+  <rect x="2270" y="743" width="90" height="75" rx="9" class="box"/><text x="2315" y="787" text-anchor="middle" class="t m">Fout</text>
+  <path d="M2140 495 V560 H2080 V590 M2150 633 H2190 M2255 670 V750 H2210" class="line"/><path d="M135 552 V860 H2210 V810" class="skip"/><path d="M2240 780 H2270" class="line"/>
+  <text x="1540" y="852" text-anchor="middle" class="t s">恒等残差；ρ 初始化为 0：模块初始严格输出 F，训练后逐通道开启运动恢复残差</text>
+  <text x="75" y="920" class="t h">完整计算：</text><text x="300" y="920" class="t m">Fout = F + ρ⊙P[(1−α)⊙G + α⊙(ωₛ⊙Hₛ + ωₗ⊙Hₗ)]</text>
+
+  <!-- detail cards -->
+  <rect x="55" y="1020" width="720" height="320" rx="16" fill="#f1f8ff" stroke="#608cb5" stroke-width="2"/>
+  <text x="85" y="1063" class="t h">为什么保留通用分支 G？</text>
+  <text x="85" y="1110" class="t m">• TJML 金粉、织纹和印花具有任意方向高频边缘</text>
+  <text x="85" y="1150" class="t m">• 固定水平滤波会把背景纹理误当成运动轨迹</text>
+  <text x="85" y="1190" class="t m">• α 可在非运动区域趋近 0，回退到 3×3 通用恢复</text>
+  <text x="85" y="1230" class="t m">• 不使用硬掩膜，路由连续、可微且无需额外测试输入</text>
+  <text x="85" y="1280" class="t s">因此“水平”只是可被局部内容否决的软偏置，而不是全图先验。</text>
+  <rect x="840" y="1020" width="720" height="320" rx="16" fill="#fff9ef" stroke="#d49b50" stroke-width="2"/>
+  <text x="870" y="1063" class="t h">为什么需要短、长两种支撑？</text>
+  <text x="870" y="1110" class="t m">• 退化核长度在不同图像与横向区域间变化</text>
+  <text x="870" y="1150" class="t m">• Hₛ 保留轻度模糊下的局部线迹细节</text>
+  <text x="870" y="1190" class="t m">• Hₗ 用空洞 1×5 覆盖 13 个水平特征位置</text>
+  <text x="870" y="1230" class="t m">• 在 H/2、H/4 尺度约对应原图 26、52 像素支撑</text>
+  <text x="870" y="1280" class="t s">Softmax 路由保证两个尺度权重归一，避免无约束幅值放大。</text>
+  <rect x="1625" y="1020" width="720" height="320" rx="16" fill="#f3fbf3" stroke="#64a76a" stroke-width="2"/>
+  <text x="1655" y="1063" class="t h">部署位置与计算特性</text>
+  <text x="1655" y="1110" class="t m">• Encoder H/2：1 个；Bottleneck H/4：2 个</text>
+  <text x="1655" y="1150" class="t m">• Decoder H/2：1 个；全分辨率：0 个</text>
+  <text x="1655" y="1190" class="t m">• 三个恢复候选均为 depthwise convolution</text>
+  <text x="1655" y="1230" class="t m">• 路由只输出 1+2 个空间权重图，开销较低</text>
+  <text x="1655" y="1280" class="t s">中低分辨率布置扩大原图感受野，并减少方向先验对细织纹的过锐化。</text>
+</svg>

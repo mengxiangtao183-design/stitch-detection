@@ -1,0 +1,7 @@
+# Copy the relevant model checkpoint's saved model configuration when evaluating.
+# This file is an optional override template for consistent online latency tests.
+base_config: comparison_base_full150.yaml
+evaluation:
+  batch_size: 1
+  num_workers: 0
+

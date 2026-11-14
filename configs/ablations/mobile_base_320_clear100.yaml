@@ -1,0 +1,111 @@
+# M0: shared MobileNetV4-FPN baseline.  No newly added module/loss is enabled.
+model:
+  name: "M0-MobileNetV4-FPN-base-320"
+  image_processing:
+    target_size: 320
+    image_subdir: "clear"
+    normalize_mean: [0.485, 0.456, 0.406]
+    normalize_std: [0.229, 0.224, 0.225]
+  backbone:
+    name: "mobilenetv4_hybrid_medium"
+    use_coord_att: false
+    pretrained: "H:/C3Netqing/model.safetensors"
+  distillation:
+    enabled: false
+  decoder:
+    type: "mobile_fpn"
+    mobile_fpn:
+      fpn_channels: 192
+      edge_channels: 128
+      loc_channels: 128
+      fusion_channels: 128
+      num_edge_blocks: 1
+      num_context_blocks: 1
+      fusion_refine_blocks: 1
+      attn_gen_intermediate_channels: 64
+      deep_context:
+        enable: false
+        gate_channels: 64
+        residual_scale_init: 0.0
+      trajectory_enhance:
+        enable: false
+        num_blocks: 1
+        strip_kernel_size: 7
+        dilations: [2, 3]
+        gate_channels: 32
+        edge_prior_blocks: 1
+      high_res_refine:
+        enable: false
+        output_stride: 1
+        refine_channels: 48
+        image_channels: 16
+        num_blocks: 1
+      icg_params:
+        image_channels: 3
+        ia_cnn_channels: 32
+        contrast_channels: 16
+        contrast_agg_kernel: 5
+        contrast_bg_thresh: 0.1
+    upsampler:
+      style: "lp"
+      groups: 4
+      dyscope: false
+  fusion_head:
+    fuse_channels: 128
+    num_refine_blocks: 2
+    attn_gen_intermediate_channels: 64
+
+training:
+  seed: 42
+  num_epochs: 30
+  batch_size: 2
+  use_amp: true
+  num_workers: 0
+  val_ratio: 0.1
+  max_samples_per_dataset: 100
+  save_best: true
+  save_freq: 30
+  gradient_clip: 1.0
+  early_stop_patience: 31
+  min_delta: 0.0005
+  optimizer:
+    learning_rate: 0.0001
+    weight_decay: 0.01
+    encoder_lr_ratio: 0.2
+  scheduler:
+    type: cosine_annealing
+    eta_min: 0.000001
+  loss:
+    w_edge: 1.0
+    w_loc: 1.15
+    w_final: 1.2
+    focal_alpha: 0.25
+    focal_gamma: 3.0
+    tversky_alpha_loc: 0.6
+    tversky_beta_loc: 0.4
+    tversky_alpha_final: 0.4
+    tversky_beta_final: 0.6
+    final_edge_dice_weight: 0.2
+    edge_focal_weight: 5.0
+    edge_reg_weight: 0.15
+    edge_dist_cutoff: 5
+    instance_weight_k: 3.0
+    instance_weight_low_thresh: 0.02
+    instance_weight_high_thresh: 0.8
+    eps: 0.0000001
+    topology_weight: 0.0
+    boundary_weight: 0.0
+    centerline_weight: 0.0
+    centerline_dilation_kernel_size: 3
+    skeleton_iterations: 8
+    boundary_kernel_size: 3
+  datasets: ["H:/DATASET/DB", "H:/DATASET/XJ", "H:/DATASET/SD"]
+
+evaluation:
+  batch_size: 2
+  num_workers: 0
+  datasets: ["H:/DATASET/DB", "H:/DATASET/XJ", "H:/DATASET/SD", "H:/DATASET/RX"]
+
+prediction:
+  batch_size: 1
+  output_size: null

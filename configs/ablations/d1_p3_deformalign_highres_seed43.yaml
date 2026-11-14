@@ -1,0 +1,10 @@
+# D1 repeatability run 2: identical architecture and hyperparameters to D1,
+# changing only the controlled random seed.
+base_config: "d1_p3_deformalign_highres.yaml"
+
+model:
+  name: "D1-P3-DeformAlign-HighRes-MobileFPN-320-Seed43"
+
+training:
+  seed: 43
+  save_best: true

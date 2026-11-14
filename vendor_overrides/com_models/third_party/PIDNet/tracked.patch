@@ -1,0 +1,10 @@
+diff --git a/models/__init__.py b/models/__init__.py
+index 469c659..2d9afcb 100644
+--- a/models/__init__.py
++++ b/models/__init__.py
+@@ -5,4 +5,4 @@ from __future__ import absolute_import
+ from __future__ import division
+ from __future__ import print_function
+ 
+-import models.pidnet
++from . import pidnet

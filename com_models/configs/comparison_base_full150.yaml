@@ -1,0 +1,25 @@
+# Shared protocol for all comparison networks.
+# DB/XJ/SD participate in training; RX remains a pure external test set.
+base_config: ../../configs/ablations/mobile_base_320_full_150_seed42.yaml
+
+model:
+  architecture: c3net
+  image_processing:
+    target_size: 320
+    image_subdir: clear
+
+training:
+  seed: 42
+  num_epochs: 150
+  batch_size: 2
+  max_samples_per_dataset: null
+  save_best: true
+  save_freq: 30
+  # Stop when validation Binary IoU has not improved for 25 consecutive epochs.
+  early_stop_patience: 25
+  monitor_metric: binary_iou
+  include_trajectory_metrics: true
+
+evaluation:
+  batch_size: 2
+  num_workers: 0

@@ -1,0 +1,15 @@
+{
+  "source_images": 112,
+  "images_per_defect_class": 28,
+  "roc": "One-versus-rest empirical curves from four-fold OOF threshold-normalized decision scores. Not calibrated probabilities; no threshold selection on test data. Curves are diagnostic and do not replace fixed-decision accuracy or alarm recall.",
+  "dice": "All 112 images, source-ID order within each class. Same GT mask for clear, blurred and restored paths. Connecting lines aid paired comparison, not temporal continuity. No smoothing, interpolation or selected success examples.",
+  "uncertainty": "Individual paired observations / empirical ROC, not a mean across independent runs. No uncertainty interval or significance claim is shown.",
+  "font": "Times New Roman 8 pt; requested serif font intentionally overrides the source preflight sans-serif recommendation.",
+  "manuscript": "No document modified.",
+  "dice_mean": {
+    "clear": 88.91239730973136,
+    "blur_direct": 83.58028485438763,
+    "deblur_then_aphnet": 87.9198604542166
+  },
+  "panel_audit": "All four classes retained; common scales and alignment audited. Dashed gray clear reference, orange blurred control and blue restored path are consistent across figures."
+}

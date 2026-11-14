@@ -63,7 +63,7 @@ class CODImageProcessor:
     
     def __init__(
         self,
-        target_size: int = 392,
+        target_size: int = 320,
         normalize_mean: Tuple[float, float, float] = (0.485, 0.456, 0.406),  # ImageNet stats
         normalize_std: Tuple[float, float, float] = (0.229, 0.224, 0.225),   # ImageNet stats
     ):
@@ -71,7 +71,7 @@ class CODImageProcessor:
         Initialize the COD image processor.
 
         Args:
-            target_size: Target size for processed images (default: 392)
+            target_size: Target size for processed images (default: 320)
             normalize_mean: RGB normalization means (default: ImageNet)
             normalize_std: RGB normalization stds (default: ImageNet)
         """

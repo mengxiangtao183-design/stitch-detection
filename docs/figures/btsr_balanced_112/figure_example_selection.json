@@ -1,0 +1,14 @@
+{
+  "stable": {
+    "skip": "074",
+    "break": "042",
+    "skew": "062",
+    "loose": "066"
+  },
+  "blur_error_restored_correct": {
+    "skip": "032",
+    "break": "030",
+    "skew": "079",
+    "loose": "013"
+  }
+}

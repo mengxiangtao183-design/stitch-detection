@@ -4,12 +4,12 @@ Utility Modules for C3Net Architecture .
 This file consolidates fundamental building blocks used across different
 components of the C3Net model, promoting code reuse and consistency.
 It includes:
-- ConvGNReLU: Standard Convolution -> Group Normalization -> ReLU block.
+- ConvGNReLU: Standard Convolution卷积 -> Group Normalization组归一化 -> ReLU block.
 - ECABlock: Efficient Channel Attention module.
-- AttentionGate: Standard Attention Gate mechanism for feature modulation.
+- AttentionGate注意门: Standard Attention Gate mechanism for feature modulation.特征调制
 - DySample: The original learnable Dynamic Upsampling module (Liu et al., ICCV 2023),
             chosen based on experimental results showing a slight advantage over
-            fixed interpolation for the C3Net baseline.
+            fixed interpolation固定插值 for the C3Net baseline.
 
 Author  : Baber Jan
 Date    : 09-05-2025
@@ -28,18 +28,18 @@ logger = logging.getLogger(__name__)
 # --- Common Convolutional Block ---
 class ConvGNReLU(nn.Sequential):
     """
-    A standard sequential block: Convolution -> Group Normalization -> ReLU.
+    A standard sequential顺序 block: Convolution卷积 -> Group Normalization -> ReLU.
 
-    Uses GroupNorm with 32 groups when possible, otherwise 1 group.
+    Uses GroupNorm with 32 groups when possible, otherwise 1 group（一组就是层归一化）.
     ReLU activation is inplace.
 
     Args:
         in_channels (int): Number of input channels.
         out_channels (int): Number of output channels.
-        kernel_size (int): Size of the convolutional kernel. Default: 3.
-        stride (int): Stride of the convolution. Default: 1.
-        padding (int): Padding added to the input. Default: 1 (for kernel_size=3).
-        dilation (int): Spacing between kernel elements. Default: 1.
+        kernel_size (int): Size of the convolutional kernel. Default: 3.大小
+        stride (int): Stride of the convolution. Default: 1.步幅
+        padding (int): Padding added to the input. Default: 1 (for kernel_size=3).填充
+        dilation (int): Spacing between kernel elements. Default: 1.卷积核元素之间的膨胀
         groups (int): Convolution groups. Default: 1 (standard convolution).
         bias (bool): Whether to include bias in convolution. Default: False.
     """
@@ -59,7 +59,7 @@ class ConvGNReLU(nn.Sequential):
         if not isinstance(out_channels, int) or out_channels <= 0:
              raise ValueError(f"'out_channels' must be a positive integer, got {out_channels}.")
 
-        # Default padding to keep spatial size same for stride=1, kernel=3
+        # Default padding to keep spatial空间 size same for stride=1, kernel=3
         if padding is None:
             padding = (kernel_size - 1) // 2 * dilation
 
@@ -105,9 +105,9 @@ class ECABlock(nn.Module):
             raise ValueError(f"'channels' must be a positive integer, got {channels}.")
         self.channels = channels
 
-        # --- Determine Kernel Size (k) ---
+        # --- Determine Kernel Size (k) ---决定通道大小
         if use_adaptive_kernel:
-            # k = |log2(C)/gamma + b/gamma|_odd
+            # k = |log2(C)/gamma + b/gamma|_odd  自适应计算 1D 卷积核大小 k
             t = int(abs((math.log2(channels) + b) / gamma))
             k = t if t % 2 else t + 1 # Ensure k is odd
         else:
@@ -116,7 +116,7 @@ class ECABlock(nn.Module):
             raise ValueError(f"ECA Block kernel size k ({k}) must be odd and positive.")
 
         # --- Layers ---
-        self.avg_pool = nn.AdaptiveAvgPool2d(1) # Global Average Pooling (B, C, 1, 1)
+        self.avg_pool = nn.AdaptiveAvgPool2d(1) # Global Average Pooling (B, C, 1, 1)全局平均池化：每个通道的所有像素平均成一个值，得到通道的“全局语义表示”
         self.conv1d = nn.Conv1d(1, 1, kernel_size=k, padding=k // 2, bias=False) # 1D Conv across channels
         self.sigmoid = nn.Sigmoid() # Channel weights [0, 1]
 
@@ -130,7 +130,7 @@ class ECABlock(nn.Module):
         y = y.transpose(-1, -2).unsqueeze(-1) # (B, 1, C) -> (B, C, 1) -> (B, C, 1, 1)
         channel_attention_weights = self.sigmoid(y)
         # Apply attention
-        return x * channel_attention_weights # Broadcasting: (B, C, H, W) * (B, C, 1, 1)
+        return x * channel_attention_weights # Broadcasting: (B, C, H, W) * (B, C, 1, 1)原始特征 (B,C,H,W) × 权重 (B,C,1,1)
 
 # --- Attention Gate Module (Included as a standard utility) ---
 class AttentionGate(nn.Module):
@@ -145,6 +145,10 @@ class AttentionGate(nn.Module):
         F_g (int): Number of channels in the gating signal 'g'.
         F_int (int): Intermediate channel dimension. Defaults to max(1, F_x // 2).
         norm_layer (Type[nn.Module]): Normalization layer. Default: nn.GroupNorm.
+        用一个门控信号（gating signal，通常来自其他分支或低分辨率特征）来“软开关”输入特征 x 的每个空间位置和通道，
+        让网络自动关注更重要的区域（比如物体区域），抑制不重要的区域（比如背景）。
+    在ICG 模块中，这个 AttentionGate 被用在 E3（Iterative Attention Gating）部分，
+    g 就是 GuidedContrastModule 生成的对比图（contrast_map），x 是要被调制的语义特征
     """
     def __init__(self,
                  F_x: int,
@@ -158,11 +162,11 @@ class AttentionGate(nn.Module):
 
         self.F_int = F_int
 
-        # Learnable projections for x and g
+        # Learnable projections for x and g   把 x 从 F_x 通道投影到 F_int（降维）中间维度
         self.W_x = nn.Conv2d(F_x, F_int, kernel_size=1, stride=1, padding=0, bias=True)
         self.W_g = nn.Conv2d(F_g, F_int, kernel_size=1, stride=1, padding=0, bias=True)
 
-        # Final convolution to get attention coefficients
+        # Final convolution to get attention coefficients系数
         self.psi = nn.Sequential(
             norm_layer(num_groups=32 if F_int >= 32 and F_int % 32 == 0 else 1, num_channels=F_int),
             nn.ReLU(inplace=True),

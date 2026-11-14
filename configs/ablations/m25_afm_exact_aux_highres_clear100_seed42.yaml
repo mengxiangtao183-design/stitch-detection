@@ -1,0 +1,20 @@
+# M25 / AFM exact auxiliary supervision.
+# This replaces M24's max-pooled coarse-cell target with the supervision
+# contract already used by the working M0 AFM: P2 logits are bilinearly resized
+# to the exact GT resolution and receive a low-weight, precision-oriented loss.
+base_config: m6_afm_guided_highres_clear100_seed42.yaml
+
+model:
+  name: "M25-AFMExactAux-HighRes-Clear100-Seed42"
+  decoder:
+    mobile_fpn:
+      afm_aux_supervision:
+        enable: true
+
+training:
+  monitor_metric: binary_iou
+  loss:
+    # Low-weight M0-style direct AFM segmentation supervision.  It is warmed
+    # up so the established M6 HighRes path remains the dominant objective.
+    afm_aux_weight: 0.10
+    afm_aux_warmup_epochs: 5

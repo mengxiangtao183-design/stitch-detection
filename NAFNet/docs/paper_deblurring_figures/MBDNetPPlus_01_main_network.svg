@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2600" height="1250" viewBox="0 0 2600 1250">
+  <defs>
+    <marker id="a" markerWidth="12" markerHeight="10" refX="11" refY="5" orient="auto"><path d="M0,0 L12,5 L0,10 Z" fill="#333"/></marker>
+    <filter id="sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="2" dy="3" stdDeviation="3" flood-color="#777" flood-opacity="0.22"/></filter>
+    <style>
+      .t{font-family:'Times New Roman','SimSun',serif;fill:#202020}.title{font-size:43px;font-weight:bold}.sub{font-size:22px}.h{font-size:26px;font-weight:bold}.m{font-size:21px}.s{font-size:17px}.xs{font-size:14px}
+      .stem{fill:#cfe8f6;stroke:#4e8fb4;stroke-width:2.2}.dwpw{fill:#ffe1d3;stroke:#d48762;stroke-width:2.2}.mbd{fill:#fff0ad;stroke:#c69b28;stroke-width:2.2}.lrc{fill:#d9efd8;stroke:#5b9a5c;stroke-width:2.2}.sample{fill:#eadcf4;stroke:#9470aa;stroke-width:2.2}.head{fill:#d8e7f7;stroke:#608cb5;stroke-width:2.2}.box{fill:#fff;stroke:#3a3a3a;stroke-width:2}
+      .line{fill:none;stroke:#333;stroke-width:2.6;marker-end:url(#a)}.skip{fill:none;stroke:#666;stroke-width:2.3;stroke-dasharray:9 7;marker-end:url(#a)}.guide{fill:none;stroke:#999;stroke-width:1.5;stroke-dasharray:5 5}
+    </style>
+  </defs>
+  <rect width="2600" height="1250" fill="white"/>
+  <text x="1300" y="55" text-anchor="middle" class="t title">MBDNet-P+ 主网络结构</text>
+  <text x="1300" y="89" text-anchor="middle" class="t sub">Two-level encoder–decoder with scale-limited motion-biased restoration</text>
+  <text x="80" y="138" class="t s">输入只包含 RGB 模糊图像；不使用线迹掩膜、材料类别、域标签或退化参数。输入右侧/下侧复制填充至 4 的倍数，输出再裁回原尺寸。</text>
+
+  <!-- scale guides -->
+  <line x1="50" y1="330" x2="2550" y2="330" class="guide"/><text x="55" y="318" class="t s">H×W</text>
+  <line x1="50" y1="555" x2="2550" y2="555" class="guide"/><text x="55" y="543" class="t s">H/2×W/2</text>
+  <line x1="50" y1="780" x2="2550" y2="780" class="guide"/><text x="55" y="768" class="t s">H/4×W/4</text>
+
+  <!-- input and encoder -->
+  <g filter="url(#sh)"><polygon points="85,245 155,225 155,365 85,385" fill="#f5e8f1" stroke="#956b89" stroke-width="2"/><polygon points="98,232 168,212 168,352 98,372" fill="#faeef6" stroke="#956b89" stroke-width="2"/><polygon points="111,219 181,199 181,339 111,359" fill="#fff8fc" stroke="#956b89" stroke-width="2"/></g>
+  <text x="133" y="418" text-anchor="middle" class="t h">模糊图像 Iᵦ</text><text x="133" y="445" text-anchor="middle" class="t s">B×3×H×W</text>
+  <rect x="235" y="260" width="135" height="118" rx="10" class="stem" filter="url(#sh)"/><text x="303" y="298" text-anchor="middle" class="t h">Stem</text><text x="303" y="329" text-anchor="middle" class="t m">3×3 Conv</text><text x="303" y="358" text-anchor="middle" class="t s">3 → 64</text><path d="M181 310 H235" class="line"/>
+  <rect x="425" y="225" width="190" height="188" rx="12" class="dwpw" filter="url(#sh)"/><text x="520" y="266" text-anchor="middle" class="t h">Encoder E0</text><text x="520" y="307" text-anchor="middle" class="t m">3 × DWPW</text><text x="520" y="342" text-anchor="middle" class="t s">通用纹理/边缘恢复</text><text x="520" y="373" text-anchor="middle" class="t s">B×64×H×W</text><text x="520" y="402" text-anchor="middle" class="t xs">输出保存为 F₀</text><path d="M370 319 H425" class="line"/>
+  <rect x="670" y="475" width="155" height="135" rx="10" class="sample" filter="url(#sh)"/><text x="748" y="512" text-anchor="middle" class="t h">Down-1</text><text x="748" y="545" text-anchor="middle" class="t s">3×3 DW, stride=2</text><text x="748" y="574" text-anchor="middle" class="t s">1×1 PW: 64→128</text><text x="748" y="601" text-anchor="middle" class="t xs">H,W ↓2；C ×2</text><path d="M615 319 H645 V542 H670" class="line"/>
+  <rect x="875" y="455" width="210" height="205" rx="12" class="dwpw" filter="url(#sh)"/><text x="980" y="496" text-anchor="middle" class="t h">Encoder E1</text><text x="980" y="536" text-anchor="middle" class="t m">4 × DWPW</text><rect x="915" y="557" width="130" height="55" rx="8" class="mbd"/><text x="980" y="591" text-anchor="middle" class="t m">MBD-E</text><text x="980" y="638" text-anchor="middle" class="t s">B×128×H/2×W/2</text><text x="980" y="657" text-anchor="middle" class="t xs">输出保存为 F₁</text><path d="M825 542 H875" class="line"/>
+  <rect x="1135" y="700" width="155" height="135" rx="10" class="sample" filter="url(#sh)"/><text x="1213" y="737" text-anchor="middle" class="t h">Down-2</text><text x="1213" y="770" text-anchor="middle" class="t s">3×3 DW, stride=2</text><text x="1213" y="799" text-anchor="middle" class="t s">1×1 PW: 128→256</text><text x="1213" y="826" text-anchor="middle" class="t xs">H,W ↓2；C ×2</text><path d="M1085 557 H1110 V767 H1135" class="line"/>
+
+  <!-- bottleneck -->
+  <rect x="1340" y="660" width="580" height="245" rx="15" fill="#fff9dc" stroke="#c69b28" stroke-width="2.6" filter="url(#sh)"/>
+  <text x="1630" y="702" text-anchor="middle" class="t h">低分辨率瓶颈 B×256×H/4×W/4</text>
+  <rect x="1375" y="740" width="120" height="80" rx="9" class="dwpw"/><text x="1435" y="773" text-anchor="middle" class="t m">12×</text><text x="1435" y="801" text-anchor="middle" class="t m">DWPW</text>
+  <rect x="1530" y="740" width="120" height="80" rx="9" class="lrc"/><text x="1590" y="773" text-anchor="middle" class="t m">LRC</text><text x="1590" y="801" text-anchor="middle" class="t xs">Local+dilated</text>
+  <rect x="1685" y="740" width="95" height="80" rx="9" class="mbd"/><text x="1733" y="788" text-anchor="middle" class="t m">MBD-1</text>
+  <rect x="1815" y="740" width="75" height="80" rx="9" class="dwpw"/><text x="1853" y="774" text-anchor="middle" class="t s">2×</text><text x="1853" y="800" text-anchor="middle" class="t s">DWPW</text>
+  <rect x="1795" y="845" width="95" height="48" rx="8" class="mbd"/><text x="1843" y="876" text-anchor="middle" class="t m">MBD-2</text>
+  <path d="M1290 767 H1340 M1495 780 H1530 M1650 780 H1685 M1780 780 H1815 M1853 820 V845" class="line"/>
+
+  <!-- decoder -->
+  <rect x="1970" y="700" width="150" height="135" rx="10" class="sample" filter="url(#sh)"/><text x="2045" y="737" text-anchor="middle" class="t h">Up-1</text><text x="2045" y="770" text-anchor="middle" class="t s">1×1: 256→512</text><text x="2045" y="799" text-anchor="middle" class="t s">PixelShuffle(2)</text><text x="2045" y="826" text-anchor="middle" class="t xs">→128 channels</text><path d="M1890 869 H1945 V767 H1970" class="line"/>
+  <circle cx="2175" cy="555" r="28" class="box"/><text x="2175" y="565" text-anchor="middle" class="t h">+</text><path d="M2120 767 H2140 V555 H2147" class="line"/>
+  <rect x="2230" y="455" width="210" height="205" rx="12" class="dwpw" filter="url(#sh)"/><text x="2335" y="496" text-anchor="middle" class="t h">Decoder D1</text><text x="2335" y="536" text-anchor="middle" class="t m">4 × DWPW</text><rect x="2270" y="557" width="130" height="55" rx="8" class="mbd"/><text x="2335" y="591" text-anchor="middle" class="t m">MBD-D</text><text x="2335" y="638" text-anchor="middle" class="t s">B×128×H/2×W/2</text><path d="M2203 555 H2230" class="line"/>
+  <rect x="2025" y="260" width="150" height="135" rx="10" class="sample" filter="url(#sh)"/><text x="2100" y="297" text-anchor="middle" class="t h">Up-2</text><text x="2100" y="330" text-anchor="middle" class="t s">1×1: 128→256</text><text x="2100" y="359" text-anchor="middle" class="t s">PixelShuffle(2)</text><text x="2100" y="386" text-anchor="middle" class="t xs">→64 channels</text><path d="M2440 557 H2470 V430 H2100 V395" class="line"/>
+  <circle cx="2225" cy="319" r="28" class="box"/><text x="2225" y="329" text-anchor="middle" class="t h">+</text><path d="M2175 328 H2197" class="line"/>
+  <rect x="2280" y="225" width="180" height="188" rx="12" class="dwpw" filter="url(#sh)"/><text x="2370" y="266" text-anchor="middle" class="t h">Decoder D0</text><text x="2370" y="307" text-anchor="middle" class="t m">3 × DWPW</text><text x="2370" y="342" text-anchor="middle" class="t s">全分辨率通用精炼</text><text x="2370" y="373" text-anchor="middle" class="t s">B×64×H×W</text><path d="M2253 319 H2280" class="line"/>
+  <rect x="2490" y="260" width="90" height="118" rx="10" class="head" filter="url(#sh)"/><text x="2535" y="298" text-anchor="middle" class="t h">Head</text><text x="2535" y="329" text-anchor="middle" class="t s">3×3</text><text x="2535" y="356" text-anchor="middle" class="t s">64→3</text><path d="M2460 319 H2490" class="line"/>
+
+  <!-- skips -->
+  <path d="M980 455 V420 H2175 V527" class="skip"/><text x="1575" y="410" text-anchor="middle" class="t s">F₁ 跳跃连接：Up-1 输出 + 半分辨率编码特征</text>
+  <path d="M520 225 V175 H2225 V291" class="skip"/><text x="1390" y="165" text-anchor="middle" class="t s">F₀ 跳跃连接：Up-2 输出 + 全分辨率编码特征</text>
+
+  <!-- output residual -->
+  <circle cx="2445" cy="1010" r="29" class="box"/><text x="2445" y="1021" text-anchor="middle" class="t h">+</text>
+  <path d="M2535 378 V940 H2445 V981" class="line"/>
+  <path d="M133 385 V1038 H2416" class="skip"/><text x="1250" y="1028" text-anchor="middle" class="t s">全局图像残差：Î = Iᵦ + R；R=Head(D0)</text>
+  <g filter="url(#sh)"><polygon points="2380,1100 2450,1080 2450,1180 2380,1200" fill="#e2efff" stroke="#608cb5" stroke-width="2"/><polygon points="2393,1087 2463,1067 2463,1167 2393,1187" fill="#edf6ff" stroke="#608cb5" stroke-width="2"/><polygon points="2406,1074 2476,1054 2476,1154 2406,1174" fill="#f7fbff" stroke="#608cb5" stroke-width="2"/></g>
+  <path d="M2445 1039 V1058" class="line"/><text x="2430" y="1222" text-anchor="middle" class="t h">恢复图像 Î</text><text x="2430" y="1245" text-anchor="middle" class="t s">Crop → B×3×H×W</text>
+
+  <!-- notes -->
+  <rect x="80" y="835" width="1000" height="150" rx="14" fill="#f7fafc" stroke="#687887" stroke-width="1.8"/>
+  <text x="105" y="871" class="t h">结构统计</text><text x="105" y="909" class="t m">宽度：64→128→256；DWPW：3+4+12+2+4+3=28；MBD：4；LRC：1；参数量：13,699,791（13.70 M）</text>
+  <text x="105" y="944" class="t m">关键原则：全分辨率不放置方向模块；H/2、H/4 上用局部软路由处理 15–25 像素近水平运动拖影。</text>
+  <text x="105" y="974" class="t s">DWPW、MBD 与 LRC 的内部计算见独立模块图；所有残差尺度从 0 初始化，使深层网络从恒等映射稳定开始学习。</text>
+</svg>

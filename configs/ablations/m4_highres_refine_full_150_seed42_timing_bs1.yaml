@@ -1,0 +1,7 @@
+# Timing-only config for M4 HighRes full-data ablation.
+base_config: m4_highres_refine_full_150_seed42.yaml
+
+evaluation:
+  batch_size: 1
+  num_workers: 0
+

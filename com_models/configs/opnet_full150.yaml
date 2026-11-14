@@ -1,0 +1,13 @@
+base_config: comparison_base_full150.yaml
+model:
+  name: COM-OPNet-IJCV2023-Full150-Seed42-Stable
+  architecture: opnet
+  backbone_path: null
+
+training:
+  # The original run diverged after epoch 16 under AMP.  Use FP32 and a lower
+  # warm-up learning rate while retaining the common dataset split and losses.
+  use_amp: false
+  gradient_clip: 0.5
+  optimizer:
+    learning_rate: 3.0e-5

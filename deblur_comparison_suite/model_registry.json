@@ -1,0 +1,143 @@
+{
+  "protocol": {
+    "manifest_dir": "H:/C3Netqing/MISCFilter/manifests/c3net_multisource_linetrace_synblur_v2",
+    "data_root": "H:/DATASET",
+    "train_domains": ["DB", "XJ", "SD", "RX"],
+    "external_test_domains": ["RXHF", "TJML"],
+    "epochs": 30,
+    "patch_size": 320,
+    "effective_batch_size": 4,
+    "seed": 42,
+    "optimizer": "AdamW",
+    "learning_rate": 0.001,
+    "minimum_learning_rate": 1e-7,
+    "weight_decay": 0.001,
+    "loss": "PSNRLoss"
+  },
+  "models": {
+    "mbdnet_p_plus": {
+      "label": "MBDNet-P+ (Ours)",
+      "source": "H:/C3Netqing/NAFNet",
+      "year": 2026,
+      "venue": "Ours",
+      "batch_size": 2,
+      "grad_accum_steps": 2
+    },
+    "mprnet": {
+      "label": "MPRNet",
+      "source": "H:/C3Netqing/Deblurring",
+      "year": 2021,
+      "venue": "CVPR",
+      "batch_size": 1,
+      "grad_accum_steps": 4
+    },
+    "nafnet": {
+      "label": "NAFNet",
+      "source": "H:/C3Netqing/NAFNet",
+      "year": 2022,
+      "venue": "ECCV",
+      "batch_size": 1,
+      "grad_accum_steps": 4
+    },
+    "restormer": {
+      "label": "Restormer",
+      "source": "third_party/Restormer",
+      "repository": "https://github.com/swz30/Restormer",
+      "year": 2022,
+      "venue": "CVPR Oral",
+      "batch_size": 1,
+      "grad_accum_steps": 4
+    },
+    "stripformer": {
+      "label": "Stripformer",
+      "source": "third_party/Stripformer",
+      "repository": "https://github.com/pp00704831/Stripformer",
+      "year": 2022,
+      "venue": "ECCV",
+      "batch_size": 1,
+      "grad_accum_steps": 4,
+      "optimizer": "Adam",
+      "learning_rate": 0.0001,
+      "weight_decay": 0.0,
+      "amp": false,
+      "run_tag": "multisource_v2_stable_fp32_s30_s42"
+    },
+    "banet": {
+      "label": "BANet",
+      "source": "third_party/BANet",
+      "repository": "https://github.com/pp00704831/banet",
+      "year": 2021,
+      "venue": "IEEE TIP 2022",
+      "batch_size": 1,
+      "grad_accum_steps": 4,
+      "optimizer": "Adam",
+      "learning_rate": 0.0001,
+      "weight_decay": 0.0,
+      "amp": false,
+      "run_tag": "multisource_v2_stable_fp32_s30_s42"
+    },
+    "loformer": {
+      "label": "LoFormer-S",
+      "source": "third_party/LoFormer",
+      "repository": "https://github.com/INVOKERer/LoFormer",
+      "year": 2024,
+      "venue": "ACM MM",
+      "batch_size": 1,
+      "grad_accum_steps": 4
+    },
+    "mimo_unet_plus": {
+      "label": "MIMO-UNet+",
+      "source": "third_party/MIMO-UNet",
+      "repository": "https://github.com/chosj95/MIMO-UNet",
+      "year": 2021,
+      "venue": "ICCV",
+      "batch_size": 1,
+      "grad_accum_steps": 4,
+      "optimizer": "Adam",
+      "learning_rate": 0.0001,
+      "weight_decay": 0.0,
+      "betas": [0.9, 0.999],
+      "amp": false,
+      "run_tag": "multisource_v2_stable_fp32_s30_s42"
+    },
+    "hinet": {
+      "label": "HINet",
+      "source": "third_party/HINet_official",
+      "repository": "https://github.com/megvii-model/HINet",
+      "year": 2021,
+      "venue": "CVPR Workshops",
+      "batch_size": 1,
+      "grad_accum_steps": 4,
+      "optimizer": "Adam",
+      "learning_rate": 0.0002,
+      "weight_decay": 0.0,
+      "betas": [0.9, 0.99],
+      "amp": false,
+      "run_tag": "multisource_v2_stable_fp32_s30_s42"
+    },
+    "ufpnet": {
+      "label": "UFPNet",
+      "source": "third_party/UFPDeblur",
+      "repository": "https://github.com/Fangzhenxuan/UFPDeblur",
+      "year": 2023,
+      "venue": "CVPR",
+      "batch_size": 1,
+      "grad_accum_steps": 4,
+      "learning_rate": 0.0002,
+      "amp": false
+    },
+    "sfnet": {
+      "label": "SFNet",
+      "source": "third_party/SFNet_official/Motion_deblurring",
+      "repository": "https://github.com/c-yn/SFNet",
+      "year": 2023,
+      "venue": "ICLR",
+      "batch_size": 2,
+      "grad_accum_steps": 2,
+      "optimizer": "Adam",
+      "learning_rate": 0.0001,
+      "weight_decay": 0.0,
+      "amp": false
+    }
+  }
+}

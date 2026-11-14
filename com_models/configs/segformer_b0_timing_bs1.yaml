@@ -1,0 +1,4 @@
+base_config: segformer_b0_full150.yaml
+evaluation:
+  batch_size: 1
+  num_workers: 0

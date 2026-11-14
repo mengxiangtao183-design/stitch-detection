@@ -1,27 +1,76 @@
-# Configuration for C3Net
-
+﻿# Configuration for C3Net
 model:
-  name: "C3Net" # Architecture name
+  name: "C3Net-MobileNetV4-Medium-FPN-KD-Clear"
 
   image_processing:
-    target_size:
-      392 # Input size (H=W). Must be divisible by encoder patch_size (14). 392/14=28.
-      # Increasing size (e.g., 504) improved performance but significantly increased GFLOPs (C3Net-L504).
-      # Decreasing size improves speed but likely harms performance. 392 offers the best balance found.
-    normalize_mean: [0.485, 0.456, 0.406] # Standard ImageNet mean for pre-trained backbone compatibility.
-    normalize_std: [0.229, 0.224, 0.225] # Standard ImageNet std dev.
+    target_size: 320
+    image_subdir: "clear"  # Train the detector directly on clear images.
+    normalize_mean: [0.485, 0.456, 0.406]
+    normalize_std: [0.229, 0.224, 0.225]
+
+
+  backbone:
+    name: "mobilenetv4_hybrid_medium"
+    use_coord_att: true
+    pretrained: "H:/C3Netqing/model.safetensors"  
+  # =====================================================================
+  # Knowledge Distillation (Teacher: DINOv2-Large 鈫?Student: MobileNetV4)
+  # Teacher runs frozen during training; only student weights are updated.
+  # =====================================================================
+  distillation:
+    enabled: false               # Set true to activate distillation
+    # teacher_checkpoint: "checkpoints/teacher/dinov2-large.pth"
+    temperature: 4.0              # KL temperature (higher = softer labels)
+    kd_weight: 0.5                # 伪: KD loss weight (total = (1-伪)*GT + 伪*KD)
+    distill_outputs:              # Per-head KD weights; set a value to 0 to disable that head.
+      final_mask: 1.0
+      object_mask: 0.7
+      edge_mask: 0.2
 
   encoder:
-    # Using DINOv2-Large with registers - Provided best performance/efficiency balance.
     model_name: "facebook/dinov2-with-registers-large"
     variant: "large"
-    # Standard ViT-L stages providing early features (1, 2) for EdgeBranch (texture/detail)
-    # and late features (23, 24) for LocBranch (semantics). Modifying these changes information source.
     output_stages: [1, 2, 23, 24]
-    patch_size: 14 # Native patch size for DINOv2 /14 models.
+    patch_size: 14
 
   # --- Decoder Settings ---
   decoder:
+    type: "mobile_fpn"            # Student decoder. DINO teacher still uses the legacy decoder.
+    mobile_fpn:
+      # Width/depth knobs for the lightweight MobileNetV4 decoder.
+      # Lower these for speed; raise them if accuracy drops too much.
+      fpn_channels: 192
+      edge_channels: 128
+      loc_channels: 128
+      fusion_channels: 128
+      num_edge_blocks: 1
+      num_context_blocks: 1
+      fusion_refine_blocks: 1
+      attn_gen_intermediate_channels: 64
+      deep_context:
+        enable: true
+        gate_channels: 64
+        residual_scale_init: 0.0
+      trajectory_enhance:
+        enable: true          # MRFA-DTE: multi-receptive-field directional trajectory enhancement.
+        num_blocks: 1
+        strip_kernel_size: 7  # Directional 1xK / Kx1 strip kernels for stitch trajectories.
+        dilations: [2, 3]     # Multi-receptive-field context for discontinuous or blurred stitches.
+        gate_channels: 32
+        edge_prior_blocks: 1  # Keep one Sobel/Laplacian edge-prior block after MRFA-DTE.
+      high_res_refine:
+        enable: true
+        output_stride: 1       # 1 -> 320x320 masks; 2 -> 160x160 masks for faster training.
+        refine_channels: 48
+        image_channels: 16
+        num_blocks: 1
+      icg_params:
+        image_channels: 3
+        ia_cnn_channels: 32
+        contrast_channels: 16
+        contrast_agg_kernel: 5
+        contrast_bg_thresh: 0.1
+
     # --- Upsampler Settings ---
     # Retaining DySample based on EXP-Upsample showing slight overall benefit vs bicubic.
     upsampler:
@@ -78,14 +127,15 @@ model:
 
 # --- Training Configuration ---
 training:
-  num_epochs: 200 # Total training epochs. Adjust based on validation curve convergence.
-  batch_size: 36 # Samples per GPU per step. Maximize based on GPU memory for stable gradients.
+  num_epochs: 40 # Total training epochs. Adjust based on validation curve convergence.
+  batch_size: 4 # Samples per GPU per step. Maximize based on GPU memory for stable gradients.
   use_amp: true # Use Automatic Mixed Precision (FP16). Highly recommended for speed/memory.
   num_workers: 0 # DataLoader workers. Increase if data loading is a bottleneck, limited by CPU cores.
   val_ratio: 0.1 # Fraction of training data for validation. Standard practice.
+  save_best: true  # Set false to skip saving best-model checkpoint (avoids OOM)
   save_freq: 20 # Save model checkpoint every N epochs. Balance disk space vs. recovery ability.
   gradient_clip: 1.0 # Max norm for gradients. Prevents exploding gradients. Tune if clipping happens often or gradients vanish.
-  early_stop_patience: 25 # Stop if validation metric doesn't improve for N epochs. Prevents overfitting/wasted time. Increase for noisy validation.
+  early_stop_patience: 25 # Stop if validation metric doesn't improve for N epochs. Prevents overfitting/wasted time.
   min_delta: 0.0005 # Minimum change considered an improvement for early stopping. Prevents stopping due to tiny fluctuations.
 
   optimizer:
@@ -96,10 +146,10 @@ training:
     # 0.2 allows moderate adaptation based on DINOv2's robustness. Lower (e.g., 0.1) freezes more, higher (e.g., 0.5-1.0) risks forgetting pre-trained knowledge.
     encoder_lr_ratio: 0.2
 
-  scheduler: # Settings for ReduceLROnPlateau
-    factor: 0.5 # LR reduction factor. Smaller factor (e.g., 0.1) = more aggressive reduction.
-    patience: 10 # Epochs patience before reducing LR. Lower patience = faster LR decay.
-    min_lr: 0.000001 # Floor for learning rate.
+  scheduler:
+    type: cosine_annealing  
+
+
 
   # --- Loss Function Configuration ---
   loss:
@@ -131,19 +181,29 @@ training:
     instance_weight_high_thresh: 0.8 # Defines "very large" object ratio.
     # General Epsilon
     eps: 0.0000001 # 1e-7
+    topology_weight: 0.15       # soft-clDice: improves stitch centerline continuity.
+    boundary_weight: 0.10       # boundary Dice: stabilizes stitch width/edge geometry.
+    centerline_weight: 0.35     # auxiliary centerline head; generated from GT mask automatically.
+    centerline_dilation_kernel_size: 3
+    skeleton_iterations: 8
+    boundary_kernel_size: 3
 
   datasets: # List of datasets used for training
-    - "datasets/COD10K"
-    - "datasets/CAMO"
+    - "H:/DATASET/DB"
+    - "H:/DATASET/XJ"
+    - "H:/DATASET/SD"
+
 
 # --- Evaluation Configuration ---
 evaluation:
   batch_size: 2
   num_workers: 8
   datasets: # Standard evaluation datasets
-    - "datasets/COD10K"
-    - "datasets/CAMO"
-    - "datasets/NC4K"
+     - "H:/DATASET/DB"
+     - "H:/DATASET/XJ"
+     - "H:/DATASET/SD"
+     - "H:/DATASET/RX"
+
 
 # --- Prediction Configuration ---
 prediction:

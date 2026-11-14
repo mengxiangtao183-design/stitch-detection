@@ -1,0 +1,16 @@
+# M6 / AGHR clear100 validation config.
+#
+# Short validation counterpart of the full-data M6 experiment.  It keeps the
+# M4 HighRes path and only enables AFM probability/uncertainty guidance inside
+# HighResStitchRefineHead.  Use this as a fair non-full control for M8.
+base_config: m4_highres_refine.yaml
+
+model:
+  name: "M6-AFMGuided-HighRes-MobileNetV4-FPN-Clear100-Seed42"
+  decoder:
+    mobile_fpn:
+      high_res_refine:
+        enable: true
+        afm_guidance:
+          enable: true
+

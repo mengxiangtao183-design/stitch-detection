@@ -1,0 +1,133 @@
+{
+  "schema_version": 1,
+  "applicable": true,
+  "auditable": true,
+  "verdict": "PASS",
+  "backend": "python-matplotlib",
+  "summary": {
+    "fail": 0,
+    "warn": 0,
+    "comparisons": 4,
+    "exemptions": 1
+  },
+  "tolerances": {
+    "alignment_pt": 1.5,
+    "gutter_pt": 1.5
+  },
+  "layout": {
+    "schema_version": 1,
+    "backend": "python-matplotlib",
+    "figure": {
+      "width_pt": 453.54330708661416,
+      "height_pt": 532.9133858267717
+    },
+    "panels": [
+      {
+        "id": "a",
+        "bbox_pt": [
+          70.2992125984252,
+          416.5022513030941,
+          445.3795275590551,
+          524.91968503937
+        ],
+        "grid_id": "matplotlib-grid-1",
+        "row_start": 0,
+        "row_stop": 1,
+        "col_start": 0,
+        "col_stop": 2
+      },
+      {
+        "id": "b",
+        "bbox_pt": [
+          70.2992125984252,
+          236.36668515027168,
+          445.3795275590551,
+          344.78411888654756
+        ],
+        "grid_id": "matplotlib-grid-1",
+        "row_start": 1,
+        "row_stop": 2,
+        "col_start": 0,
+        "col_stop": 2
+      },
+      {
+        "id": "c",
+        "bbox_pt": [
+          70.2992125984252,
+          39.968503937007796,
+          310.5812849626981,
+          164.64855273372513
+        ],
+        "grid_id": "matplotlib-grid-1",
+        "row_start": 2,
+        "row_stop": 3,
+        "col_start": 0,
+        "col_stop": 1
+      },
+      {
+        "id": "d",
+        "bbox_pt": [
+          349.26669861334597,
+          39.968503937007796,
+          445.3795275590551,
+          164.64855273372513
+        ],
+        "grid_id": "matplotlib-grid-1",
+        "row_start": 2,
+        "row_stop": 3,
+        "col_start": 1,
+        "col_stop": 2
+      }
+    ],
+    "row_groups": [
+      {
+        "id": "row-1",
+        "panels": [
+          "c",
+          "d"
+        ]
+      }
+    ],
+    "column_groups": [
+      {
+        "id": "column-1",
+        "panels": [
+          "a",
+          "b"
+        ]
+      }
+    ],
+    "boundary_groups": [
+      {
+        "id": "inferred-shared-left-1",
+        "edge": "left",
+        "panels": [
+          "a",
+          "b",
+          "c"
+        ]
+      },
+      {
+        "id": "inferred-shared-right-1",
+        "edge": "right",
+        "panels": [
+          "a",
+          "b",
+          "d"
+        ]
+      }
+    ],
+    "exemptions": [
+      {
+        "panels": [
+          "d"
+        ],
+        "checks": [
+          "panel-width"
+        ],
+        "reason": "The narrow win-rate panel shares rows with the wider six-domain heatmap."
+      }
+    ]
+  },
+  "findings": []
+}

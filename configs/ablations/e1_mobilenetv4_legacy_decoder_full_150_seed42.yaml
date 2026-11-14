@@ -1,0 +1,19 @@
+# E1 full-data ablation: MobileNetV4 backbone + legacy C3Net decoder.
+#
+# Full counterpart of e1_mobilenetv4_legacy_decoder_clear100_seed42.yaml.
+# Used to separate the MobileNetV4 encoder contribution from the Mobile-FPN
+# decoder reconstruction under the same full-150 protocol as M0/M4/M6.
+base_config: e1_mobilenetv4_legacy_decoder_clear100_seed42.yaml
+
+model:
+  name: "E1-MobileNetV4-LegacyDecoder-Full-150-Seed42"
+
+training:
+  seed: 42
+  num_epochs: 150
+  max_samples_per_dataset: null
+  save_best: true
+  save_freq: 30
+  early_stop_patience: 151
+  monitor_metric: binary_iou
+

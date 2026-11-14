@@ -1,0 +1,4 @@
+base_config: unet_full150.yaml
+evaluation:
+  batch_size: 1
+  num_workers: 0

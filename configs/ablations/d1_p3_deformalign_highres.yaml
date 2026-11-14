@@ -1,0 +1,19 @@
+# D1: M4 HighRes plus one P4-to-P3 cross-scale deformable alignment module.
+# SGCL remains disabled; no TCE, DySample, or additional edge block is enabled.
+base_config: "m4_highres_refine.yaml"
+
+model:
+  name: "D1-P3-DeformAlign-HighRes-MobileFPN-320"
+  decoder:
+    mobile_fpn:
+      cross_scale_deformable_alignment:
+        enable: true
+        gate_channels: 48
+        max_offset: 2.0
+
+training:
+  save_best: true
+  loss:
+    centerline_weight: 0.0
+    topology_weight: 0.0
+    boundary_weight: 0.0

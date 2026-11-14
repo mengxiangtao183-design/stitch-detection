@@ -1,0 +1,31 @@
+protocol:
+  seed: 42
+  outer_folds: 4
+  inner_folds: 3
+  normal_test_fraction: 0.20
+  training_conditions: [clear, deblur_then_aphnet]
+  calibration_conditions: [clear, deblur_then_aphnet]
+  min_defect_alarm_recall: 0.85
+  threshold_coordinate_passes: 5
+  threshold_objective: accuracy
+augmentation:
+  variants_per_local_class: 3
+model:
+  classifier: extra_trees
+  n_estimators: 200
+  min_samples_leaf: 2
+weights:
+  real_condition: 2.0
+  normal: 0.25
+paths:
+  tsr_config: H:/C3Netqing/configs/defect_head/tsr_defect_rules.yaml
+  labels: H:/DATASET/quexian/dataset_112_320/defect_review/defect_labels_completed.csv
+  gt_mask_dir: H:/DATASET/quexian/dataset_112_320/masks
+  clear_aphnet_masks: H:/C3Netqing/results/prediction/runs/m6-afmguided-highres-mobilenetv4-fpn-full-150-seed42_20260915_152506/results/segmentation/probability
+  blur_direct_aphnet_masks: H:/C3Netqing/results/prediction/runs/m6-afmguided-highres-mobilenetv4-fpn-full-150-seed42_20260915_154128/results/segmentation/probability
+  deblur_then_aphnet_masks: H:/C3Netqing/results/prediction/runs/m6-afmguided-highres-mobilenetv4-fpn-full-150-seed42_20260915_154140/results/segmentation/probability
+  normal_DB: H:/C3Netqing/results/prediction/runs/m6-afmguided-highres-mobilenetv4-fpn-full-150-seed42_20260825_204213/results/segmentation/binary
+  normal_SD: H:/C3Netqing/results/prediction/runs/m6-afmguided-highres-mobilenetv4-fpn-full-150-seed42_20260825_204311/results/segmentation/binary
+  normal_XJ: H:/C3Netqing/results/prediction/runs/m6-afmguided-highres-mobilenetv4-fpn-full-150-seed42_20260825_204333/results/segmentation/binary
+  normal_RX: H:/C3Netqing/results/prediction/runs/m6-afmguided-highres-mobilenetv4-fpn-full-150-seed42_20260825_204419/results/segmentation/binary
+  output: H:/C3Netqing/results/defect_detection/tsr_defect_nested4fold_joint_clear_deblur_112_short_residual_break_v5

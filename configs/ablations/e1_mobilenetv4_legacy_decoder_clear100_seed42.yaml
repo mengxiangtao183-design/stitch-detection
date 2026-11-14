@@ -1,0 +1,44 @@
+# E1: MobileNetV4 backbone + original/legacy C3Net dual-branch decoder.
+#
+# Purpose:
+# - supplementary ablation to separate "MobileNetV4 lightweight encoder" from
+#   "Mobile-FPN decoder reconstruction";
+# - MobileNetV4 extracts C2/C3/C4/C5, then the legacy EdgeBranch + CLP + AFM are
+#   used instead of the Mobile-FPN decoder;
+# - no HighRes, no Mobile-FPN, no extra modules.
+#
+# Compare against:
+# - original C3Net baseline;
+# - M0-AFM MobileNetV4 + Mobile-FPN;
+# - M6 final model.
+base_config: mobile_base_320_clear100.yaml
+
+model:
+  name: "E1-MobileNetV4-LegacyDecoder-Clear100-Seed42"
+  backbone:
+    use_coord_att: false
+  decoder:
+    type: "legacy"
+    upsampler:
+      style: "lp"
+      groups: 4
+      dyscope: false
+    edge_branch:
+      intermediate_channels: [512, 256, 128]
+      output_channels: 128
+      num_enhance_blocks: 2
+    loc_branch:
+      intermediate_channels: [512, 256, 128]
+      output_channels: 128
+      num_enhance_blocks: 1
+      icg_params:
+        image_channels: 3
+        ia_cnn_channels: 32
+        contrast_channels: 16
+        contrast_agg_kernel: 5
+        contrast_bg_thresh: 0.1
+  fusion_head:
+    fuse_channels: 128
+    num_refine_blocks: 2
+    attn_gen_intermediate_channels: 64
+

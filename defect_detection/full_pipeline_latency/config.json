@@ -1,0 +1,21 @@
+{
+  "project_root": "H:/C3Netqing",
+  "clear_dir": "H:/DATASET/quexian/dataset_112_320/images",
+  "blur_dir": "H:/DATASET/quexian/dataset_112_320/synblur_k3to15_seed42",
+  "expected_sources": 112,
+  "router_summary": "H:/C3Netqing/results/deblurring_ablation/quexian_synblur48_dynamic_skip/dynamic_skip_summary.json",
+  "deblur_checkpoint": "H:/C3Netqing/NAFNet/checkpoints/MultiSourceV2_MBDNetPPlus_FTDirGradSSIM5_S42/model_best.pth",
+  "deblur_arch": "mbdnet-p-plus",
+  "deblur_width": 64,
+  "seg_checkpoint": "H:/C3Netqing/results/training/runs/m6-afmguided-highres-mobilenetv4-fpn-full-150-seed42_20260726_003419/checkpoints/model_best.pth",
+  "seg_threshold": 0.5,
+  "defect_model": "H:/C3Netqing/results/defect_detection/tsr_binary_topology_v2_balanced_final112/model_final.joblib",
+  "detector_config": "H:/C3Netqing/configs/defect_head/tsr_defect_rules.yaml",
+  "image_size": 320,
+  "batch_size": 1,
+  "cpu_threads": 1,
+  "warmup": 10,
+  "repeats": 3,
+  "seed": 42,
+  "output_root": "H:/C3Netqing/results/full_pipeline_latency"
+}

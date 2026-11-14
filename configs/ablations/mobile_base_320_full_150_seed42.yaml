@@ -1,0 +1,17 @@
+# Full-data, 150-epoch M0 ablation foundation.  Inherits all model, loss,
+# augmentation and MobileNetV4 pretrained-weight settings from the clear100 run.
+base_config: mobile_base_320_clear100.yaml
+
+model:
+  name: "M0-AFM-MobileNetV4-FPN-Full-150-Seed42"
+
+training:
+  seed: 42
+  num_epochs: 150
+  # null removes the previous per-dataset 100-image cap.
+  max_samples_per_dataset: null
+  save_best: true
+  save_freq: 30
+  # Do not end the requested 150-epoch budget early.
+  early_stop_patience: 151
+  monitor_metric: binary_iou

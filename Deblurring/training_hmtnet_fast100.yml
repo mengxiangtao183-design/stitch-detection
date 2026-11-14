@@ -1,0 +1,131 @@
+GPU: [0]
+
+# Progressive HMT main restoration: each source contributes its first 100
+# matched training pairs. RX remains external test.
+MODEL:
+  MODE: 'Deblurring'
+  SESSION: 'HMTNet_DualViewResidualTrajectoryPyramid_AFBandGate_Fast100_E120'
+  N_FEAT: 96
+  SCALE_UNETFEATS: 48
+  SCALE_ORSNETFEATS: 32
+  NUM_CAB: 8
+
+  EDGE_REFINE: True
+  EDGE_REFINE_MID: 24
+  LIGHT_ADAPT: False
+  TRAJECTORY_LIGHTWEIGHT: False
+  STAGE1_TRISTRIPE: True
+  STAGE1_STRIPES: 3
+  STAGE1_OVERLAP: 0.20
+  STAGE2_PAIR_ALIGNED: True
+  GATED_CSFF: False
+  STITCH_TRAJECTORY_ALIGNMENT: False
+  STRIPE_TOPOLOGY_RECONSTRUCTION: False
+  INTERSTAGE_RESIDUAL_REASSEMBLY: False
+
+  TRISTRIP_CONTEXT_PYRAMID: True
+  TRISTRIP_CONTEXT_BLOCKS: 3
+  HORIZONTAL_TRAJECTORY_BLOCKS: True
+  # HMT owns the reconstruction path.  Pairwise TPT-RNet decoding is disabled;
+  # the retained TCFM settings describe HMT's feature-memory injection only.
+  TPTRNET_CORE: False
+  TPTR_TCFM: True
+  TPTR_TCFM_HORIZONTAL_KERNEL: 15
+  HMT_NET_CORE: True
+  HMT_BLOCKS: 4
+
+  FREQUENCY_REFINE: True
+  FREQUENCY_REFINE_HIDDEN: 16
+  FREQUENCY_BAND_GATE: True
+  FREQUENCY_BAND_LOW_START: 0.05
+  FREQUENCY_BAND_LOW_END: 0.10
+  FREQUENCY_BAND_HIGH_START: 0.30
+  FREQUENCY_BAND_HIGH_END: 0.40
+  FREQUENCY_DISAGREEMENT_GATE: False
+
+OPTIM:
+  BATCH_SIZE: 2
+  # 270 training pairs with batch=2 and accumulation=4 yield about 34
+  # optimizer updates per epoch.  120 epochs provides roughly 4,080 updates,
+  # which is adequate for a new 24M-parameter reconstruction path.
+  NUM_EPOCHS: 120
+  LR_INITIAL: 2.0e-4
+  LR_MIN: 1.0e-6
+  ACCUM_ITERS: 4
+  TPTR_LR_MULTIPLIER: 1.0
+  HMT_LR_MULTIPLIER: 1.5
+
+TRAINING:
+  VAL_AFTER_EVERY: 3
+  CHECKPOINT_EVERY: 5
+  DO_VALIDATE: True
+  # Starts at epoch 1 when the session has no checkpoint and allows the
+  # guarded launcher to continue from model_latest.pth after an interruption.
+  RESUME: true
+  FINETUNE: false
+  PRETRAINED_PATH: ''
+  TRAIN_PS: 320
+  VAL_PS: 320
+  TRAIN_DIR: ''
+  VAL_DIR: ''
+  TRAIN_DIRS:
+    - 'H:/DATASET/DB/train'
+    - 'H:/DATASET/XJ/train'
+    - 'H:/DATASET/SD/train'
+  VAL_DIRS: []
+  INPUT_SUBDIR: 'Imgs1'
+  TARGET_SUBDIR: 'clear'
+  EDGE_SUBDIR: 'Edges_320'
+  MAX_IMAGES_PER_TRAIN_DIR: 100
+  VAL_SPLIT: 0.1
+  SPLIT_SEED: 42
+  STRATIFIED_VAL_SPLIT: True
+  EPOCH_DETERMINISTIC_DATA: True
+  NUM_WORKERS: 0
+  SEED: 42
+  USE_AMP: True
+  CUDNN_BENCHMARK: False
+  CUDNN_DETERMINISTIC: True
+  SAVE_BEST: True
+  SAVE_BEST_EVERY: 1
+  SAVE_OPTIMIZER: False
+  SAFE_CHECKPOINTS: True
+  SAVE_DIR: 'H:/C3Netqing/Deblurring/checkpoints/train'
+
+AUGMENT:
+  ENABLE: True
+  COLOR_PROB: 0.3
+  BRIGHTNESS: 0.15
+  CONTRAST: 0.15
+  SATURATION: 0.15
+  HUE: 0.02
+  GAMMA_PROB: 0.3
+  GAMMA_MIN: 0.85
+  GAMMA_MAX: 1.20
+  INPUT_NOISE_PROB: 0.10
+  INPUT_NOISE_STD: 0.010
+  LOW_LIGHT_PROB: 0.0
+  # Keep the known horizontal trajectory orientation during augmentation.
+  PRESERVE_HORIZONTAL_TRAJECTORY: True
+
+LOSS:
+  # Only the terminal trajectory-pyramid recovery image is supervised.
+  # Stage-1 and Stage-2 now expose feature memory, not restored images.
+  STAGE_WEIGHTS: [1.0, 0.0, 0.0]
+  EDGE_WEIGHT: 0.05
+  DISTILL_WEIGHT: 0.00
+  STRIPE_CONSISTENCY_WEIGHT: 0.00
+  FREQUENCY_CONSISTENCY_WEIGHT: 0.00
+  STRUCTURE_TEXTURE_WEIGHT: 0.02
+  STRUCTURE_TEXTURE_SIGMA: 1.50
+
+DISTILL:
+  ENABLE: False
+  TEACHER_WEIGHTS: ''
+  TEACHER_N_FEAT: 96
+  TEACHER_SCALE_UNETFEATS: 48
+  TEACHER_SCALE_ORSNETFEATS: 32
+  TEACHER_NUM_CAB: 8
+  TEACHER_EDGE_REFINE: False
+  TEACHER_EDGE_REFINE_MID: 24
+  TEACHER_AMP: False

@@ -6,7 +6,7 @@ detection results from C3Net. It generates three key visualizations for evaluati
 
 1. Binary Segmentation:
    - Direct threshold visualization showing detected objects
-   - Preserves original prediction confidence values (0-255)
+   - Saves a true 0/255 foreground mask at the configured threshold
    - Useful for quantitative analysis and model comparison
 
 2. Confidence Heatmaps:
@@ -88,27 +88,40 @@ from typing import Optional, List, Dict
 import logging
 import torch
 
+def _prediction_to_numpy(prediction) -> np.ndarray:
+    """Convert a prediction map from tensor or numpy to a squeezed float array."""
+    if torch.is_tensor(prediction):
+        prediction = prediction.detach().float().cpu().numpy()
+    else:
+        prediction = np.asarray(prediction, dtype=np.float32)
+
+    if prediction.ndim > 2:
+        prediction = prediction.squeeze()
+
+    return prediction
+
 def save_binary_visualization(
     prediction: np.ndarray,
     save_path: str,
+    threshold: float = 0.5,
 ) -> None:
     """
-    Save binary visualization of prediction along with confidence.
+    Save thresholded binary visualization of prediction.
     
     Args:
         prediction: Prediction map [H, W] with values in [0, 1]
         save_path: Path to save visualization
+        threshold: Probability threshold for the foreground mask
     """
     # Create directory if needed
     save_path = Path(save_path)
     save_path.parent.mkdir(parents=True, exist_ok=True)
     
-    # Ensure 2D array
-    if prediction.ndim > 2:
-        prediction = prediction.squeeze()
+    prediction = _prediction_to_numpy(prediction)
+    prediction = np.clip(prediction, 0.0, 1.0)
     
-    # Convert confidence values to 0-255 range directly
-    confidence_map = (prediction * 255).astype(np.uint8)
+    # Save an actual binary mask. Confidence remains available via heatmaps.
+    confidence_map = (prediction >= threshold).astype(np.uint8) * 255
     
     # Save image
     cv2.imwrite(str(save_path), confidence_map)
@@ -132,9 +145,8 @@ def save_heatmap_visualization(
     save_path = Path(save_path)
     save_path.parent.mkdir(parents=True, exist_ok=True)
     
-    # Ensure 2D array
-    if prediction.ndim > 2:
-        prediction = prediction.squeeze()
+    prediction = _prediction_to_numpy(prediction)
+    prediction = np.clip(prediction, 0.0, 1.0)
         
     # Normalize if needed
     if normalize:
@@ -175,9 +187,7 @@ def save_overlay_visualization(
         save_path = Path(save_path)
         save_path.parent.mkdir(parents=True, exist_ok=True)
         
-        # Ensure 2D prediction
-        if prediction.ndim > 2:
-            prediction = prediction.squeeze()
+        prediction = _prediction_to_numpy(prediction)
         
         # Convert RGB to BGR if needed
         if image.ndim == 3 and image.shape[-1] == 3:
@@ -247,13 +257,10 @@ class ResultVisualizer:
         for stage_name, stage_pred in predictions.items():
             if stage_name == 'final_mask':
                 stage_filename = filename
-                stage_pred = stage_pred.sigmoid().cpu().numpy()
             else:
                 stage_filename = f"{filename}_{stage_name}"
-            
-            # Convert tensor to numpy if needed
-            if torch.is_tensor(stage_pred):
-                stage_pred = stage_pred.cpu().numpy()
+
+            stage_pred = _prediction_to_numpy(stage_pred)
 
             # Save binary prediction for each stage
             save_binary_visualization(
