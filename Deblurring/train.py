@@ -26,7 +26,7 @@ from MPRNet import MPRNet, build_mprnet_from_config
 from warmup_scheduler import GradualWarmupScheduler
 
 
-CONFIG_PATH = Path(__file__).with_name('training.yml')
+CONFIG_PATH = Path(__file__).with_name('training_mprnet_original_multisource_synblur_v2_s30.yml')
 
 
 def parse_args():

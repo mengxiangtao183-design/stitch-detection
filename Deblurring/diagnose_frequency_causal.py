@@ -25,7 +25,7 @@ from test_quality_fusion import (
 )
 
 
-CONFIG_PATH = Path(__file__).with_name("diagnosis_frequency_causal_m5v3.yml")
+CONFIG_PATH = Path(__file__).resolve().parent.parent / "_archive" / "deblurring_nonpaper_yaml_2026-11-14" / "diagnosis_frequency_causal_m5v3.yml"
 
 
 def parse_args():

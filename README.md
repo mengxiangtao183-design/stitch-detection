@@ -58,6 +58,8 @@ python main.py predict --config configs/default.yaml --model checkpoints/model_b
 
 分割对比配置与操作见 [`com_models/README.md`](com_models/README.md)；去模糊统一比较见 [`deblur_comparison_suite/README.md`](deblur_comparison_suite/README.md)；缺陷检测的设计和运行口径见 `defect_detection/` 中的 Markdown 文档。实验复现时应同时记录所用配置、数据清单、随机种子及权重来源。
 
+当前论文实验的配置入口：分割主模型 M6 使用 [`configs/ablations/m6_afm_guided_highres_full_150_seed42.yaml`](configs/ablations/m6_afm_guided_highres_full_150_seed42.yaml)，分割对比与消融分别见 `com_models/configs/` 和 `configs/ablations/`；去模糊主模型的实际运行参数快照见 [`NAFNet/experiment_configs/mbdnet_p_plus_r12_s30_s42_run_config.json`](NAFNet/experiment_configs/mbdnet_p_plus_r12_s30_s42_run_config.json)，MPRNet 对比配置见 [`Deblurring/training_mprnet_original_multisource_synblur_v2_s30.yml`](Deblurring/training_mprnet_original_multisource_synblur_v2_s30.yml)。去模糊旧探索 YAML 的清理口径见 [`Deblurring/PAPER_YAML_AUDIT.md`](Deblurring/PAPER_YAML_AUDIT.md)。
+
 ## 数据、权重与结果
 
 数据集、预训练权重、训练检查点和逐次运行结果通常体积很大，并受各自的数据使用条款约束，因此不作为普通 Git 源文件提交。`.gitignore` 排除了这些生成或下载的目录与文件，**本地文件不会因此被删除**。发布代码不等于已发布可直接复现全部数值的资源包。

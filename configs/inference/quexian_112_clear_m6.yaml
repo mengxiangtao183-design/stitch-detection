@@ -1,9 +1,0 @@
-# Inference-only configuration for all 112 clear Quxian source images.
-base_config: ../ablations/m6_afm_guided_highres_clear100_seed42.yaml
-
-model:
-  name: "M6-AFMGuided-HighRes-Quxian112-Clear"
-
-prediction:
-  batch_size: 1
-  output_size: [320, 320]

@@ -1,6 +1,0 @@
-# ACHNet inference configuration for frozen-MBDNet restored counterparts.
-base_config: ../ablations/m6_afm_guided_highres_clear100_seed42.yaml
-
-prediction:
-  batch_size: 1
-  output_size: [320, 320]

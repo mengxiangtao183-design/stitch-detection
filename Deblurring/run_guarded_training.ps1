@@ -1,5 +1,5 @@
 param(
-    [string]$Config = 'training_tptrnet_tcp_scratch_full150.yml',
+    [string]$Config = '../_archive/deblurring_nonpaper_yaml_2026-11-14/training_tptrnet_tcp_scratch_full150.yml',
     [string]$PythonExe = 'D:\professional_software\anaconda3\envs\c3net\python.exe',
     [int]$MaxRestarts = 40,
     [int]$RestartDelaySeconds = 10

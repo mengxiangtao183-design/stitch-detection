@@ -6,7 +6,7 @@ $ErrorActionPreference = 'Stop'
 
 $projectRoot = 'H:\C3Netqing\Deblurring'
 $python = 'D:\professional_software\anaconda3\python.exe'
-$config = 'training_tpt_net_stam_fast100.yml'
+$config = '../_archive/deblurring_nonpaper_yaml_2026-11-14/training_tpt_net_stam_fast100.yml'
 $session = 'TPT_Net_AFBandGate_STAM_Fast100'
 $modelDir = Join-Path $projectRoot "checkpoints\train\Deblurring\models\$session"
 $resultDir = Join-Path $projectRoot "checkpoints\train\Deblurring\results\${session}_TestBest"

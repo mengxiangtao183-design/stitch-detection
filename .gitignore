@@ -88,6 +88,7 @@ htmlcov/
 **/pretrained_models/
 **/_deps/
 .docx_deps/
+_archive/
 **/__pycache__/
 *.pth
 *.pt

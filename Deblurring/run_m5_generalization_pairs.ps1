@@ -5,8 +5,8 @@ param(
 $ErrorActionPreference = "Stop"
 $ProjectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Seeds = @(42)
-$M2Config = Join-Path $ProjectRoot "training_mprnet_m2_generalization_pair_fast100.yml"
-$M5Config = Join-Path $ProjectRoot "training_mprnet_m5v3_generalization_pair_fast100.yml"
+$M2Config = Join-Path $ProjectRoot "../_archive/deblurring_nonpaper_yaml_2026-11-14/training_mprnet_m2_generalization_pair_fast100.yml"
+$M5Config = Join-Path $ProjectRoot "../_archive/deblurring_nonpaper_yaml_2026-11-14/training_mprnet_m5v3_generalization_pair_fast100.yml"
 
 Write-Host "Paired generalization runner v2: 2 runs, seed 42 only"
 Write-Host "Sessions: MPRNet_M2_GeneralizationPairSafeTensor_Seed42, MPRNet_M5v3_GeneralizationPairSafeTensor_Seed42"

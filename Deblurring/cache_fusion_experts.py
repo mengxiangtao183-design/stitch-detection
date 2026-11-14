@@ -11,7 +11,7 @@ from quality_fusion import build_frozen_expert, forward_padded, load_yaml, resol
 
 
 VALID_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff"}
-CONFIG_PATH = Path(__file__).with_name("training_quality_fusion_fast100.yml")
+CONFIG_PATH = Path(__file__).resolve().parent.parent / "_archive" / "deblurring_nonpaper_yaml_2026-11-14" / "training_quality_fusion_fast100.yml"
 
 
 def parse_args():

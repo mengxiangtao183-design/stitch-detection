@@ -26,7 +26,7 @@ from test_quality_fusion import (
 )
 
 
-CONFIG_PATH = Path(__file__).with_name("diagnosis_frequency_hybrid_m2_m5v3.yml")
+CONFIG_PATH = Path(__file__).resolve().parent.parent / "_archive" / "deblurring_nonpaper_yaml_2026-11-14" / "diagnosis_frequency_hybrid_m2_m5v3.yml"
 VARIANTS = (
     "m2_shared_frequency_off",
     "m2_shared_m5_frequency_on",
